@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ai-salesperson",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "C:\\Users\\Dell\\Documents\\GitHub\\17-07-AI Salesperson for Corporate Training",
+      "port": 3100
+    }
+  ]
+}

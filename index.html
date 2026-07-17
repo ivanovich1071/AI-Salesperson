@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Продажник: Корпоративное обучение Вероники Пунчик</title>
+    <style>
+        :root {
+            --bg-milky: #FAF9F6;
+            --brown-deep: #3E2723;
+            --brown-light: #5D4037;
+            --gold-mustard: #D4AF37;
+            --gold-light: #F4E5B2;
+            --text-dark: #2C1B18;
+            --text-muted: #6D5E59;
+            --border-color: #E6DFD8;
+            --shadow-soft: 0 10px 30px -5px rgba(62, 39, 35, 0.1);
+            --shadow-gold: 0 4px 15px rgba(212, 175, 55, 0.3);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-milky); color: var(--text-dark); height: 100vh; overflow: hidden; }
+
+        .app-container { display: flex; height: 100vh; width: 100vw; }
+
+        .left-panel {
+            width: 25%;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            background: #FFFDF9;
+        }
+
+        .chat-area {
+            flex: 3;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chat-message {
+            background: var(--bg-milky);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            animation: fadeIn 0.4s ease;
+        }
+        .chat-message.ai { border-left: 3px solid var(--gold-mustard); }
+
+        .footer-area {
+            flex: 1;
+            padding: 20px;
+            background: var(--brown-deep);
+            color: var(--gold-light);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+        }
+        .footer-area a { color: var(--gold-mustard); text-decoration: none; }
+        .footer-area a:hover { text-decoration: underline; }
+
+        .right-panel {
+            width: 75%;
+            padding: 40px 60px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: translateX(30px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .screen.active { display: block; opacity: 1; transform: translateX(0); }
+
+        h1 { font-size: 32px; font-weight: 700; color: var(--brown-deep); margin-bottom: 8px; }
+        .subtitle { color: var(--text-muted); font-size: 16px; margin-bottom: 32px; line-height: 1.5; }
+
+        .form-group { margin-bottom: 24px; }
+        label { display: block; font-size: 14px; font-weight: 600; color: var(--brown-deep); margin-bottom: 8px; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: #FFF;
+            font-size: 15px;
+            color: var(--text-dark);
+            transition: all 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--gold-mustard);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        }
+
+        .input-with-mic { position: relative; }
+        .mic-btn {
+            position: absolute;
+            right: 12px;
+            top: 18px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--brown-light);
+            padding: 4px;
+            border-radius: 50%;
+        }
+        .mic-btn:hover { background: var(--gold-light); }
+        .mic-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--gold-mustard); color: var(--brown-deep); box-shadow: var(--shadow-gold); }
+        .btn-primary:hover { background: #E5C14D; transform: translateY(-1px); }
+        .btn-secondary { background: transparent; color: var(--brown-light); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: var(--bg-milky); }
+
+        /* --- EXPERT BLOCK --- */
+        .expert-block {
+            display: flex;
+            gap: 24px;
+            background: linear-gradient(135deg, #FFFDF5 0%, #FFF9E6 100%);
+            border: 1px solid var(--gold-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+            align-items: center;
+        }
+        .expert-photo {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--gold-mustard);
+            box-shadow: var(--shadow-gold);
+            flex-shrink: 0;
+        }
+        .expert-info h3 { font-size: 20px; color: var(--brown-deep); margin-bottom: 6px; }
+        .expert-info .role { color: var(--gold-mustard); font-weight: 600; font-size: 14px; margin-bottom: 10px; }
+        .expert-info p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+        /* --- MODULE CARDS WITH PHOTOS --- */
+        .module-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 0;
+            margin-bottom: 16px;
+            background: #FFF;
+            display: flex;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .module-card:hover, .module-card.selected {
+            border-color: var(--gold-mustard);
+            box-shadow: var(--shadow-soft);
+        }
+        .module-card.selected { background: #FFFDF5; }
+        .module-img {
+            width: 200px;
+            min-height: 160px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .module-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+        .module-card:hover .module-img img { transform: scale(1.05); }
+        .module-img::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 60%, rgba(62, 39, 35, 0.3) 100%);
+        }
+        .module-info {
+            padding: 20px 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .module-info h3 { font-size: 18px; margin-bottom: 6px; color: var(--brown-deep); }
+        .module-info p { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
+        .module-price { font-weight: 700; color: var(--gold-mustard); font-size: 15px; }
+
+        .cost-block {
+            background: var(--brown-deep);
+            color: var(--bg-milky);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            margin-top: 24px;
+        }
+        .cost-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+        .cost-total { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 12px; margin-top: 12px; font-size: 20px; font-weight: 700; color: var(--gold-mustard); }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+        .date-chip {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .date-chip:hover, .date-chip.selected { background: var(--gold-mustard); color: var(--brown-deep); border-color: var(--gold-mustard); font-weight: 600; }
+        .time-slots { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+        .time-chip {
+            padding: 10px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .time-chip:hover, .time-chip.selected { background: var(--brown-deep); color: var(--gold-mustard); border-color: var(--brown-deep); }
+
+        .admin-link { position: fixed; bottom: 10px; right: 10px; font-size: 11px; color: var(--border-color); text-decoration: none; opacity: 0.5; z-index: 100; }
+        .admin-link:hover { opacity: 1; color: var(--gold-mustard); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+        <div class="chat-area" id="chatArea">
+            <div class="chat-message ai">
+                👋 Здравствуйте! Я AI-ассистент Вероники Пунчик. Помогу подобрать идеальную программу корпоративного обучения по ИИ для вашей команды.
+            </div>
+        </div>
+        <div class="footer-area">
+            <div><strong>Вероника Пунчик</strong></div>
+            <div>📧 pvnvna@yandex.by</div>
+            <div>✈️ <a href="#">Telegram: ДоцентыИИноваторы</a></div>
+            <div>💻 <a href="#">GitHub</a></div>
+            <div style="margin-top: 8px; opacity: 0.7;">
+                <a href="#">Политика конфиденциальности</a><br>
+                © 2026 Все права защищены.
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+        
+        <!-- SCREEN 1 -->
+        <div class="screen active" id="screen-1">
+            <h1>Расскажите о вашей компании</h1>
+            <p class="subtitle">За несколько минут AI изучит вашу задачу и подготовит персональную программу корпоративного обучения.</p>
+            
+            <!-- EXPERT BLOCK WITH PHOTO -->
+            <div class="expert-block">
+                <img src="./photo_2026-07-17_2.jpg" alt="Вероника Пунчик" class="expert-photo" onerror="this.style.background='var(--gold-light)'; this.alt='Фото'">
+                <div class="expert-info">
+                    <h3>Вероника Пунчик</h3>
+                    <div class="role">К.п.н., доцент, бизнес-аналитик</div>
+                    <p>Автор программы «Нейросервисы и системы ИИ». Более 10 лет опыта в корпоративном обучении. Провела семинары для Брестского мясокомбината, БелАЗ, МГИРО и других ведущих предприятий.</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Название компании</label>
+                <input type="text" placeholder="Например, Брестский мясокомбинат">
+            </div>
+            <div class="form-group">
+                <label>Сайт компании</label>
+                <input type="url" placeholder="https://company.ru">
+            </div>
+            <div class="form-group">
+                <label>Кто будет учиться? (Выберите роль)</label>
+                <select id="userRole">
+                    <option value="">-- Выберите категорию --</option>
+                    <option value="Руководители">Руководители</option>
+                    <option value="Документооборот/аналитики">Документооборот / аналитики</option>
+                    <option value="HR">HR</option>
+                    <option value="Продажи/коммерческий блок">Продажи / коммерческий блок</option>
+                    <option value="Производство/инженеры">Производство / инженеры</option>
+                    <option value="Универсальные специалисты">Универсальные специалисты</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Сколько сотрудников планируете обучить?</label>
+                <input type="number" placeholder="Например, 15">
+            </div>
+            <div class="form-group">
+                <label>Какие задачи хотите решить с помощью обучения?</label>
+                <div class="input-with-mic">
+                    <textarea rows="3" placeholder="Например: проекты регулярно выходят за сроки, хотим создать единый стандарт..."></textarea>
+                    <button class="mic-btn" title="Голосовой ввод"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button>
+                </div>
+            </div>
+
+            <div class="flex-between">
+                <div></div>
+                <button class="btn btn-primary" onclick="goToScreen('screen-2')">Начать AI-диагностику →</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2 -->
+        <div class="screen" id="screen-2">
+            <h1>Уточним вашу задачу</h1>
+            <p class="subtitle">AI изучил информацию. Осталось несколько вопросов, чтобы собрать программу точнее.</p>
+            
+            <div class="form-group">
+                <label>01. Как сейчас в вашей компании организован контроль сроков и документооборота?</label>
+                <div class="input-with-mic">
+                    <textarea rows="2" placeholder="Ваш ответ..."></textarea>
+                    <button class="mic-btn"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>02. Сталкивались ли вы с "галлюцинациями" ИИ или проблемами безопасности данных при тестировании инструментов?</label>
+                <div class="input-with-mic">
+                    <textarea rows="2" placeholder="Ваш ответ..."></textarea>
+                    <button class="mic-btn"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button>
+                </div>
+            </div>
+
+            <div class="flex-between">
+                <button class="btn btn-secondary" onclick="goToScreen('screen-1')">← Назад</button>
+                <button class="btn btn-primary" onclick="goToScreen('screen-3')">Сформировать предложение →</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: WITH REAL PHOTOS -->
+        <div class="screen" id="screen-3">
+            <h1>Персональная программа</h1>
+            <p class="subtitle">Программа сформирована AI на основе задач вашей команды и результатов диагностики.</p>
+            
+            <div class="module-card selected">
+                <div class="module-img">
+                    <img src="./photo_2026-07-17_3.jpg" alt="Вводный интенсив" onerror="this.parentElement.style.background='linear-gradient(135deg, var(--brown-light), var(--brown-deep))'">
+                </div>
+                <div class="module-info">
+                    <h3>Вводный интенсив-модуль (12 ч)</h3>
+                    <p>6 занятий по 90 мин. Основы, промпт-инжиниринг, работа с документами, BYOD-практикум.</p>
+                    <div class="module-price">150 000 ₽ запуск + 18 000 ₽/участник</div>
+                </div>
+            </div>
+            
+            <div class="module-card">
+                <div class="module-img">
+                    <img src="./photo_2026-07-17_4.jpg" alt="Практический модуль" onerror="this.parentElement.style.background='linear-gradient(135deg, var(--brown-light), var(--brown-deep))'">
+                </div>
+                <div class="module-info">
+                    <h3>Практический модуль по созданию продукта</h3>
+                    <p>Глубокая проработка реальных кейсов компании, создание прототипов ИИ-ассистентов.</p>
+                    <div class="module-price">200 000 ₽ запуск + 25 000 ₽/участник</div>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-img">
+                    <img src="./photo_2026-07-17_5.jpg" alt="Консалтинг" onerror="this.parentElement.style.background='linear-gradient(135deg, var(--brown-light), var(--brown-deep))'">
+                </div>
+                <div class="module-info">
+                    <h3>Консалтинг и руководство проектами</h3>
+                    <p>Индивидуальная разработка дорожной карты внедрения ИИ, аудит процессов, сопровождение пилотного проекта.</p>
+                    <div class="module-price">300 000 ₽ за проект (фиксировано)</div>
+                </div>
+            </div>
+
+            <div class="cost-block">
+                <div class="cost-row"><span>Запуск программы (Вводный интенсив)</span><span>150 000 ₽</span></div>
+                <div class="cost-row"><span>15 участников × 18 000 ₽</span><span>270 000 ₽</span></div>
+                <div class="cost-total">
+                    <span>Итоговая стоимость</span>
+                    <span>420 000 ₽</span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 32px;">
+                <label>Что вызывает вопросы или сомнения? (Необязательно)</label>
+                <div class="input-with-mic">
+                    <textarea id="objectionInput" rows="3" placeholder="Стоимость, формат, сроки — расскажите, что хотелось бы уточнить..."></textarea>
+                    <button class="mic-btn"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button>
+                </div>
+            </div>
+
+            <div class="flex-between">
+                <button class="btn btn-secondary" onclick="goToScreen('screen-2')">← Назад</button>
+                <button class="btn btn-primary" onclick="handleObjection()">Обсудить сомнения →</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 4 -->
+        <div class="screen" id="screen-4">
+            <h1>Давайте разберём этот вопрос</h1>
+            
+            <div style="background: var(--gold-light); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px; border-left: 4px solid var(--gold-mustard);">
+                <strong>Вы отметили:</strong> <span id="displayObjection" style="font-style: italic;">"Высокая стоимость для нашего бюджета"</span>
+            </div>
+
+            <div class="chat-message ai" style="background: #FFF; border: 1px solid var(--border-color); padding: 24px;">
+                <p style="margin-bottom: 12px;"><strong>1. Понимаю вашу логику:</strong> Инвестиции в обучение всегда требуют четкого обоснования ROI.</p>
+                <p style="margin-bottom: 12px;"><strong>2. Конкретно для вашей компании:</strong> Учитывая, что вы хотите обучить 15 человек, стоимость одного часа качественного практического разбора кейсов на ваших реальных данных составляет менее 2000 ₽. Это дешевле, чем один час простоя специалиста из-за неэффективного документооборота.</p>
+                <p style="margin-bottom: 12px;"><strong>3. Бизнес-контекст:</strong> Внедрение даже одного шаблона автоматизации отчетов (Занятие 3) окупает стоимость курса за первый месяц за счет экономии 5-7 часов в неделю на каждого сотрудника.</p>
+                <p><strong>4. Безопасный следующий шаг:</strong> Предлагаем не принимать решение по описанию. За 30 минут эксперт разберёт вашу текущую систему и уточнит расчёт.</p>
+            </div>
+
+            <div class="flex-between">
+                <button class="btn btn-secondary" onclick="goToScreen('screen-3')">← Назад к предложению</button>
+                <button class="btn btn-primary" onclick="goToScreen('screen-5')">Выбрать время встречи →</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 5 -->
+        <div class="screen" id="screen-5">
+            <h1>Обсудим программу с экспертом</h1>
+            <p class="subtitle">30 минут. Без обязательств. Разберём вашу задачу и уточним программу под структуру команды.</p>
+            
+            <label>Выберите дату:</label>
+            <div class="calendar-grid">
+                <div class="date-chip" onclick="selectDate(this)">20 июля<br><small>Пн</small></div>
+                <div class="date-chip selected" onclick="selectDate(this)">22 июля<br><small>Ср</small></div>
+                <div class="date-chip" onclick="selectDate(this)">24 июля<br><small>Пт</small></div>
+                <div class="date-chip" onclick="selectDate(this)">27 июля<br><small>Пн</small></div>
+            </div>
+
+            <label>Доступное время:</label>
+            <div class="time-slots">
+                <div class="time-chip" onclick="selectTime(this)">10:00</div>
+                <div class="time-chip selected" onclick="selectTime(this)">14:30</div>
+                <div class="time-chip" onclick="selectTime(this)">16:00</div>
+            </div>
+
+            <div class="form-group">
+                <label>Ваше имя</label>
+                <input type="text" placeholder="Иван Иванов">
+            </div>
+            <div class="form-group">
+                <label>Компания</label>
+                <input type="text" value="Брестский мясокомбинат" readonly style="background: #F5F5F5;">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" placeholder="ivan@company.ru">
+            </div>
+            <div class="form-group">
+                <label>Телефон</label>
+                <input type="tel" placeholder="+375 (XX) XXX-XX-XX">
+            </div>
+
+            <div class="flex-between">
+                <button class="btn btn-secondary" onclick="goToScreen('screen-4')">← Назад</button>
+                <button class="btn btn-primary" onclick="goToScreen('screen-6')">Подтвердить встречу ✓</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 6: SUCCESS WITH EXPERT PHOTO -->
+        <div class="screen" id="screen-6" style="text-align: center; padding-top: 40px;">
+            <div style="font-size: 64px; margin-bottom: 16px;">✨</div>
+            <h1>Встреча забронирована!</h1>
+            <p class="subtitle">Мы подготовим материалы по вашей компании и передадим эксперту результаты AI-диагностики до встречи.</p>
+            
+            <div style="background: #FFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px; max-width: 500px; margin: 0 auto 32px auto; text-align: left; display: flex; gap: 20px; align-items: center;">
+                <img src="./photo_2026-07-17_2.jpg" alt="Вероника Пунчик" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold-mustard);" onerror="this.style.background='var(--gold-light)'">
+                <div>
+                    <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">Ваш эксперт:</div>
+                    <div style="font-size: 20px; font-weight: 700; color: var(--brown-deep); margin-bottom: 4px;">Вероника Пунчик</div>
+                    <div style="font-size: 15px; color: var(--text-muted); margin-bottom: 8px;">22 июля, 14:30 (МСК)</div>
+                    <div style="font-size: 14px;">📹 Онлайн (ссылка придет на email)</div>
+                </div>
+            </div>
+
+            <div style="background: var(--gold-light); padding: 16px; border-radius: var(--radius-md); max-width: 500px; margin: 0 auto 32px auto; font-size: 14px; text-align: left;">
+                <strong>Что уже получит эксперт к встрече:</strong>
+                <ul style="margin-left: 20px; margin-top: 8px; color: var(--brown-light);">
+                    <li>Информация о компании и цели обучения</li>
+                    <li>Результаты AI-диагностики (2 вопроса)</li>
+                    <li>Предварительный расчёт стоимости: 420 000 ₽</li>
+                </ul>
+            </div>
+
+            <button class="btn btn-secondary" onclick="resetApp()">Начать новую диагностику</button>
+        </div>
+
+        <!-- SCREEN 7: ADMIN LOGIN -->
+        <div class="screen" id="screen-admin-login" style="max-width: 400px; margin-top: 10vh;">
+            <h1>Вход в админ-панель</h1>
+            <p class="subtitle">Управление слотами и заявками</p>
+            <div class="form-group">
+                <label>Логин</label>
+                <input type="text" id="adminUser" value="admin">
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="adminPass" value="demo2026">
+            </div>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" onclick="checkAdmin()">Войти</button>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="goToScreen('screen-1')">Вернуться к приложению</button>
+        </div>
+
+        <!-- SCREEN 8: ADMIN DASHBOARD -->
+        <div class="screen" id="screen-admin-dash">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h1>Панель управления</h1>
+                <button class="btn btn-secondary" onclick="goToScreen('screen-1')">Выйти</button>
+            </div>
+            
+            <div style="background: #FFF; border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--border-color); margin-bottom: 24px;">
+                <h3 style="margin-bottom: 16px;">Забронированные встречи</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border-color); text-align: left; color: var(--text-muted);">
+                            <th style="padding: 8px;">Дата/Время</th>
+                            <th style="padding: 8px;">Компания</th>
+                            <th style="padding: 8px;">Контакт</th>
+                            <th style="padding: 8px;">Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 12px 8px;">22 июля, 14:30</td>
+                            <td style="padding: 12px 8px;">Брестский мясокомбинат</td>
+                            <td style="padding: 12px 8px;">ivan@company.ru</td>
+                            <td style="padding: 12px 8px;"><span style="background: var(--gold-light); color: var(--brown-deep); padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">Забронировано</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="background: #FFF; border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--border-color);">
+                <h3 style="margin-bottom: 16px;">Шаблон сообщения для эксперта (Копировать)</h3>
+                <textarea readonly style="background: #F9F9F9; font-family: monospace; font-size: 13px; width: 100%;" rows="10">🔔 НОВАЯ ЗАЯВКА НА ВСТРЕЧУ
+
+📅 Дата: 22 июля, 14:30
+🏢 Компания: Брестский мясокомбинат
+👤 Контакт: Иван Иванов, ivan@company.ru, +375...
+
+📊 Краткая сводка диагностики:
+- Роль: Руководители
+- Цель: Автоматизация документооборота
+- Рекомендуемый модуль: Вводный интенсив (12 ч)
+- Расчетная стоимость: 420 000 ₽
+
+⚠️ Возражение клиента: "Высокая стоимость для нашего бюджета" (AI уже дал предварительный ответ про ROI).</textarea>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<a href="#" class="admin-link" onclick="event.preventDefault(); goToScreen('screen-admin-login')">Админ</a>
+
+<script>
+    function goToScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById(screenId);
+        if(target) {
+            target.classList.add('active');
+        } else {
+            console.error("Screen not found:", screenId);
+        }
+        updateChat(screenId);
+    }
+
+    function updateChat(screenId) {
+        const chatArea = document.getElementById('chatArea');
+        let message = "";
+
+        switch(screenId) {
+            case 'screen-2':
+                message = "🔍 <strong>Анализирую данные...</strong><br>Отлично, я изучил описание вашей компании. Теперь задам 2 уточняющих вопроса, чтобы программа попала точно в цель.";
+                break;
+            case 'screen-3':
+                message = "✨ <strong>Программа готова!</strong><br>На основе ваших ответов я подобрал оптимальный модуль и рассчитал стоимость. Посмотрите детали справа.";
+                break;
+            case 'screen-4':
+                message = "💡 <strong>Работаю с возражением...</strong><br>Я подготовил аргументированный ответ, основанный на специфике вашего бизнеса и результатах обучения.";
+                break;
+            case 'screen-5':
+                message = "📅 <strong>Переходим к финалу.</strong><br>Выберите удобное время для 30-минутной встречи с Вероникой. Все данные диагностики уже сохранены.";
+                break;
+            case 'screen-6':
+                message = "🎉 <strong>Встреча подтверждена!</strong><br>Я передал все материалы эксперту. До связи на встрече!";
+                break;
+        }
+
+        if (message) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message ai';
+            msgDiv.innerHTML = message;
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+    }
+
+    function handleObjection() {
+        const val = document.getElementById('objectionInput').value;
+        if(val.trim() !== "") {
+            document.getElementById('displayObjection').innerText = '"' + val + '"';
+        }
+        goToScreen('screen-4');
+    }
+
+    function selectDate(el) {
+        document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function selectTime(el) {
+        document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function checkAdmin() {
+        const u = document.getElementById('adminUser').value;
+        const p = document.getElementById('adminPass').value;
+        if(u === 'admin' && p === 'demo2026') {
+            goToScreen('screen-admin-dash');
+        } else {
+            alert('Неверный логин или пароль. Попробуйте admin / demo2026');
+        }
+    }
+
+    function resetApp() {
+        document.getElementById('chatArea').innerHTML = `
+            <div class="chat-message ai">
+                👋 Здравствуйте! Я AI-ассистент Вероники Пунчик. Помогу подобрать идеальную программу корпоративного обучения по ИИ для вашей команды.
+            </div>
+        `;
+        document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+        document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+        goToScreen('screen-1');
+    }
+</script>
+
+</body>
+</html>

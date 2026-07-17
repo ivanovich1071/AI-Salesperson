@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Свободный слот для встречи с экспертом
+model TimeSlot {
+  id        String    @id @default(cuid())
+  date      String // YYYY-MM-DD
+  time      String // HH:MM
+  isBooked  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  booking   Booking?
+
+  @@unique([date, time])
+}
+
+// Забронированная встреча + сводка AI-диагностики
+model Booking {
+  id         String   @id @default(cuid())
+  slotId     String   @unique
+  slot       TimeSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  name       String
+  company    String
+  email      String
+  phone      String
+
+  // Сводка визарда (JSON-строка): роль, цели, ответы диагностики,
+  // рекомендованные модули, стоимость, возражение
+  summary    String   @default("{}")
+  totalCost  Int      @default(0)
+  status     String   @default("booked") // booked | done | cancelled
+  createdAt  DateTime @default(now())
+}

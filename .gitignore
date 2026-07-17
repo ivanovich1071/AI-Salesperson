@@ -1,0 +1,32 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# env / secrets
+.env
+.env.local
+.env.production
+
+# database
+/prisma/*.db
+/prisma/*.db-journal
+
+# misc
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+# claude local settings (содержит локальные разрешения)
+.claude/settings.local.json
+
+# obsidian: локальное состояние рабочего пространства (конфиг vault'а — в git)
+knowledge/.obsidian/workspace.json
+knowledge/.obsidian/workspace-mobile.json
+knowledge/.obsidian/cache
+knowledge/.obsidian/plugins

@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-milk text-ink font-sans antialiased;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-2xl bg-gold px-8 py-4 text-base font-semibold text-brown-deep shadow-gold transition-all hover:bg-gold-hover hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-2xl border border-line bg-transparent px-8 py-4 text-base font-semibold text-brown-light transition-all hover:bg-milk;
+  }
+  .card {
+    @apply rounded-3xl border border-line bg-white shadow-soft;
+  }
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-brown-deep;
+  }
+  .title-underline {
+    @apply mx-auto mt-3 h-1 w-20 rounded-full bg-gold;
+  }
+  .input-base {
+    @apply w-full rounded-2xl border border-line bg-white px-4 py-3.5 text-[15px] text-ink transition-all focus:outline-none focus:border-gold focus:ring-[3px] focus:ring-gold/15;
+  }
+  .label-base {
+    @apply mb-2 block text-sm font-semibold text-brown-deep;
+  }
+}
+
+/* Анимация появления сообщений чата */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-in-up {
+  animation: fadeInUp 0.4s ease;
+}
+
+/* Мигающий индикатор записи */
+@keyframes recPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.rec-pulse {
+  animation: recPulse 1s infinite;
+}
