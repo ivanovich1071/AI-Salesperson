@@ -44,7 +44,7 @@ export async function chatCompletion(
       "Content-Type": "application/json",
       "HTTP-Referer":
         process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100",
-      "X-Title": "AI Salesperson — Veronika Punchik",
+      "X-Title": "AI Salesperson - Veronika Punchik",
     },
     body: JSON.stringify({
       model: textModel(),
