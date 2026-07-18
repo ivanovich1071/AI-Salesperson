@@ -19,7 +19,8 @@ Next.js 14 (App Router) · TypeScript · Tailwind (палитра в `tailwind.c
 | Что | Где |
 |---|---|
 | Цены и каталог модулей (BYN 1000/1300/1500) | `src/lib/pricing.ts` — ЕДИНСТВЕННОЕ место правки цен |
-| Системный промпт AI-продажника | `prompts/assistant-system.md` (заглушка — ждём текст заказчика) |
+| Системный промпт AI-продажника | `prompts/assistant-system.md` (v1.0 от заказчика, 18.07.2026, адаптирован) |
+| Детерминированный выбор модулей по роли | `src/lib/moduleSelection.ts` (матрица «роль → модули/занятия»; AI модули НЕ выбирает) |
 | База знаний (RAG) | `knowledge/*.md` — это Obsidian-vault, открывать как vault |
 | OpenRouter-клиент (chat, JSON-retry, whisper) | `src/lib/openrouter.ts` |
 | Zod-схемы AI-ответов и входных данных | `src/lib/schemas.ts` |

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { chatJson } from "@/lib/openrouter";
 import { CompanyInfoSchema, ProposalSchema } from "@/lib/schemas";
 import { MODULES, calculateCost, modulePriceLabel } from "@/lib/pricing";
+import { selectProgram, describePlan } from "@/lib/moduleSelection";
 
 export const runtime = "nodejs";
 export const maxDuration = 90;
@@ -15,27 +16,37 @@ const InputSchema = z.object({
 
 /**
  * POST /api/ai/proposal
- * Экран 3: персональная программа. AI выбирает модули и объясняет выбор,
- * стоимость считает бэкенд детерминированно (AI цифры не придумывает).
+ * Экран 3: персональная программа.
+ * Модули выбирает СИСТЕМА детерминированно (Program Selector, матрица ролей),
+ * стоимость считает бэкенд (Pricing Agent). AI только объясняет выбор
+ * и оформляет предложение (Presentation Agent).
  */
 export async function POST(req: NextRequest) {
   try {
     const { company, questions, answers } = InputSchema.parse(await req.json());
 
+    // === Program Selector: детерминированный выбор по роли ===
+    const plan = selectProgram(company.userRole);
+    const selectedModules = plan.modules
+      .map((id) => MODULES.find((m) => m.id === id)!)
+      .filter(Boolean);
+
     const qa = questions
       .map((q, i) => `Вопрос: ${q}\nОтвет клиента: ${answers[i] || "(без ответа)"}`)
       .join("\n\n");
 
-    const catalog = MODULES.map(
-      (m) =>
-        `- id="${m.id}": ${m.title}. ${m.description} Длительность: ${m.duration}. Формат: ${m.format}. Цена: ${modulePriceLabel(m)}.`
-    ).join("\n");
+    const catalog = selectedModules
+      .map(
+        (m) =>
+          `- id="${m.id}": ${m.title}. ${m.description} Длительность: ${m.duration}. Формат: ${m.format}.`
+      )
+      .join("\n");
 
     const proposal = await chatJson(
       [
         {
           role: "user",
-          content: `Клиент прошёл диагностику. Составь персональное предложение.
+          content: `Клиент прошёл диагностику. Оформи персональное предложение (Presentation Agent).
 
 ДАННЫЕ КЛИЕНТА:
 - Компания: ${company.companyName}
@@ -47,14 +58,21 @@ export async function POST(req: NextRequest) {
 ДИАГНОСТИКА:
 ${qa}
 
-КАТАЛОГ МОДУЛЕЙ (выбирай ТОЛЬКО из этих id, цены НЕ называй — их считает система):
+СИСТЕМА УЖЕ ВЫБРАЛА МОДУЛИ по матрице направленности (менять состав НЕЛЬЗЯ):
 ${catalog}
+
+ПЛАН ЗАНЯТИЙ ДЛЯ РОЛИ «${company.userRole}»:
+${describePlan(plan)}
+
+Для КАЖДОГО выбранного модуля напиши, почему он подходит именно этой роли и компании,
+со ссылкой на конкретные занятия и инструменты из базы знаний. Цены НЕ упоминай.
+Эффект описывай качественно, без процентов и сумм.
 
 Верни ТОЛЬКО JSON вида:
 {
   "summary": "Блок «Что мы увидели»: краткий саммари ситуации компании (3-5 предложений)",
-  "recommendedModules": [{"id": "intro", "reason": "почему модуль подходит именно этой роли и компании (2-3 предложения)"}],
-  "trainingFormat": "Блок «Как будет проходить обучение»: формат (онлайн/офлайн, BYOD), какие занятия из программы будут в фокусе для этой роли, конкретные инструменты (DeepSeek, Gemini, Perplexity, NotebookLM, Gamma, Буквица, SM AI PL)",
+  "recommendedModules": [${plan.modules.map((id) => `{"id": "${id}", "reason": "почему подходит (2-3 предложения, со ссылкой на занятия)"}`).join(", ")}],
+  "trainingFormat": "Блок «Как будет проходить обучение»: формат (очно/дистанционно, BYOD), занятия в фокусе для этой роли, конкретные инструменты из базы знаний",
   "matchScore": 87,
   "chatComment": "короткая реплика AI-продажника в чат о готовом предложении"
 }`,
@@ -63,23 +81,23 @@ ${catalog}
       (data) => ProposalSchema.parse(data)
     );
 
-    // Детерминированный расчет стоимости на бэкенде
-    const moduleIds = proposal.recommendedModules.map((m) => m.id);
-    const cost = calculateCost(moduleIds, company.participantCount);
+    // Детерминированная сборка: состав модулей — только из плана системы,
+    // от AI берём только объяснения (reason); стоимость — Pricing Agent.
+    const aiReasons = new Map(
+      proposal.recommendedModules.map((m) => [m.id, m.reason])
+    );
+    const modules = selectedModules.map((m) => ({
+      id: m.id,
+      title: m.title,
+      duration: m.duration,
+      format: m.format,
+      description: m.description,
+      image: m.image,
+      priceLabel: modulePriceLabel(m),
+      reason: aiReasons.get(m.id) || m.description,
+    }));
 
-    const modules = proposal.recommendedModules.map((rec) => {
-      const m = MODULES.find((x) => x.id === rec.id)!;
-      return {
-        id: m.id,
-        title: m.title,
-        duration: m.duration,
-        format: m.format,
-        description: m.description,
-        image: m.image,
-        priceLabel: modulePriceLabel(m),
-        reason: rec.reason,
-      };
-    });
+    const cost = calculateCost(plan.modules, company.participantCount);
 
     return NextResponse.json({
       summary: proposal.summary,
