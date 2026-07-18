@@ -223,6 +223,14 @@ export default function Screen5Booking() {
         <p className="mt-4 rounded-2xl bg-red-50 p-3 text-sm text-red-700">{error}</p>
       )}
 
+      {!canConfirm && !submitting && (
+        <p className="mt-4 text-right text-xs text-muted">
+          {!selectedSlotId
+            ? "Чтобы подтвердить встречу, выберите дату и время выше."
+            : "Заполните имя, email и телефон — и кнопка станет активной."}
+        </p>
+      )}
+
       <div className="mt-8 flex items-center justify-between">
         <button
           className="btn-secondary"
