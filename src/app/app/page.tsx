@@ -30,8 +30,16 @@ export default function WizardPage() {
   const [mounted, setMounted] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
-  // zustand persist → рендерим после монтирования, чтобы избежать hydration mismatch
-  useEffect(() => setMounted(true), []);
+  // zustand persist → рендерим после монтирования, чтобы избежать hydration mismatch.
+  // Переход с лендинга (?new=1) начинает диагностику с чистого листа для нового клиента.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("new") === "1") {
+      useWizardStore.getState().reset();
+      window.history.replaceState({}, "", "/app");
+    }
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (

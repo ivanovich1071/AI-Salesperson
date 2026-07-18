@@ -93,7 +93,7 @@ export default function LandingPage() {
             ))}
             <li>
               <Link
-                href="/app"
+                href="/app?new=1"
                 className="rounded-2xl bg-gold px-5 py-2.5 font-semibold text-brown-deep shadow-gold transition-all hover:bg-gold-hover"
               >
                 AI-диагностика
@@ -124,7 +124,7 @@ export default function LandingPage() {
               </li>
             ))}
             <li className="pt-2">
-              <Link href="/app" className="btn-primary w-full justify-center">
+              <Link href="/app?new=1" className="btn-primary w-full justify-center">
                 Пройти AI-диагностику →
               </Link>
             </li>
@@ -167,7 +167,7 @@ export default function LandingPage() {
               (РФ)
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/app" className="btn-primary">
+              <Link href="/app?new=1" className="btn-primary">
                 🚀 Пройти AI-диагностику →
               </Link>
               <a
@@ -305,7 +305,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="mt-10 text-center">
-            <Link href="/app" className="btn-primary">
+            <Link href="/app?new=1" className="btn-primary">
               Подобрать модули под мою команду →
             </Link>
           </div>
@@ -477,7 +477,7 @@ export default function LandingPage() {
               компанию, подберёт модули, рассчитает стоимость и запишет на встречу с
               Вероникой.
             </p>
-            <Link href="/app" className="btn-primary mt-8">
+            <Link href="/app?new=1" className="btn-primary mt-8">
               ✨ Пройти AI-диагностику и записаться →
             </Link>
           </div>

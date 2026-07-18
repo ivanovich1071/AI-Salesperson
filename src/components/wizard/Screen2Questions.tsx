@@ -8,8 +8,18 @@ export default function Screen2Questions() {
   const s = useWizardStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [sent, setSent] = useState<Record<number, boolean>>({});
 
   const answered = s.answers.filter((a) => a && a.trim()).length;
+
+  // Отправка ответа, введённого вручную: фиксирует ответ и дублирует его в AI-чат
+  function sendAnswer(i: number) {
+    const text = (s.answers[i] || "").trim();
+    if (!text) return;
+    s.pushChat("user", `Ответ на вопрос ${i + 1}: ${text}`);
+    s.pushChat("status", `✅ Ответ на вопрос ${String(i + 1).padStart(2, "0")} записан.`);
+    setSent((prev) => ({ ...prev, [i]: true }));
+  }
 
   async function buildProposal() {
     if (loading) return;
@@ -70,14 +80,38 @@ export default function Screen2Questions() {
                 rows={3}
                 placeholder="Ваш ответ..."
                 value={s.answers[i] || ""}
-                onChange={(e) => s.setAnswer(i, e.target.value)}
+                onChange={(e) => {
+                  s.setAnswer(i, e.target.value);
+                  if (sent[i]) setSent((prev) => ({ ...prev, [i]: false }));
+                }}
               />
-              <div className="absolute right-2 top-2">
+              <div className="absolute right-2 top-2 flex flex-col items-center gap-1">
                 <MicButton
                   onText={(t) =>
                     s.setAnswer(i, s.answers[i] ? `${s.answers[i]} ${t}` : t)
                   }
                 />
+                <button
+                  type="button"
+                  title="Отправить ответ"
+                  disabled={!(s.answers[i] || "").trim()}
+                  onClick={() => sendAnswer(i)}
+                  className={`rounded-full p-2 transition-colors disabled:opacity-30 ${
+                    sent[i]
+                      ? "bg-gold text-brown-deep"
+                      : "text-brown-light hover:bg-gold-light"
+                  }`}
+                >
+                  {sent[i] ? (
+                    <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+                      <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+                      <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
           </div>
