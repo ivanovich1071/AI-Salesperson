@@ -34,7 +34,8 @@ npm run dev                # http://localhost:3100
 npm run build && npm run start   # прод-сборка и запуск
 npx tsc --noEmit                 # проверка типов
 npm run db:studio                # Prisma Studio — визуальный просмотр БД
-node scripts/seed-slots.mjs 2026-08-01 2026-08-14   # сгенерировать демо-слоты для календаря
+node scripts/seed-slots.mjs 2026-08-01 2026-08-14   # сгенерировать демо-слоты на диапазон дат
+node scripts/seed-current-month.mjs                 # слоты на текущий месяц + чистка прошедших (для cron)
 ```
 
 ## Переменные окружения (`.env`)
