@@ -1,24 +1,81 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWizardStore } from "@/store/wizardStore";
+import MicButton from "./MicButton";
 
 /**
- * Левая колонка (~25% ширины): AI-чат на всю высоту.
- * «Голос» AI-продажника: приветствия, пояснения, статусы загрузки.
- * Футер на диалоговых/диагностических страницах убран по требованию заказчика —
- * контакты остаются на лендинге.
+ * Левая колонка (~25% ширины): интерактивный AI-чат на всю высоту.
+ * Показывает реплики ассистента и статусы + принимает сообщения пользователя
+ * (текст и голос). Ассистент отвечает с учётом контекста визарда (/api/ai/chat).
  */
 export default function ChatPanel() {
   const chat = useWizardStore((s) => s.chat);
+  const pushChat = useWizardStore((s) => s.pushChat);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [chat.length]);
+  }, [chat.length, sending]);
+
+  async function send() {
+    const text = input.trim();
+    if (!text || sending) return;
+    setInput("");
+    pushChat("user", text);
+    setSending(true);
+
+    // История для модели: только реплики ai/user (без статусов), последние 12
+    const s = useWizardStore.getState();
+    const history = [...s.chat, { id: "tmp", kind: "user" as const, text }]
+      .filter((m) => m.kind === "ai" || m.kind === "user")
+      .slice(-12)
+      .map((m) => ({ role: m.kind === "ai" ? ("assistant" as const) : ("user" as const), content: m.text }));
+
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: history,
+          context: {
+            companyName: s.companyName,
+            userRole: s.userRole,
+            participantCount: s.participantCount,
+            goals: s.goals,
+            step: s.step,
+            proposal: s.proposal
+              ? {
+                  assemblyName: s.proposal.assemblyName,
+                  totalHours: s.proposal.totalHours,
+                  modules: s.proposal.trainingModules.map((m) => `${m.code}. ${m.title}`),
+                  trainingTotal: s.proposal.trainingCost.total,
+                  currency: s.proposal.trainingCost.currency,
+                }
+              : null,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "AI недоступен");
+      pushChat("ai", data.reply);
+    } catch (e) {
+      pushChat(
+        "ai",
+        e instanceof Error && e.message.length < 160
+          ? e.message
+          : "Не удалось получить ответ. Попробуйте ещё раз или продолжите заполнение формы."
+      );
+    } finally {
+      setSending(false);
+    }
+  }
 
   return (
     <div className="flex h-full flex-col border-r border-line bg-[#FFFDF9]">
+      {/* Лента сообщений */}
       <div ref={scrollRef} className="flex flex-1 flex-col gap-3 overflow-y-auto p-5">
         {chat.map((m) => (
           <div
@@ -27,15 +84,54 @@ export default function ChatPanel() {
               m.kind === "status"
                 ? "border-gold-light bg-gold-light/40 text-brown-light italic"
                 : m.kind === "user"
-                  ? "border-line bg-white text-ink"
+                  ? "self-end border-line bg-white text-ink"
                   : "border-line border-l-[3px] border-l-gold bg-milk text-ink"
             }`}
           >
             {m.text}
           </div>
         ))}
+        {sending && (
+          <div className="fade-in-up flex items-center gap-2 rounded-2xl border border-line border-l-[3px] border-l-gold bg-milk p-4 text-sm text-muted">
+            <span className="h-3 w-3 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+            Ассистент печатает...
+          </div>
+        )}
       </div>
 
+      {/* Поле ввода: текст + голос + отправка */}
+      <div className="border-t border-line bg-white p-3">
+        <div className="flex items-end gap-2 rounded-2xl border border-line bg-milk p-2 focus-within:border-gold">
+          <textarea
+            className="max-h-28 flex-1 resize-none bg-transparent px-2 py-1 text-sm text-ink outline-none"
+            rows={1}
+            placeholder="Спросите ассистента или напишите комментарий..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                send();
+              }
+            }}
+          />
+          <MicButton onText={(t) => setInput((prev) => (prev ? `${prev} ${t}` : t))} />
+          <button
+            type="button"
+            onClick={send}
+            disabled={!input.trim() || sending}
+            aria-label="Отправить"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold text-brown-deep transition-colors hover:bg-gold-hover disabled:opacity-40"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+              <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+          </button>
+        </div>
+        <p className="mt-1 px-1 text-[11px] text-muted">
+          Enter — отправить, Shift+Enter — новая строка. Можно диктовать голосом 🎙️
+        </p>
+      </div>
     </div>
   );
 }

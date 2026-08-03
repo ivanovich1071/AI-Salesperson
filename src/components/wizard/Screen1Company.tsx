@@ -25,6 +25,12 @@ export default function Screen1Company() {
       s.setField("objectionResponse", null);
     }
 
+    // Отражаем введённые данные в чате как сообщение пользователя
+    s.pushChat(
+      "user",
+      `Компания «${s.companyName}», роль: ${s.userRole}, участников: ${s.participantCount}.` +
+        (s.goals.trim() ? ` Задачи: ${s.goals.trim()}` : "")
+    );
     s.pushChat("status", "🔍 Изучаем специфику вашей отрасли...");
 
     // Парсинг сайта (мягкий фолбэк при ошибке) — единственный сетевой шаг
