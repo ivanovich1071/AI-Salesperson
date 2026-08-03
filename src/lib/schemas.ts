@@ -1,26 +1,23 @@
 import { z } from "zod";
 
-// === Zod-схемы для строгой валидации JSON-ответов Qwen (по ТЗ, раздел 12) ===
+// === Zod-схемы для строгой валидации JSON-ответов Qwen ===
 
-/** Экран 2: диагностические вопросы */
-export const DiagnosticQuestionsSchema = z.object({
-  chatIntro: z.string().min(1),
-  questions: z.array(z.string().min(5)).min(3).max(4),
-});
-export type DiagnosticQuestions = z.infer<typeof DiagnosticQuestionsSchema>;
-
-/** Экран 3: персональное предложение */
+/**
+ * Экран 3: персональное предложение.
+ * Состав модулей и цены выбирает КОД (Program Selector + Pricing).
+ * AI отвечает только объяснениями: summary, reason по каждому модулю,
+ * формат, шкала соответствия, реплика в чат.
+ */
 export const ProposalSchema = z.object({
   summary: z.string().min(1), // Блок 1: «Что мы увидели»
-  recommendedModules: z
+  moduleReasons: z
     .array(
       z.object({
-        id: z.enum(["intro", "practice", "consulting"]),
+        code: z.string().min(1), // код модуля из переданного списка (Б1, П3, ...)
         reason: z.string().min(1), // почему подходит этой роли/компании
       })
     )
-    .min(1)
-    .max(3),
+    .min(1),
   trainingFormat: z.string().min(1), // Блок 3: «Как будет проходить обучение»
   matchScore: z.number().min(0).max(100), // шкала соответствия
   chatComment: z.string().min(1), // комментарий AI в чат

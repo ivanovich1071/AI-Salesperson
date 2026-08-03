@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MODULES } from "@/lib/pricing";
 
 /* ===== Мини-иконки (inline SVG вместо Font Awesome) ===== */
 const CheckIcon = () => (
@@ -25,20 +24,39 @@ const NAV_LINKS = [
   { href: "#contact", label: "Контакты" },
 ];
 
-const MODULE_TOPICS: Record<string, string[]> = {
-  intro: [
-    "Обзор ИИ-трендов",
-    "Основы работы с нейросетями для генерации текста, изображений, видео, презентаций",
-    "Политика индивидуальной и корпоративной работы с VPN",
-    "Кейс-практикум промптинга",
-  ],
-  practice: [
-    "Групповая и индивидуальная работа над собственными проектами и решениями",
-    "Прототипы корпоративных ИИ-ассистентов (SM AI PL и др.)",
-    "Интеграция в рабочие процессы",
-  ],
-  consulting: ["Персональная поддержка", "Доработка проектов", "Решение задач"],
-};
+// Продуктовые уровни для витрины лендинга (описательно, независимо от каталога модулей)
+const PRODUCT_LEVELS = [
+  {
+    title: "Практическое обучение",
+    subtitle: "Модули Б1, Б2, П1–П8, РУК · по 4 ч",
+    image: "/images/photo_2026-07-17_3.jpg",
+    topics: [
+      "Базовые модули: задачи, промпты, работа с файлами, проверка результатов и безопасность",
+      "Профессиональные модули под роль: документы, данные, HR, продажи, управление и др.",
+      "Экспертное заключение по итогам обучения",
+    ],
+  },
+  {
+    title: "Лаборатория AI-кейсов",
+    subtitle: "Отдельный продукт после обучения",
+    image: "/images/photo_2026-07-17_4.jpg",
+    topics: [
+      "Команды находят, проверяют и оформляют собственные кейсы применения ИИ",
+      "До 4 командных кейсов за цикл",
+      "Итог — дорожная карта внедрения ИИ",
+    ],
+  },
+  {
+    title: "Проектирование и разработка",
+    subtitle: "Следующие продуктовые уровни",
+    image: "/images/photo_2026-07-17_5.jpg",
+    topics: [
+      "Проектирование: сценарий, требования, данные, проверки",
+      "Разработка: PoC, MVP или готовое решение",
+      "Стоимость — после отдельной оценки задачи",
+    ],
+  },
+];
 
 const CERTIFICATES = [
   { src: "/images/cert-prompt-engineer.jpg", label: "Промпт-инженер (Университет Зерокодинга)" },
@@ -270,13 +288,13 @@ export default function LandingPage() {
             <h2 className="section-title">Программа обучения</h2>
             <div className="title-underline" />
             <p className="mx-auto mt-4 max-w-2xl text-muted">
-              Три модульных продукта — от вводного интенсива до консалтинга. Персональную
-              комбинацию под вашу команду подберёт AI-диагностика.
+              От практического обучения до проектирования решений. Персональную программу
+              под вашу команду с расчётом стоимости подберёт AI-диагностика.
             </p>
           </div>
           <div className="mt-12 grid gap-8 lg:grid-cols-3">
-            {MODULES.map((m, i) => (
-              <div key={m.id} className="card group flex flex-col overflow-hidden">
+            {PRODUCT_LEVELS.map((m, i) => (
+              <div key={m.title} className="card group flex flex-col overflow-hidden">
                 <div className="relative h-48 overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -291,10 +309,9 @@ export default function LandingPage() {
                 </div>
                 <div className="flex flex-1 flex-col p-6">
                   <h3 className="text-lg font-bold text-brown-deep">{m.title}</h3>
-                  <p className="mt-1 text-sm font-medium text-gold">{m.duration}</p>
-                  <p className="text-sm text-muted">{m.format}</p>
+                  <p className="mt-1 text-sm font-medium text-gold">{m.subtitle}</p>
                   <ul className="mt-4 flex-1 space-y-2">
-                    {MODULE_TOPICS[m.id].map((t) => (
+                    {m.topics.map((t) => (
                       <li key={t} className="flex gap-2 text-sm text-brown-light">
                         <CheckIcon /> {t}
                       </li>

@@ -47,8 +47,8 @@ export default function Screen3Proposal() {
           userRole: s.userRole,
           participantCount: s.participantCount,
           goals: s.goals,
-          recommendedModules: p!.modules.map((m) => m.title),
-          totalCost: p!.cost.total,
+          recommendedModules: p!.trainingModules.map((m) => `${m.code}. ${m.title}`),
+          totalCost: p!.trainingCost.total,
         }),
       });
       const data = await res.json();
@@ -73,7 +73,7 @@ export default function Screen3Proposal() {
         Персональная программа для вашей компании
       </h1>
       <p className="mt-2 text-muted">
-        Сформирована AI на основе задач команды «{s.companyName}» и результатов диагностики.
+        Сформирована на основе задач команды «{s.companyName}» и результатов диагностики.
       </p>
 
       {/* Блок 1: Что мы увидели */}
@@ -82,23 +82,27 @@ export default function Screen3Proposal() {
         <p className="mt-2 text-sm leading-relaxed text-brown-light">{p.summary}</p>
       </div>
 
-      {/* Блок 2: Рекомендуемые модули */}
-      <h3 className="mt-8 font-bold text-brown-deep">Рекомендуемые модули</h3>
+      {/* Блок 2: Рекомендуемые учебные модули */}
+      <div className="mt-8 flex items-baseline justify-between">
+        <h3 className="font-bold text-brown-deep">Рекомендуемые учебные модули</h3>
+        <span className="text-sm font-semibold text-gold">
+          {p.assemblyName} · {p.totalHours} ч
+        </span>
+      </div>
       <div className="mt-3 space-y-4">
-        {p.modules.map((m) => (
-          <div key={m.id} className="card flex flex-col overflow-hidden sm:flex-row">
-            <div className="relative h-40 shrink-0 sm:h-auto sm:w-48">
+        {p.trainingModules.map((m) => (
+          <div key={m.code} className="card flex flex-col overflow-hidden sm:flex-row">
+            <div className="relative h-36 shrink-0 sm:h-auto sm:w-44">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={m.image} alt={m.title} className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-brown-deep/20" />
+              <span className="absolute left-3 top-3 rounded-2xl bg-gold px-3 py-1 text-sm font-bold text-brown-deep shadow-gold">
+                {m.code}
+              </span>
             </div>
             <div className="flex-1 p-5">
               <h4 className="font-bold text-brown-deep">{m.title}</h4>
-              <p className="mt-0.5 text-xs font-semibold text-gold">
-                {m.duration} · {m.format}
-              </p>
+              <p className="mt-0.5 text-xs font-semibold text-gold">{m.hours} ак. часа</p>
               <p className="mt-2 text-sm leading-relaxed text-muted">{m.reason}</p>
-              <p className="mt-2 text-sm font-bold text-gold">{m.priceLabel}</p>
             </div>
           </div>
         ))}
@@ -110,25 +114,71 @@ export default function Screen3Proposal() {
         <p className="mt-2 text-sm leading-relaxed text-brown-light">{p.trainingFormat}</p>
       </div>
 
-      {/* Блок 4: Детерминированный расчет стоимости */}
+      {/* Блок 4: Расчёт стоимости обучения */}
       <div className="mt-6 rounded-3xl bg-brown-deep p-6 text-milk">
-        <h3 className="font-bold text-gold">Расчёт стоимости</h3>
+        <h3 className="font-bold text-gold">Расчёт стоимости обучения</h3>
+        <p className="mt-1 text-xs text-milk/60">
+          Расчёт по потокам и профессиональным группам, не по числу участников.
+          {p.trainingCost.streams > 1 && ` Потоков: ${p.trainingCost.streams}.`}
+        </p>
         <div className="mt-3 space-y-2 text-sm">
-          {p.cost.lines.map((l, i) => (
+          {p.trainingCost.lines.map((l, i) => (
             <div key={i} className="flex justify-between gap-4">
               <span className="text-milk/85">{l.label}</span>
-              <span className="shrink-0">{l.amount.toLocaleString("ru-RU")} {p.cost.currency}</span>
+              <span className="shrink-0">
+                {l.amount.toLocaleString("ru-RU")} {p.trainingCost.currency}
+              </span>
             </div>
           ))}
         </div>
         <div className="mt-4 flex justify-between border-t border-milk/20 pt-3 text-lg font-bold text-gold">
-          <span>Итоговая стоимость</span>
-          <span>{formatMoney(p.cost.total)}</span>
+          <span>Стоимость обучения</span>
+          <span>{formatMoney(p.trainingCost.total)}</span>
         </div>
         <p className="mt-2 text-xs text-milk/60">
-          Расчёт выполнен автоматически по каталогу программ. Финальные условия — на
-          встрече с экспертом.
+          Цены ориентировочные. Командировочные, аренда и платные аккаунты — отдельно.
+          Финальные условия — на встрече с экспертом.
         </p>
+      </div>
+
+      {/* Отдельный продукт: Лаборатория AI-кейсов */}
+      <div className="card mt-6 border-l-4 border-l-gold p-6">
+        <div className="flex items-baseline justify-between gap-4">
+          <h3 className="font-bold text-brown-deep">{p.lab.title}</h3>
+          <span className="shrink-0 text-sm font-bold text-gold">{p.lab.range}</span>
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-muted">{p.lab.description}</p>
+        <p className="mt-2 text-xs font-semibold text-brown-light">
+          Предлагается отдельно, не входит в стоимость обучения.
+        </p>
+      </div>
+
+      {/* Проектирование и разработка */}
+      <div className="card mt-6 p-6">
+        <div className="flex items-baseline justify-between gap-4">
+          <h3 className="font-bold text-brown-deep">{p.designDevelopment.title}</h3>
+          <span className="shrink-0 text-sm font-semibold text-gold">
+            {p.designDevelopment.note}
+          </span>
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          {p.designDevelopment.description}
+        </p>
+      </div>
+
+      {/* Что дальше — лестница продуктов */}
+      <div className="mt-6 rounded-3xl bg-gold-light p-6">
+        <h3 className="font-bold text-brown-deep">Что дальше</h3>
+        <ol className="mt-3 space-y-2">
+          {p.nextSteps.map((step, i) => (
+            <li key={i} className="flex gap-3 text-sm text-brown-light">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold text-xs font-bold text-brown-deep">
+                {i + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
       </div>
 
       {/* Блок 5: Оценка и сомнения */}

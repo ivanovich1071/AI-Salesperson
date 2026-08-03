@@ -10,13 +10,10 @@ export interface ChatMessage {
 }
 
 export interface ProposalModule {
-  id: string;
+  code: string;
   title: string;
-  duration: string;
-  format: string;
-  description: string;
+  hours: number;
   image: string;
-  priceLabel: string;
   reason: string;
 }
 
@@ -24,15 +21,33 @@ export interface CostBreakdown {
   lines: { label: string; amount: number }[];
   total: number;
   currency: string;
+  streams: number;
+}
+
+export interface LabInfo {
+  title: string;
+  range: string; // "5 000–9 500 BYN"
+  description: string;
+}
+
+export interface DesignDevInfo {
+  title: string;
+  note: string;
+  description: string;
 }
 
 export interface ProposalData {
   summary: string;
-  modules: ProposalModule[];
+  trainingModules: ProposalModule[];
+  totalHours: number;
+  assemblyName: string;
   trainingFormat: string;
+  trainingCost: CostBreakdown;
+  lab: LabInfo;
+  designDevelopment: DesignDevInfo;
+  nextSteps: string[];
   matchScore: number;
   chatComment: string;
-  cost: CostBreakdown;
 }
 
 export interface ObjectionResponseData {
@@ -63,9 +78,8 @@ interface WizardState {
   participantCount: number;
   goals: string;
 
-  // Экран 2
-  diagnosticQuestions: string[];
-  answers: string[];
+  // Экран 2 — структурные ответы чекбокс-анкеты: qid → выбранные + «Другое»
+  diagnosticAnswers: Record<string, { selected: string[]; other: string }>;
 
   // Экран 3
   proposal: ProposalData | null;
@@ -87,7 +101,9 @@ interface WizardState {
   setStep: (step: WizardStep) => void;
   pushChat: (kind: ChatMessage["kind"], text: string) => void;
   replaceLastStatus: (text: string) => void;
-  setAnswer: (index: number, value: string) => void;
+  toggleOption: (qid: string, option: string) => void; // чекбокс: добавить/убрать
+  setSingle: (qid: string, option: string) => void; // radio (под-вопрос): заменить
+  setOther: (qid: string, text: string) => void; // поле «Другое»
   fingerprint: () => string;
   markGenerated: () => void;
   needsRegeneration: () => boolean;
@@ -108,8 +124,7 @@ const initialData = {
   userRole: "",
   participantCount: 10,
   goals: "",
-  diagnosticQuestions: [] as string[],
-  answers: [] as string[],
+  diagnosticAnswers: {} as Record<string, { selected: string[]; other: string }>,
   proposal: null as ProposalData | null,
   objection: "",
   objectionResponse: null as ObjectionResponseData | null,
@@ -143,11 +158,27 @@ export const useWizardStore = create<WizardState>()(
           return { chat };
         }),
 
-      setAnswer: (index, value) =>
+      toggleOption: (qid, option) =>
         set((s) => {
-          const answers = [...s.answers];
-          answers[index] = value;
-          return { answers };
+          const cur = s.diagnosticAnswers[qid] ?? { selected: [], other: "" };
+          const selected = cur.selected.includes(option)
+            ? cur.selected.filter((o) => o !== option)
+            : [...cur.selected, option];
+          return { diagnosticAnswers: { ...s.diagnosticAnswers, [qid]: { ...cur, selected } } };
+        }),
+
+      setSingle: (qid, option) =>
+        set((s) => {
+          const cur = s.diagnosticAnswers[qid] ?? { selected: [], other: "" };
+          return {
+            diagnosticAnswers: { ...s.diagnosticAnswers, [qid]: { ...cur, selected: [option] } },
+          };
+        }),
+
+      setOther: (qid, text) =>
+        set((s) => {
+          const cur = s.diagnosticAnswers[qid] ?? { selected: [], other: "" };
+          return { diagnosticAnswers: { ...s.diagnosticAnswers, [qid]: { ...cur, other: text } } };
         }),
 
       fingerprint: () => {
@@ -173,7 +204,7 @@ export const useWizardStore = create<WizardState>()(
       name: "ai-salesperson-wizard",
       partialize: (s) => {
         // не сохраняем функции; chat сохраняем, чтобы шаг назад не терял историю
-        const { setField, setStep, pushChat, replaceLastStatus, setAnswer, fingerprint, markGenerated, needsRegeneration, reset, ...data } = s;
+        const { setField, setStep, pushChat, replaceLastStatus, toggleOption, setSingle, setOther, fingerprint, markGenerated, needsRegeneration, reset, ...data } = s;
         return data;
       },
     }

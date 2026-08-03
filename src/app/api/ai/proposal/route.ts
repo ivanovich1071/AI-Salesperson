@@ -2,77 +2,94 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { chatJson } from "@/lib/openrouter";
 import { CompanyInfoSchema, ProposalSchema } from "@/lib/schemas";
-import { MODULES, calculateCost, modulePriceLabel } from "@/lib/pricing";
-import { selectProgram, describePlan } from "@/lib/moduleSelection";
+import {
+  getModule,
+  calculateTrainingCost,
+  totalHours,
+  assemblyName,
+  formatRange,
+  LAB,
+  DESIGN_DEVELOPMENT,
+} from "@/lib/pricing";
+import { selectProgram } from "@/lib/moduleSelection";
 
 export const runtime = "nodejs";
 export const maxDuration = 90;
 
+const QAItem = z.object({ question: z.string(), answer: z.string() });
 const InputSchema = z.object({
   company: CompanyInfoSchema,
-  questions: z.array(z.string()),
-  answers: z.array(z.string()),
+  qa: z.array(QAItem), // объединённые ответы анкеты: вопрос + (чекбоксы + «Другое»)
 });
+
+const NEXT_STEPS = [
+  "Экспертное заключение по итогам обучения (входит в стоимость)",
+  "Лаборатория AI-кейсов или аудит процессов — по желанию",
+  "Дорожная карта внедрения ИИ (по итогам лаборатории или аудита)",
+  "Проектирование и разработка конкретного решения — после отдельной оценки",
+];
 
 /**
  * POST /api/ai/proposal
- * Экран 3: персональная программа.
- * Модули выбирает СИСТЕМА детерминированно (Program Selector, матрица ролей),
- * стоимость считает бэкенд (Pricing Agent). AI только объясняет выбор
- * и оформляет предложение (Presentation Agent).
+ * Модули выбирает СИСТЕМА (Program Selector, Таблица 7), стоимость обучения
+ * считает КОД (Pricing, Таблица 5). AI только объясняет выбор и оформляет предложение.
  */
 export async function POST(req: NextRequest) {
   try {
-    const { company, questions, answers } = InputSchema.parse(await req.json());
+    const { company, qa } = InputSchema.parse(await req.json());
 
-    // === Program Selector: детерминированный выбор по роли ===
-    const plan = selectProgram(company.userRole);
-    const selectedModules = plan.modules
-      .map((id) => MODULES.find((m) => m.id === id)!)
-      .filter(Boolean);
+    const answersText = qa.map((x) => x.answer).join("\n");
+    const hasManagers = company.userRole === "Руководители";
 
-    const qa = questions
-      .map((q, i) => `Вопрос: ${q}\nОтвет клиента: ${answers[i] || "(без ответа)"}`)
-      .join("\n\n");
+    // === Program Selector: детерминированный выбор ===
+    const selection = selectProgram(company.userRole, answersText, hasManagers);
+    const codes = selection.modules;
 
-    const catalog = selectedModules
-      .map(
-        (m) =>
-          `- id="${m.id}": ${m.title}. ${m.description} Длительность: ${m.duration}. Формат: ${m.format}.`
-      )
+    // === Pricing: детерминированный расчёт обучения ===
+    const cost = calculateTrainingCost(codes, company.participantCount);
+    const hours = totalHours(codes);
+    const bundle = assemblyName(codes);
+
+    const catalog = codes
+      .map((c) => {
+        const m = getModule(c)!;
+        return `- ${c}: ${m.title} (${m.hours} ч, аудитория: ${m.audience})`;
+      })
       .join("\n");
+
+    const qaText = qa
+      .map((x) => `Вопрос: ${x.question}\nОтвет: ${x.answer || "(без ответа)"}`)
+      .join("\n\n");
 
     const proposal = await chatJson(
       [
         {
           role: "user",
-          content: `Клиент прошёл диагностику. Оформи персональное предложение (Presentation Agent).
+          content: `Клиент прошёл диагностику (чекбокс-анкета). Оформи персональное предложение.
 
 ДАННЫЕ КЛИЕНТА:
 - Компания: ${company.companyName}
-- Текст с сайта: ${company.parsedWebsiteText ? company.parsedWebsiteText.slice(0, 2500) : "(нет)"}
 - Роль участников: ${company.userRole}
 - Количество участников: ${company.participantCount}
-- Цели: ${company.goals}
+- Текст с сайта: ${company.parsedWebsiteText ? company.parsedWebsiteText.slice(0, 2000) : "(нет)"}
 
-ДИАГНОСТИКА:
-${qa}
+ОТВЕТЫ АНКЕТЫ:
+${qaText}
 
-СИСТЕМА УЖЕ ВЫБРАЛА МОДУЛИ по матрице направленности (менять состав НЕЛЬЗЯ):
+СИСТЕМА УЖЕ ВЫБРАЛА УЧЕБНЫЕ МОДУЛИ по матрице направленности (состав менять НЕЛЬЗЯ):
 ${catalog}
+Сборка: «${bundle}», суммарно ${hours} ак. часов.
+${selection.publicCloudRestricted ? "ВАЖНО: у клиента запрещены публичные облачные ИИ-сервисы — подчеркни работу в закрытом контуре и локальные/корпоративные инструменты." : ""}
 
-ПЛАН ЗАНЯТИЙ ДЛЯ РОЛИ «${company.userRole}»:
-${describePlan(plan)}
-
-Для КАЖДОГО выбранного модуля напиши, почему он подходит именно этой роли и компании,
-со ссылкой на конкретные занятия и инструменты из базы знаний. Цены НЕ упоминай.
-Эффект описывай качественно, без процентов и сумм.
+Для КАЖДОГО выбранного модуля напиши краткое объяснение, почему он подходит именно
+этой роли и задачам клиента, со ссылкой на занятия и инструменты из базы знаний.
+Цены НЕ упоминай (их считает система). Эффект описывай качественно, без процентов и сумм.
 
 Верни ТОЛЬКО JSON вида:
 {
-  "summary": "Блок «Что мы увидели»: краткий саммари ситуации компании (3-5 предложений)",
-  "recommendedModules": [${plan.modules.map((id) => `{"id": "${id}", "reason": "почему подходит (2-3 предложения, со ссылкой на занятия)"}`).join(", ")}],
-  "trainingFormat": "Блок «Как будет проходить обучение»: формат (очно/дистанционно, BYOD), занятия в фокусе для этой роли, конкретные инструменты из базы знаний",
+  "summary": "Блок «Что мы увидели»: 3-5 предложений о ситуации компании по ответам анкеты",
+  "moduleReasons": [${codes.map((c) => `{"code": "${c}", "reason": "почему модуль ${c} подходит (2-3 предложения)"}`).join(", ")}],
+  "trainingFormat": "Как будет проходить обучение: очно/дистанционно, BYOD, принцип «демонстрация → применение → результат», конкретные инструменты из базы знаний",
   "matchScore": 87,
   "chatComment": "короткая реплика AI-продажника в чат о готовом предложении"
 }`,
@@ -81,31 +98,41 @@ ${describePlan(plan)}
       (data) => ProposalSchema.parse(data)
     );
 
-    // Детерминированная сборка: состав модулей — только из плана системы,
-    // от AI берём только объяснения (reason); стоимость — Pricing Agent.
-    const aiReasons = new Map(
-      proposal.recommendedModules.map((m) => [m.id, m.reason])
+    const reasonByCode = new Map(
+      proposal.moduleReasons.map((r) => [r.code, r.reason])
     );
-    const modules = selectedModules.map((m) => ({
-      id: m.id,
-      title: m.title,
-      duration: m.duration,
-      format: m.format,
-      description: m.description,
-      image: m.image,
-      priceLabel: modulePriceLabel(m),
-      reason: aiReasons.get(m.id) || m.description,
-    }));
 
-    const cost = calculateCost(plan.modules, company.participantCount);
+    const trainingModules = codes.map((c) => {
+      const m = getModule(c)!;
+      return {
+        code: c,
+        title: m.title,
+        hours: m.hours,
+        image: m.image,
+        reason: reasonByCode.get(c) || m.condition,
+      };
+    });
 
     return NextResponse.json({
       summary: proposal.summary,
-      modules,
+      trainingModules,
+      totalHours: hours,
+      assemblyName: bundle,
       trainingFormat: proposal.trainingFormat,
+      trainingCost: cost,
+      lab: {
+        title: LAB.title,
+        range: formatRange(LAB.priceMin, LAB.priceMax),
+        description: LAB.description,
+      },
+      designDevelopment: {
+        title: DESIGN_DEVELOPMENT.title,
+        note: DESIGN_DEVELOPMENT.note,
+        description: DESIGN_DEVELOPMENT.description,
+      },
+      nextSteps: NEXT_STEPS,
       matchScore: proposal.matchScore,
       chatComment: proposal.chatComment,
-      cost,
     });
   } catch (e) {
     console.error("[ai/proposal]", e);

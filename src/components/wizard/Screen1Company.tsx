@@ -18,22 +18,16 @@ export default function Screen1Company() {
     setLoading(true);
     setError("");
 
-    // При изменении данных Шага 1 зависимые AI-блоки регенерируются (ТЗ, раздел 13)
+    // При изменении данных Шага 1 зависимые блоки сбрасываются
     if (s.needsRegeneration()) {
-      s.setField("diagnosticQuestions", []);
-      s.setField("answers", []);
+      s.setField("diagnosticAnswers", {});
       s.setField("proposal", null);
       s.setField("objectionResponse", null);
-    } else if (s.diagnosticQuestions.length > 0) {
-      // данные не менялись — просто вернуться к вопросам
-      s.setStep(2);
-      setLoading(false);
-      return;
     }
 
     s.pushChat("status", "🔍 Изучаем специфику вашей отрасли...");
 
-    // 1. Парсинг сайта (мягкий фолбэк при ошибке)
+    // Парсинг сайта (мягкий фолбэк при ошибке) — единственный сетевой шаг
     let parsedText = "";
     if (s.websiteUrl.trim()) {
       try {
@@ -48,51 +42,27 @@ export default function Screen1Company() {
         } else {
           s.pushChat(
             "ai",
-            "Не удалось автоматически проанализировать сайт. AI будет опираться на ваше текстовое описание."
+            "Не удалось автоматически проанализировать сайт. Я буду опираться на ваши ответы в анкете."
           );
         }
       } catch {
         s.pushChat(
           "ai",
-          "Не удалось автоматически проанализировать сайт. AI будет опираться на ваше текстовое описание."
+          "Не удалось автоматически проанализировать сайт. Я буду опираться на ваши ответы в анкете."
         );
       }
     }
     s.setField("parsedWebsiteText", parsedText);
+    s.markGenerated();
 
-    s.replaceLastStatus("🧭 Анализируем матрицу направленности...");
-
-    // 2. Генерация диагностических вопросов
-    try {
-      const res = await fetch("/api/ai/questions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyName: s.companyName,
-          websiteUrl: s.websiteUrl,
-          parsedWebsiteText: parsedText,
-          userRole: s.userRole,
-          participantCount: s.participantCount,
-          goals: s.goals,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "AI недоступен");
-
-      s.setField("diagnosticQuestions", data.questions);
-      s.setField("answers", new Array(data.questions.length).fill(""));
-      s.markGenerated();
-      s.replaceLastStatus("✅ Диагностика подготовлена.");
-      s.pushChat("ai", data.chatIntro);
-      s.setStep(2);
-    } catch (e) {
-      const msg =
-        e instanceof Error ? e.message : "AI временно недоступен. Попробуйте ещё раз.";
-      setError(msg);
-      s.replaceLastStatus("⚠️ Не получилось запустить диагностику. Попробуйте ещё раз.");
-    } finally {
-      setLoading(false);
-    }
+    // Диагностические вопросы теперь фиксированные (по роли) — переходим сразу к анкете
+    s.replaceLastStatus("✅ Диагностика подготовлена под вашу роль.");
+    s.pushChat(
+      "ai",
+      `Отлично! Подобрал вопросы под роль «${s.userRole}». Отметьте подходящие варианты — чем точнее ответы, тем точнее программа.`
+    );
+    s.setStep(2);
+    setLoading(false);
   }
 
   return (

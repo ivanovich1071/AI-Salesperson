@@ -1,73 +1,116 @@
-import type { ModuleId } from "./pricing";
+import type { ModuleCode } from "./pricing";
+import { getModule } from "./pricing";
 
 // ============================================================
-// PROGRAM SELECTOR (системный промпт, раздел 4):
-// детерминированный выбор модулей и занятий по роли.
-// AI модули НЕ выбирает — он только объясняет выбор системы.
+// PROGRAM SELECTOR (Таблица 7) — детерминированный автоподбор
+// учебных модулей по роли + сигналам из чекбокс-ответов.
+// AI модули НЕ выбирает: получает готовый список и объясняет выбор.
 // ============================================================
 
-export interface RolePlan {
-  modules: ModuleId[];
-  requiredLessons: number[];
-  optionalLessons: number[];
-}
-
-const DEFAULT_PLAN: RolePlan = {
-  modules: ["intro"],
-  requiredLessons: [1, 2, 3],
-  optionalLessons: [4, 5, 6],
+// Базовый план по роли (какие П-модули профильны для роли)
+const ROLE_MODULES: Record<string, ModuleCode[]> = {
+  "Руководители": ["П1"],
+  "Документооборот / аналитики": ["П2", "П3"],
+  "HR": ["П5"],
+  "Продажи / коммерческий блок": ["П6"],
+  "Производство / инженеры": [], // офисных П-модулей нет → только база
+  "Универсальные специалисты": [],
 };
 
-export const ROLE_PLANS: Record<string, RolePlan> = {
-  "Руководители": {
-    modules: ["intro", "consulting"],
-    requiredLessons: [1, 3],
-    optionalLessons: [2, 4, 5, 6],
-  },
-  "Документооборот / аналитики": {
-    modules: ["intro", "practice"],
-    requiredLessons: [2, 3],
-    optionalLessons: [1, 4, 5],
-  },
-  "HR": {
-    modules: ["intro", "practice"],
-    requiredLessons: [4],
-    optionalLessons: [1, 2, 3, 6],
-  },
-  "Продажи / коммерческий блок": {
-    modules: ["intro", "practice"],
-    requiredLessons: [5],
-    optionalLessons: [1, 2, 3, 4],
-  },
-  "Производство / инженеры": {
-    modules: ["practice", "consulting"],
-    requiredLessons: [6],
-    optionalLessons: [1, 2, 3, 5],
-  },
-  "Универсальные специалисты": DEFAULT_PLAN,
-};
+// Ключевые слова из ответов → профессиональный модуль (Таблица 7)
+const SIGNAL_MODULES: { module: ModuleCode; keywords: string[] }[] = [
+  { module: "П2", keywords: ["переписк", "протокол", "письм", "ocr", "служебн", "регламент", "инструкц"] },
+  { module: "П3", keywords: ["таблиц", "отчет", "отчёт", "данны", "аналит", "свод"] },
+  { module: "П4", keywords: ["договор", "закупк", "коммерческ", "снабжен", "тендер"] },
+  { module: "П5", keywords: ["hr", "персонал", "адаптац", "должностн", "обучен сотрудник", "кадров"] },
+  { module: "П6", keywords: ["маркетинг", "продаж", "клиент", "конкурент"] },
+  { module: "П7", keywords: ["образован", "исследован", "студент", "преподав", "учебн"] },
+  { module: "П8", keywords: ["презентац", "график", "видео", "изображен", "визуал", "контент"] },
+];
 
-const LESSON_TITLES: Record<number, string> = {
-  1: "Применение ИИ на предприятии: возможности, ограничения и эффекты",
-  2: "Инструменты ИИ и автоматизация работы с документами",
-  3: "Работа с данными, отчетами и неструктурированной информацией",
-  4: "Оптимизация работы сотрудников: HR, инструкции и обучение",
-  5: "Применение ИИ в продажах, аналитике и работе с клиентами",
-  6: "ИИ в производстве и автоматизация процессов",
-};
+// Сигналы, требующие Б2 (документы / данные / регулирование)
+const B2_KEYWORDS = [
+  "документ", "данны", "таблиц", "договор", "регламент", "безопасн",
+  "политик", "запрещ", "конфиденц", "персональн",
+];
 
-export function selectProgram(role: string): RolePlan {
-  return ROLE_PLANS[role] ?? DEFAULT_PLAN;
+// Признак запрета публичных облачных ИИ-сервисов (Q05)
+const PUBLIC_BAN_KEYWORDS = [
+  "публичные облачные ии-сервисы запрещены",
+  "только локальные",
+  "нельзя загружать внутренние",
+];
+
+export interface SelectionResult {
+  modules: ModuleCode[];
+  requiredLessons: ModuleCode[];
+  optionalLessons: ModuleCode[];
+  publicCloudRestricted: boolean;
 }
 
-export function lessonTitle(n: number): string {
-  return LESSON_TITLES[n] ? `Занятие ${n}. ${LESSON_TITLES[n]}` : `Занятие ${n}`;
+/**
+ * Подбор модулей.
+ * @param role         роль участников (экран 1)
+ * @param answersText  объединённый текст всех чекбокс-ответов (нижний регистр не обязателен)
+ * @param hasManagers  участвуют ли руководители (роль = Руководители)
+ */
+export function selectProgram(
+  role: string,
+  answersText: string,
+  hasManagers: boolean
+): SelectionResult {
+  const text = (answersText || "").toLowerCase();
+  const modules = new Set<ModuleCode>();
+
+  // 1. Б1 — всегда
+  modules.add("Б1");
+
+  // 2. Б2 — при сигналах документы/данные/политика (базовое обучение — норма)
+  if (B2_KEYWORDS.some((k) => text.includes(k)) || role !== "Универсальные специалисты") {
+    modules.add("Б2");
+  }
+
+  // 3. Профильные модули роли
+  for (const code of ROLE_MODULES[role] ?? []) modules.add(code);
+
+  // 4. Сигналы из ответов → доп. модули
+  for (const { module, keywords } of SIGNAL_MODULES) {
+    if (keywords.some((k) => text.includes(k))) modules.add(module);
+  }
+
+  // 5. Руководители → управленческий контур
+  if (hasManagers || role === "Руководители") {
+    modules.add("П1");
+    modules.add("РУК");
+  }
+
+  const publicCloudRestricted = PUBLIC_BAN_KEYWORDS.some((k) => text.includes(k));
+
+  // Упорядочиваем: Б1, Б2, П* по номеру, РУК в конце
+  const ordered = orderModules(Array.from(modules));
+  const required: ModuleCode[] = ordered.filter((c) => c === "Б1" || c === "Б2");
+  const optional: ModuleCode[] = ordered.filter((c) => c !== "Б1" && c !== "Б2");
+
+  return {
+    modules: ordered,
+    requiredLessons: required,
+    optionalLessons: optional,
+    publicCloudRestricted,
+  };
 }
 
-/** Текстовое описание плана для передачи в промпт AI */
-export function describePlan(plan: RolePlan): string {
-  return [
-    `Обязательные занятия: ${plan.requiredLessons.map(lessonTitle).join("; ")}.`,
-    `Желательные занятия: ${plan.optionalLessons.map(lessonTitle).join("; ")}.`,
-  ].join("\n");
+const ORDER: ModuleCode[] = ["Б1", "Б2", "П1", "П2", "П3", "П4", "П5", "П6", "П7", "П8", "РУК"];
+
+function orderModules(codes: ModuleCode[]): ModuleCode[] {
+  return ORDER.filter((c) => codes.includes(c));
+}
+
+/** Текстовое описание плана для промпта AI */
+export function describeSelection(codes: ModuleCode[]): string {
+  return codes
+    .map((c) => {
+      const m = getModule(c);
+      return m ? `${c} — ${m.title} (${m.hours} ч)` : c;
+    })
+    .join("; ");
 }

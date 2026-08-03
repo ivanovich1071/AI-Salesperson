@@ -58,15 +58,17 @@ export default function Screen6Success() {
             Информация о компании «{s.companyName}» ({s.userRole},{" "}
             {s.participantCount} участников) и цели обучения
           </li>
-          <li>Результаты AI-диагностики ({s.diagnosticQuestions.length} вопроса)</li>
+          <li>Результаты AI-диагностики (чекбокс-анкета по роли)</li>
           {s.proposal && (
             <>
               <li>
-                Рекомендованные модули:{" "}
-                {s.proposal.modules.map((m) => m.title).join("; ")}
+                Рекомендованные модули ({s.proposal.assemblyName},{" "}
+                {s.proposal.totalHours} ч):{" "}
+                {s.proposal.trainingModules.map((m) => m.code).join(", ")}
               </li>
               <li>
-                Предварительный расчёт стоимости: {formatMoney(s.proposal.cost.total)}
+                Предварительная стоимость обучения:{" "}
+                {formatMoney(s.proposal.trainingCost.total)}
               </li>
             </>
           )}

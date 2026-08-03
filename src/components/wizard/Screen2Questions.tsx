@@ -1,31 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useWizardStore } from "@/store/wizardStore";
+import { questionsForRole, QUESTIONNAIRE_INTRO } from "@/lib/diagnosticQuestions";
+import type { UserRole } from "@/lib/pricing";
 import MicButton from "./MicButton";
+
+const OTHER = "Другое";
 
 export default function Screen2Questions() {
   const s = useWizardStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [sent, setSent] = useState<Record<number, boolean>>({});
+  const [otherOpen, setOtherOpen] = useState<Record<string, boolean>>({});
 
-  const answered = s.answers.filter((a) => a && a.trim()).length;
+  const questions = useMemo(
+    () => questionsForRole((s.userRole as UserRole) || "Универсальные специалисты"),
+    [s.userRole]
+  );
 
-  // Отправка ответа, введённого вручную: фиксирует ответ и дублирует его в AI-чат
-  function sendAnswer(i: number) {
-    const text = (s.answers[i] || "").trim();
-    if (!text) return;
-    s.pushChat("user", `Ответ на вопрос ${i + 1}: ${text}`);
-    s.pushChat("status", `✅ Ответ на вопрос ${String(i + 1).padStart(2, "0")} записан.`);
-    setSent((prev) => ({ ...prev, [i]: true }));
+  const ans = (qid: string) => s.diagnosticAnswers[qid] ?? { selected: [], other: "" };
+
+  // Вопрос считается отвеченным: есть чекбокс или заполнено «Другое»
+  const answered = (qid: string) => {
+    const a = ans(qid);
+    return a.selected.length > 0 || a.other.trim().length > 0;
+  };
+  const allAnswered = questions.every((q) => answered(q.id));
+
+  function toggleOther(qid: string) {
+    setOtherOpen((prev) => {
+      const open = !prev[qid];
+      if (!open) s.setOther(qid, ""); // сняли «Другое» — чистим текст
+      return { ...prev, [qid]: open };
+    });
   }
 
   async function buildProposal() {
-    if (loading) return;
+    if (loading || !allAnswered) return;
     setLoading(true);
     setError("");
     s.pushChat("status", "🧩 Собираем персональную программу и считаем стоимость...");
+
+    // Объединяем чекбоксы + «Другое» в один ответ на вопрос (+ под-вопросы отдельно)
+    const qa: { question: string; answer: string }[] = [];
+    for (const q of questions) {
+      const a = ans(q.id);
+      const parts = [...a.selected];
+      if (a.other.trim()) parts.push(a.other.trim());
+      qa.push({ question: q.text, answer: parts.join("; ") });
+      if (q.sub) {
+        const sa = ans(q.sub.id);
+        if (sa.selected[0]) qa.push({ question: q.sub.text, answer: sa.selected[0] });
+      }
+    }
 
     try {
       const res = await fetch("/api/ai/proposal", {
@@ -40,8 +68,7 @@ export default function Screen2Questions() {
             participantCount: s.participantCount,
             goals: s.goals,
           },
-          questions: s.diagnosticQuestions,
-          answers: s.answers,
+          qa,
         }),
       });
       const data = await res.json();
@@ -63,59 +90,105 @@ export default function Screen2Questions() {
   return (
     <div className="fade-in-up">
       <h1 className="text-3xl font-bold text-brown-deep">Уточним вашу задачу</h1>
-      <p className="mt-2 text-muted">
-        AI изучил информацию. Осталось несколько вопросов, чтобы собрать программу точнее.
-        Чем подробнее ответы — тем точнее программа (отвечать можно голосом).
-      </p>
+      <p className="mt-2 text-muted">{QUESTIONNAIRE_INTRO}</p>
 
-      <div className="mt-8 space-y-6">
-        {s.diagnosticQuestions.map((q, i) => (
-          <div key={i}>
-            <label className="label-base">
-              {String(i + 1).padStart(2, "0")}. {q}
-            </label>
-            <div className="relative">
-              <textarea
-                className="input-base pr-12"
-                rows={3}
-                placeholder="Ваш ответ..."
-                value={s.answers[i] || ""}
-                onChange={(e) => {
-                  s.setAnswer(i, e.target.value);
-                  if (sent[i]) setSent((prev) => ({ ...prev, [i]: false }));
-                }}
-              />
-              <div className="absolute right-2 top-2 flex flex-col items-center gap-1">
-                <MicButton
-                  onText={(t) =>
-                    s.setAnswer(i, s.answers[i] ? `${s.answers[i]} ${t}` : t)
-                  }
-                />
-                <button
-                  type="button"
-                  title="Отправить ответ"
-                  disabled={!(s.answers[i] || "").trim()}
-                  onClick={() => sendAnswer(i)}
-                  className={`rounded-full p-2 transition-colors disabled:opacity-30 ${
-                    sent[i]
-                      ? "bg-gold text-brown-deep"
-                      : "text-brown-light hover:bg-gold-light"
-                  }`}
-                >
-                  {sent[i] ? (
-                    <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
-                      <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
-                      <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z" />
-                    </svg>
-                  )}
-                </button>
+      <div className="mt-8 space-y-8">
+        {questions.map((q, i) => {
+          const a = ans(q.id);
+          const isOtherOpen = otherOpen[q.id] || a.other.length > 0;
+          return (
+            <div key={q.id}>
+              <p className="font-semibold text-brown-deep">
+                {String(i + 1).padStart(2, "0")}. {q.text}
+              </p>
+              <p className="mt-1 text-xs text-muted">Можно выбрать несколько вариантов:</p>
+
+              <div className="mt-3 space-y-2">
+                {q.options.map((opt) => (
+                  <label
+                    key={opt}
+                    className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3 text-sm transition-colors ${
+                      a.selected.includes(opt)
+                        ? "border-gold bg-gold-light/50 text-brown-deep"
+                        : "border-line bg-white text-brown-light hover:border-gold"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-gold"
+                      checked={a.selected.includes(opt)}
+                      onChange={() => s.toggleOption(q.id, opt)}
+                    />
+                    <span>{opt}</span>
+                  </label>
+                ))}
+
+                {/* «Другое» — чекбокс, раскрывающий поле с микрофоном */}
+                {q.hasOther && (
+                  <div>
+                    <label
+                      className={`flex cursor-pointer items-center gap-3 rounded-2xl border p-3 text-sm transition-colors ${
+                        isOtherOpen
+                          ? "border-gold bg-gold-light/50 text-brown-deep"
+                          : "border-line bg-white text-brown-light hover:border-gold"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 shrink-0 accent-gold"
+                        checked={isOtherOpen}
+                        onChange={() => toggleOther(q.id)}
+                      />
+                      <span>{OTHER}</span>
+                    </label>
+                    {isOtherOpen && (
+                      <div className="relative mt-2">
+                        <textarea
+                          className="input-base pr-12"
+                          rows={2}
+                          placeholder="Напишите или продиктуйте свой вариант..."
+                          value={a.other}
+                          onChange={(e) => s.setOther(q.id, e.target.value)}
+                        />
+                        <div className="absolute right-2 top-2">
+                          <MicButton
+                            onText={(t) => s.setOther(q.id, a.other ? `${a.other} ${t}` : t)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
+
+              {/* Под-вопрос (single-select) */}
+              {q.sub && (
+                <div className="mt-4 rounded-2xl bg-milk p-4">
+                  <p className="text-sm font-semibold text-brown-deep">{q.sub.text}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {q.sub.options.map((opt) => {
+                      const selected = ans(q.sub!.id).selected[0] === opt;
+                      return (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => s.setSingle(q.sub!.id, opt)}
+                          className={`rounded-full border px-4 py-1.5 text-xs transition-colors ${
+                            selected
+                              ? "border-brown-deep bg-brown-deep font-semibold text-gold"
+                              : "border-line bg-white text-brown-light hover:border-brown-deep"
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {error && (
@@ -126,11 +199,7 @@ export default function Screen2Questions() {
         <button className="btn-secondary" onClick={() => s.setStep(1)}>
           ← Назад
         </button>
-        <button
-          className="btn-primary"
-          disabled={answered === 0 || loading}
-          onClick={buildProposal}
-        >
+        <button className="btn-primary" disabled={!allAnswered || loading} onClick={buildProposal}>
           {loading ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-brown-deep border-t-transparent" />
@@ -141,6 +210,11 @@ export default function Screen2Questions() {
           )}
         </button>
       </div>
+      {!allAnswered && (
+        <p className="mt-3 text-right text-xs text-muted">
+          Ответьте на все вопросы (хотя бы один вариант или «Другое»), чтобы продолжить.
+        </p>
+      )}
     </div>
   );
 }
