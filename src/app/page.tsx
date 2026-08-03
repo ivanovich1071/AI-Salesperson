@@ -3,118 +3,97 @@
 import { useState } from "react";
 import Link from "next/link";
 
-/* ===== Мини-иконки (inline SVG вместо Font Awesome) ===== */
-const CheckIcon = () => (
-  <svg viewBox="0 0 24 24" className="mt-1 h-4 w-4 shrink-0 fill-gold">
-    <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" />
-  </svg>
-);
-const BrainIcon = ({ className = "h-6 w-6" }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={`fill-current ${className}`}>
-    <path d="M12 2a4 4 0 0 0-4 4 4 4 0 0 0-3 6.6A4 4 0 0 0 8 19a4 4 0 0 0 4 3 4 4 0 0 0 4-3 4 4 0 0 0 3-6.4A4 4 0 0 0 16 6a4 4 0 0 0-4-4Zm0 2a2 2 0 0 1 2 2v12a2 2 0 1 1-4 0V6a2 2 0 0 1 2-2Z" />
-  </svg>
-);
-
+/* ===== Данные страницы «ВайбМайнд» (структура и тексты перенесены со страницы VibeZmest) ===== */
 const NAV_LINKS = [
-  { href: "#home", label: "Главная" },
-  { href: "#about", label: "О курсе" },
-  { href: "#program", label: "Программа" },
-  { href: "#benefits", label: "AI-навыки" },
-  { href: "#author", label: "Автор" },
-  { href: "#contact", label: "Контакты" },
+  { href: "#benefits", label: "Преимущества" },
+  { href: "#process", label: "Как мы работаем" },
+  { href: "#formats", label: "Форматы" },
+  { href: "#course", label: "Курс" },
+  { href: "#about", label: "О компании" },
+  { href: "#contacts", label: "Контакты" },
 ];
 
-// Продуктовые уровни для витрины лендинга (описательно, независимо от каталога модулей)
-const PRODUCT_LEVELS = [
+const BENEFITS = [
   {
-    title: "Практическое обучение",
-    subtitle: "Модули Б1, Б2, П1–П8, РУК · по 4 ч",
-    image: "/images/photo_2026-07-17_3.jpg",
-    topics: [
-      "Базовые модули: задачи, промпты, работа с файлами, проверка результатов и безопасность",
-      "Профессиональные модули под роль: документы, данные, HR, продажи, управление и др.",
-      "Экспертное заключение по итогам обучения",
-    ],
+    emoji: "⚡",
+    title: "Повышаем производительность",
+    text: "Помогаем сотрудникам быстрее выполнять интеллектуальную работу",
   },
   {
-    title: "Лаборатория AI-кейсов",
-    subtitle: "Отдельный продукт после обучения",
-    image: "/images/photo_2026-07-17_4.jpg",
-    topics: [
-      "Команды находят, проверяют и оформляют собственные кейсы применения ИИ",
-      "До 4 командных кейсов за цикл",
-      "Итог — дорожная карта внедрения ИИ",
-    ],
+    emoji: "📚",
+    title: "Сохраняем знания организации",
+    text: "Превращаем опыт сотрудников в доступные базы знаний и AI-помощников",
   },
   {
-    title: "Проектирование и разработка",
-    subtitle: "Следующие продуктовые уровни",
-    image: "/images/photo_2026-07-17_5.jpg",
-    topics: [
-      "Проектирование: сценарий, требования, данные, проверки",
-      "Разработка: PoC, MVP или готовое решение",
-      "Стоимость — после отдельной оценки задачи",
-    ],
+    emoji: "🤖",
+    title: "Автоматизируем рутину",
+    text: "Сокращаем время на документы, поиск информации, отчёты и коммуникации",
+  },
+  {
+    emoji: "🧭",
+    title: "Сопровождаем изменения",
+    text: "Помогаем внедрять ИИ как рабочий инструмент организации",
   },
 ];
 
-const CERTIFICATES = [
-  { src: "/images/cert-prompt-engineer.jpg", label: "Промпт-инженер (Университет Зерокодинга)" },
-  { src: "/images/cert-cisco.jpg", label: "Cisco IT Essentials" },
-  { src: "/images/cert-docent.jpg", label: "Доцент по специальности «Педагогика»" },
-  { src: "/images/cert-phd.jpg", label: "Кандидат педагогических наук" },
+const PROCESS = [
+  { n: "1", title: "Диагностика", text: "Изучаем задачи и процессы организации" },
+  { n: "2", title: "Обучение", text: "Показываем практические сценарии применения ИИ" },
+  { n: "3", title: "Пилотный проект", text: "Запускаем первое рабочее решение" },
+  { n: "4", title: "Масштабирование", text: "Распространяем успешный опыт на другие процессы" },
 ];
 
-const SKILLS = [
+const FORMATS = [
   {
-    title: "Ключевые навыки",
-    text: "Освоите работу с ведущими AI-моделями (ChatGPT, Gemini, Qwen, DeepSeek, Kimi, GigaChat, YandexGPT и др.), агрегаторами и ключевыми нейросервисами",
+    emoji: "🎓",
+    title: "Корпоративное обучение",
+    text: "Программы для руководителей и сотрудников",
   },
   {
-    title: "Рабочее окружение и доступ",
-    text: "Овладеете пошаговым алгоритмом регистрации, настройки и подготовки своего рабочего места (BYOD) для немедленной и эффективной работы с нейросетями",
+    emoji: "🧩",
+    title: "Консалтинг",
+    text: "Поиск точек роста и возможностей применения ИИ",
   },
   {
-    title: "Разработка AI-помощников",
-    text: "Освоите методологию автоматизации (коллекция промптов, чат-боты, ассистенты)",
+    emoji: "🛠️",
+    title: "Проектное внедрение",
+    text: "Создание и запуск AI-ботов, ассистентов и автоматизированных процессов",
   },
   {
-    title: "Готовые AI-решения",
-    text: "Создадите работающий кейс автоматизации, полностью адаптированный под вашу профессиональную деятельность (от промпта до бота и пайплайна)",
-  },
-  {
-    title: "Постоянная поддержка",
-    text: "Получите консультации преподавателя и доступ к актуальным методическим материалам через онлайн-дашборд",
+    emoji: "🤝",
+    title: "Сопровождение команды",
+    text: "Поддержка команды на этапе изменений",
   },
 ];
 
-export default function LandingPage() {
+export default function VibeMindHome() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [modalCert, setModalCert] = useState<{ src: string; label: string } | null>(null);
 
   return (
-    <main className="bg-milk">
+    <main className="bg-mist text-graphite">
       {/* ===== NAVBAR ===== */}
-      <nav className="fixed inset-x-0 top-0 z-40 border-b border-line bg-milk/90 backdrop-blur">
+      <nav className="fixed inset-x-0 top-0 z-40 border-b border-teal/10 bg-mist/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-          <a href="#home" className="flex items-center gap-2 font-bold text-brown-deep">
-            <span className="text-gold"><BrainIcon /></span>
-            <span>Корпоративный AI Курс</span>
+          <a href="#hero" className="flex items-center gap-2 font-bold text-graphite">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/vibemind-logo.jpg" alt="ВайбМайнд" className="h-9 w-auto" />
+            <span>ВайбМайнд</span>
           </a>
-          <ul className="hidden items-center gap-6 text-sm font-medium text-brown-light lg:flex">
+          <ul className="hidden items-center gap-6 text-sm font-medium text-graphite/70 lg:flex">
             {NAV_LINKS.map((l) => (
               <li key={l.href}>
-                <a href={l.href} className="transition-colors hover:text-gold">
+                <a href={l.href} className="transition-colors hover:text-teal">
                   {l.label}
                 </a>
               </li>
             ))}
             <li>
               <Link
-                href="/app?new=1"
-                className="rounded-2xl bg-gold px-5 py-2.5 font-semibold text-brown-deep shadow-gold transition-all hover:bg-gold-hover"
+                href="/course"
+                className="rounded-2xl px-5 py-2.5 font-semibold text-white shadow-teal transition-all hover:-translate-y-0.5"
+                style={{ background: "linear-gradient(135deg, #00b1b4, #00d9a6)" }}
               >
-                AI-диагностика
+                Корпоративный курс
               </Link>
             </li>
           </ul>
@@ -123,18 +102,18 @@ export default function LandingPage() {
             aria-label="Меню"
             onClick={() => setMenuOpen((v) => !v)}
           >
-            <span className="h-0.5 w-6 bg-brown-deep" />
-            <span className="h-0.5 w-6 bg-brown-deep" />
-            <span className="h-0.5 w-6 bg-brown-deep" />
+            <span className="h-0.5 w-6 bg-graphite" />
+            <span className="h-0.5 w-6 bg-graphite" />
+            <span className="h-0.5 w-6 bg-graphite" />
           </button>
         </div>
         {menuOpen && (
-          <ul className="border-t border-line bg-milk px-5 py-4 lg:hidden">
+          <ul className="border-t border-teal/10 bg-mist px-5 py-4 lg:hidden">
             {NAV_LINKS.map((l) => (
               <li key={l.href}>
                 <a
                   href={l.href}
-                  className="block py-2 font-medium text-brown-light"
+                  className="block py-2 font-medium text-graphite/80"
                   onClick={() => setMenuOpen(false)}
                 >
                   {l.label}
@@ -142,8 +121,8 @@ export default function LandingPage() {
               </li>
             ))}
             <li className="pt-2">
-              <Link href="/app?new=1" className="btn-primary w-full justify-center">
-                Пройти AI-диагностику →
+              <Link href="/course" className="btn-teal w-full justify-center">
+                Корпоративный курс →
               </Link>
             </li>
           </ul>
@@ -151,456 +130,255 @@ export default function LandingPage() {
       </nav>
 
       {/* ===== HERO ===== */}
-      <section
-        id="home"
-        className="relative overflow-hidden bg-gradient-to-br from-brown-deep via-[#4E342E] to-brown-light pb-24 pt-36 text-milk"
+      <header
+        id="hero"
+        className="relative overflow-hidden pb-24 pt-36 text-white"
+        style={{
+          background:
+            "linear-gradient(90deg, #111111 0%, #111111 34%, #0e1e1f 66%, #073d3d 100%)",
+        }}
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-gold/10 blur-3xl"
+          className="pointer-events-none absolute right-[8%] top-[18%] h-96 w-96 rounded-full bg-teal/20 blur-3xl"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-40 left-1/4 h-80 w-80 rounded-full bg-gold/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-teal-emerald/15 blur-3xl"
         />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-[3fr_2fr]">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-[2fr_3fr]">
+          <div className="flex justify-center">
+            <div className="rounded-3xl bg-white p-6 shadow-2xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/vibemind-logo.jpg"
+                alt="Логотип ВайбМайнд"
+                className="h-56 w-auto"
+              />
+            </div>
+          </div>
           <div>
-            <h1 className="text-4xl font-extrabold leading-tight md:text-5xl">
-              <span className="text-gold">+30% к эффективности команды.</span>{" "}
-              Делегирование задач ИИ: от рутины к экспертным решениям
+            <p className="text-lg font-medium italic text-teal-emerald">
+              Социально ответственный интеллектуальный белорусский бизнес
+            </p>
+            <h1 className="mt-4 text-4xl font-extrabold leading-tight md:text-5xl">
+              Обучаем, консультируем и сопровождаем цифровую трансформацию рабочих процессов
             </h1>
-            <p className="mt-6 text-lg leading-relaxed text-milk/85">
-              Обучение сотрудников: от делегирования ИИ документов, отчётов, писем и сбора
-              аналитики — до создания чат-ботов, автоматизированных пайплайнов и
-              медиаконтента. Авторский корпоративный курс с сопровождением эксперта по ИИ,
-              к.п.н., члена Комитета по искусственному интеллекту{" "}
-              <a
-                href="https://nfai.ru/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline decoration-gold underline-offset-2"
-              >
-                НФИИ
-              </a>{" "}
-              (РФ)
+            <p className="mt-6 text-lg leading-relaxed text-white/80">
+              Помогаем командам внедрять ИИ в реальную деятельность организации — от
+              делегирования рутины до собственных виртуальных сотрудников.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/app?new=1" className="btn-primary">
-                🚀 Пройти AI-диагностику →
-              </Link>
-              <a
-                href="#about"
-                className="inline-flex items-center gap-2 rounded-2xl border border-milk/30 px-8 py-4 font-semibold text-milk transition-all hover:bg-milk/10"
-              >
-                Узнать больше
+              <a href="#contacts" className="btn-teal">
+                Обсудить задачу
               </a>
+              <Link
+                href="/course"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-8 py-4 font-semibold text-white transition-all hover:bg-white/10"
+              >
+                Корпоративный курс
+              </Link>
             </div>
-            <p className="mt-4 text-sm text-milk/60">
-              За несколько минут AI изучит вашу задачу и подготовит персональную программу
-              обучения с расчётом стоимости
-            </p>
           </div>
-          <div className="hidden justify-center lg:flex">
-            <div className="flex h-64 w-64 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold shadow-gold">
-              <BrainIcon className="h-32 w-32" />
-            </div>
+        </div>
+      </header>
+
+      {/* ===== BENEFITS ===== */}
+      <section id="benefits" className="py-20">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="text-center">
+            <h2 className="vm-title">Чем мы полезны</h2>
+            <div className="vm-underline" />
+          </div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {BENEFITS.map((b) => (
+              <div key={b.title} className="vm-card">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal/10 text-2xl">
+                  {b.emoji}
+                </div>
+                <h3 className="mt-4 text-lg font-bold text-graphite">{b.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-graphite/70">{b.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PROCESS ===== */}
+      <section id="process" className="bg-white py-20">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="text-center">
+            <h2 className="vm-title">Как мы работаем</h2>
+            <div className="vm-underline" />
+          </div>
+          <div className="mt-12 flex flex-col items-stretch gap-4 lg:flex-row lg:items-center">
+            {PROCESS.map((s, i) => (
+              <div key={s.n} className="flex flex-1 items-center gap-4 lg:flex-col lg:text-center">
+                <div className="flex flex-1 flex-col rounded-3xl border border-teal/15 bg-mist p-6 lg:w-full">
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white lg:mx-auto"
+                    style={{ background: "linear-gradient(135deg, #00b1b4, #00d9a6)" }}
+                  >
+                    {s.n}
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold text-graphite">{s.title}</h3>
+                  <p className="mt-2 text-sm text-graphite/70">{s.text}</p>
+                </div>
+                {i < PROCESS.length - 1 && (
+                  <span className="hidden text-2xl text-teal lg:inline">→</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== FORMATS ===== */}
+      <section id="formats" className="py-20">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="text-center">
+            <h2 className="vm-title">Форматы сотрудничества</h2>
+            <div className="vm-underline" />
+          </div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {FORMATS.map((f) => (
+              <div key={f.title} className="vm-card">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal/10 text-2xl">
+                  {f.emoji}
+                </div>
+                <h3 className="mt-4 text-lg font-bold text-graphite">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-graphite/70">{f.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== COURSE ===== */}
+      <section
+        id="course"
+        className="py-20 text-white"
+        style={{
+          background:
+            "linear-gradient(135deg, #0e1e1f 0%, #073d3d 60%, #00b1b4 140%)",
+        }}
+      >
+        <div className="mx-auto max-w-4xl px-5 text-center">
+          <h2 className="text-3xl font-bold md:text-4xl">Корпоративный курс по ИИ</h2>
+          <div className="mx-auto mt-3 h-1 w-24 rounded-full bg-teal-emerald" />
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
+            Для большинства организаций цифровая трансформация начинается с формирования
+            общего языка и практических навыков работы с ИИ. Персональную программу под вашу
+            команду с расчётом стоимости подберёт AI-диагностика.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link href="/course" className="btn-teal">
+              Перейти к программе курса →
+            </Link>
+            <Link
+              href="/app?new=1"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-8 py-4 font-semibold text-white transition-all hover:bg-white/10"
+            >
+              ✨ Пройти AI-диагностику
+            </Link>
           </div>
         </div>
       </section>
 
       {/* ===== ABOUT ===== */}
-      <section id="about" className="py-20">
-        <div className="mx-auto max-w-6xl px-5">
+      <section id="about" className="bg-white py-20">
+        <div className="mx-auto max-w-4xl px-5">
           <div className="text-center">
-            <h2 className="section-title">О курсе</h2>
-            <div className="title-underline" />
+            <h2 className="vm-title">О компании</h2>
+            <div className="vm-underline" />
           </div>
-          <p className="mx-auto mt-8 max-w-4xl text-center text-lg leading-relaxed text-muted">
-            О нейросетях сегодня говорят все. Но чаще — в контексте малого бизнеса,
-            маркетинга или фриланса. Этот курс — иной ракурс: он ориентирован на повышение
-            эффективности работы сотрудников в организациях, на предприятиях и в
-            госсекторе. Курс{" "}
-            <strong className="text-brown-deep">
-              «Нейросервисы и системы искусственного интеллекта: от основ к экспертным
-              решениям»
-            </strong>{" "}
-            — интенсивная программа для обучения специалистов{" "}
-            <strong className="text-brown-deep">на базе вашего предприятия</strong>,
-            адаптированная под реальные задачи сотрудников. Обучение строится на
-            практических кейсах в сфере профессиональной деятельности — от упрощения
-            рутинных процессов до внедрения интеллектуальных решений. При выборе
-            AI-инструментария учитываются{" "}
-            <strong className="text-brown-deep">
-              корпоративная политика безопасности, особенности использования VPN и доступ к
-              рабочему окружению
-            </strong>
-            .{" "}
-            <span className="font-semibold text-gold">
-              Искусственный интеллект доступнее, чем кажется — достаточно сделать первый шаг
-              с опытным наставником
-            </span>
-          </p>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            <div className="card p-8">
-              <h3 className="text-xl font-bold text-brown-deep">
-                Гибкая адаптация программы под запрос организации
-              </h3>
-              <p className="mt-3 text-muted">
-                Обучение в группах одной организации или отрасли позволяет адаптировать
-                курс под:
-              </p>
-              <ul className="mt-4 space-y-2">
-                {["Профессию", "Уровень цифровой культуры", "Инфраструктуру организации"].map(
-                  (t) => (
-                    <li key={t} className="flex gap-2 text-brown-light">
-                      <CheckIcon /> {t}
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-            <div className="card p-8">
-              <h3 className="text-xl font-bold text-brown-deep">Для кого этот курс</h3>
-              <ul className="mt-4 space-y-2">
-                {[
-                  "Руководители — оптимизация бизнес-процессов",
-                  "Педагоги — внедрение ИИ в образовательную среду",
-                  "Аналитики — анализ данных и прогнозирование",
-                  "Маркетологи — автоматизация и персонализация",
-                  "Инженеры — решение технических задач",
-                  "Для всех, кто хочет повысить эффективность и оптимизировать рутину",
-                ].map((t) => (
-                  <li key={t} className="flex gap-2 text-brown-light">
-                    <CheckIcon /> {t}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="mt-8 space-y-4 text-lg leading-relaxed text-graphite/75">
+            <p>
+              <strong className="text-graphite">ВайбМайнд Лаб</strong> — социально
+              ответственная белорусская компания, которая помогает организациям{" "}
+              <strong className="text-graphite">осмысленно внедрять ИИ</strong>. Мы обучаем,
+              консультируем и сопровождаем изменения, чтобы современные технологии усиливали
+              профессиональную экспертизу, сохраняли и развивали знания организаций, повышали
+              производительность интеллектуального труда и приносили реальную пользу людям,
+              командам и обществу.
+            </p>
+            <p>
+              Наш подход основан на методологии, практическом опыте, ответственном
+              использовании технологий и внимании к{" "}
+              <strong className="text-graphite">
+                людям как главной ценности любой организации
+              </strong>
+              .
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ===== PROGRAM ===== */}
-      <section id="program" className="bg-white py-20">
+      {/* ===== CONTACTS ===== */}
+      <section id="contacts" className="py-20">
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center">
-            <h2 className="section-title">Программа обучения</h2>
-            <div className="title-underline" />
-            <p className="mx-auto mt-4 max-w-2xl text-muted">
-              От практического обучения до проектирования решений. Персональную программу
-              под вашу команду с расчётом стоимости подберёт AI-диагностика.
-            </p>
+            <h2 className="vm-title">Контакты</h2>
+            <div className="vm-underline" />
           </div>
-          <div className="mt-12 grid gap-8 lg:grid-cols-3">
-            {PRODUCT_LEVELS.map((m, i) => (
-              <div key={m.title} className="card group flex flex-col overflow-hidden">
-                <div className="relative h-48 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={m.image}
-                    alt={m.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brown-deep/60 to-transparent" />
-                  <span className="absolute left-4 top-4 rounded-2xl bg-gold px-3 py-1 text-sm font-bold text-brown-deep shadow-gold">
-                    0{i + 1}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <h3 className="text-lg font-bold text-brown-deep">{m.title}</h3>
-                  <p className="mt-1 text-sm font-medium text-gold">{m.subtitle}</p>
-                  <ul className="mt-4 flex-1 space-y-2">
-                    {m.topics.map((t) => (
-                      <li key={t} className="flex gap-2 text-sm text-brown-light">
-                        <CheckIcon /> {t}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
+          <div className="mx-auto mt-12 grid max-w-2xl gap-6 sm:grid-cols-2">
+            <div className="vm-card text-center">
+              <h3 className="font-bold text-teal">Телефон</h3>
+              <a
+                href="tel:+375297200700"
+                className="mt-1 block text-graphite/80 hover:text-teal"
+              >
+                +375 29 7-200-700
+              </a>
+            </div>
+            <div className="vm-card text-center">
+              <h3 className="font-bold text-teal">Telegram</h3>
+              {/* TODO: указать реальный Telegram ВайбМайнд (заглушка) */}
+              <a href="#" className="mt-1 block text-graphite/80 hover:text-teal">
+                @vibemind
+              </a>
+            </div>
           </div>
           <div className="mt-10 text-center">
-            <Link href="/app?new=1" className="btn-primary">
-              Подобрать модули под мою команду →
+            <Link href="/app?new=1" className="btn-teal">
+              ✨ Пройти AI-диагностику →
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== BENEFITS / SKILLS ===== */}
-      <section id="benefits" className="py-20">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center">
-            <h2 className="section-title">Формируемые AI-навыки</h2>
-            <div className="title-underline" />
-          </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {SKILLS.map((s) => (
-              <div key={s.title} className="card p-7">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold-light text-brown-deep">
-                  <BrainIcon />
-                </div>
-                <h3 className="mt-4 text-lg font-bold text-brown-deep">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{s.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== AUTHOR ===== */}
-      <section id="author" className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center">
-            <h2 className="section-title">Автор и ключевой спикер курса</h2>
-            <div className="title-underline" />
-          </div>
-
-          <div className="mt-12 flex flex-col gap-10 lg:flex-row">
-            <div className="shrink-0 text-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/PVN-v1.jpg"
-                alt="Вероника Пунчик"
-                className="mx-auto w-64 rounded-3xl border-4 border-gold shadow-gold"
-              />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-brown-deep">
-                Вероника Николаевна Пунчик
-              </h3>
-              <p className="mt-1 font-semibold text-gold">
-                Бизнес-аналитик, методолог AI-решений, кандидат педагогических наук, доцент
-              </p>
-              <div className="mt-4 space-y-4 leading-relaxed text-muted">
-                <p>
-                  Исследователь, разработчик AI-решений для цифровой трансформации
-                  образования, бизнеса, организаций и профессиональных сообществ. Автор
-                  более{" "}
-                  <strong className="text-brown-deep">
-                    250 научных и учебно-методических публикаций
-                  </strong>
-                  . Индекс Хирша РИНЦ — <strong className="text-brown-deep">10</strong>.
-                </p>
-                <p>
-                  С IT — через всю жизнь: от детского увлечения программированием и
-                  вычислительной техникой в 1985 году до современных проектов в области
-                  искусственного интеллекта, автоматизации и бизнес-аналитики через{" "}
-                  <strong className="text-brown-deep">
-                    промпт-инжиниринг (Университет Зерокодинга, резидент Сколково)
-                  </strong>
-                  .
-                </p>
-                <p>
-                  <strong className="text-brown-deep">
-                    25 лет инновационной педагогической деятельности:
-                  </strong>{" "}
-                  от ассистента кафедры педагогики БГПУ до профессора кафедры молодежной
-                  политики РИВШ.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Сертификаты */}
-          <div className="mt-14">
-            <h4 className="text-center text-xl font-bold text-brown-deep">
-              Дипломы и сертификаты
-            </h4>
-            <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-4">
-              {CERTIFICATES.map((c) => (
-                <button
-                  key={c.src}
-                  className="card overflow-hidden p-3 text-left transition-transform hover:-translate-y-1"
-                  onClick={() => setModalCert(c)}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={c.src}
-                    alt={c.label}
-                    className="h-40 w-full rounded-2xl object-cover"
-                  />
-                  <p className="mt-2 text-center text-xs font-medium text-brown-light">
-                    {c.label}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Партнёры */}
-          <div className="mt-12 space-y-6">
-            <div>
-              <h4 className="font-bold text-brown-deep">Партнёры и организации:</h4>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <a href="https://smaipl.ru/" target="_blank" rel="noopener noreferrer">
-                  <span className="rounded-2xl bg-gold-light px-4 py-2 text-sm font-semibold text-brown-deep">
-                    SMAIPL
-                  </span>
-                </a>
-                <a href="https://nfai.ru/" target="_blank" rel="noopener noreferrer">
-                  <span className="rounded-2xl bg-gold-light px-4 py-2 text-sm font-semibold text-brown-deep">
-                    НФИИ
-                  </span>
-                </a>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-bold text-brown-deep">Внедрено:</h4>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {[
-                  "БелАЗ",
-                  "Синодальный отдел по делам молодежи Белорусской Православной Церкви",
-                  "NEWM-Limited (Ireland)",
-                  "ЭЛТИ-КУДИЦ (Москва)",
-                  "Спортивный менеджер со знаком качества (Брест)",
-                ].map((b) => (
-                  <span
-                    key={b}
-                    className="rounded-2xl border border-line bg-milk px-4 py-2 text-sm font-medium text-brown-light"
-                  >
-                    {b}
-                  </span>
-                ))}
-                <a
-                  href="http://mgiro.minsk.edu.by/main.aspx?guid=213143"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="rounded-2xl border border-line bg-milk px-4 py-2 text-sm font-medium text-brown-light">
-                    МГИРО
-                  </span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== CONTACT / CTA (вместо Google Forms) ===== */}
-      <section
-        id="contact"
-        className="bg-gradient-to-br from-brown-deep via-[#4E342E] to-brown-light py-20 text-milk"
-      >
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">Оставить заявку</h2>
-            <div className="title-underline" />
-            <p className="mx-auto mt-4 max-w-2xl text-milk/80">
-              Сделайте первый шаг к интеграции искусственного интеллекта в свою
-              профессиональную сферу. Наш AI-продажник за несколько минут изучит вашу
-              компанию, подберёт модули, рассчитает стоимость и запишет на встречу с
-              Вероникой.
-            </p>
-            <Link href="/app?new=1" className="btn-primary mt-8">
-              ✨ Пройти AI-диагностику и записаться →
-            </Link>
-          </div>
-
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { title: "Email", value: "pvnvna@yandex.by", href: "mailto:pvnvna@yandex.by" },
-              {
-                title: "GitHub",
-                value: "github.com/PedFund",
-                href: "https://github.com/PedFund",
-              },
-              { title: "Локация", value: "Минск, Беларусь" },
-              {
-                title: "Telegram-канал",
-                value: "ДоцентыИИноваторы",
-                href: "https://t.me/IInovatorsD",
-              },
-            ].map((c) => (
-              <div
-                key={c.title}
-                className="rounded-3xl border border-milk/15 bg-milk/5 p-6 text-center"
-              >
-                <h4 className="font-bold text-gold">{c.title}</h4>
-                {c.href ? (
-                  <a
-                    href={c.href}
-                    target={c.href.startsWith("http") ? "_blank" : undefined}
-                    rel="noopener noreferrer"
-                    className="mt-1 block text-sm text-milk/85 underline-offset-2 hover:underline"
-                  >
-                    {c.value}
-                  </a>
-                ) : (
-                  <p className="mt-1 text-sm text-milk/85">{c.value}</p>
-                )}
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
       {/* ===== FOOTER ===== */}
-      <footer className="bg-[#2C1B18] py-10 text-sm text-milk/70">
+      <footer className="bg-graphite py-10 text-sm text-white/60">
         <div className="mx-auto max-w-6xl px-5">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-2 font-bold text-milk">
-              <span className="text-gold"><BrainIcon /></span>
-              Курс по нейросервисам и ИИ
+            <div className="flex items-center gap-2 font-bold text-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/vibemind-logo.jpg"
+                alt="ВайбМайнд"
+                className="h-8 w-auto rounded-lg bg-white p-1"
+              />
+              ВайбМайнд
             </div>
             <div className="flex flex-wrap justify-center gap-5">
-              {NAV_LINKS.slice(0, 5).map((l) => (
-                <a key={l.href} href={l.href} className="hover:text-gold">
+              {NAV_LINKS.map((l) => (
+                <a key={l.href} href={l.href} className="hover:text-teal">
                   {l.label}
                 </a>
               ))}
-              <Link href="/privacy" className="hover:text-gold">
+              <Link href="/course" className="hover:text-teal">
+                Курс
+              </Link>
+              <Link href="/privacy" className="hover:text-teal">
                 Политика конфиденциальности
               </Link>
             </div>
-            <div className="flex gap-4">
-              <a href="mailto:pvnvna@yandex.by" aria-label="Email" className="hover:text-gold">
-                ✉️
-              </a>
-              <a
-                href="https://github.com/PedFund"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="hover:text-gold"
-              >
-                💻
-              </a>
-              <a
-                href="https://t.me/pvnvna"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Telegram"
-                className="hover:text-gold"
-              >
-                ✈️
-              </a>
-            </div>
           </div>
-          <p className="mt-8 border-t border-milk/10 pt-6 text-center">
-            © 2025–2026 Вероника Пунчик | Плательщик НПД | УНП АА1103777. Все права
-            защищены.
+          <p className="mt-8 border-t border-white/10 pt-6 text-center">
+            © 2025–2026 ВайбМайнд Лаб. Все права защищены.
           </p>
         </div>
       </footer>
-
-      {/* ===== CERT MODAL ===== */}
-      {modalCert && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-brown-deep/80 p-6"
-          onClick={() => setModalCert(null)}
-        >
-          <div className="max-h-full max-w-3xl overflow-auto rounded-3xl bg-white p-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={modalCert.src} alt={modalCert.label} className="w-full rounded-2xl" />
-            <p className="mt-3 text-center font-semibold text-brown-deep">
-              {modalCert.label}
-            </p>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
