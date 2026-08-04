@@ -27,6 +27,8 @@ const STEP_TITLES: Record<number, string> = {
  */
 export default function WizardPage() {
   const step = useWizardStore((s) => s.step);
+  const setStep = useWizardStore((s) => s.setStep);
+  const proposal = useWizardStore((s) => s.proposal);
   const [mounted, setMounted] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -47,6 +49,18 @@ export default function WizardPage() {
         <span className="h-8 w-8 animate-spin rounded-full border-[3px] border-gold border-t-transparent" />
       </div>
     );
+  }
+
+  /**
+   * Навигация по шагам: назад — свободно (на любой пройденный),
+   * вперёд — только если данные шага готовы (есть предложение / бронь).
+   */
+  function canGoTo(n: number): boolean {
+    if (n === step) return false;
+    if (n < step) return true; // назад всегда можно
+    if (n === 3 || n === 4) return !!proposal; // предложение и возражения — после расчёта
+    if (n === 5) return !!proposal; // выбор времени — после предложения
+    return false; // шаг 2 вперёд — только через кнопку «Начать AI-диагностику»
   }
 
   const screen =
@@ -76,23 +90,39 @@ export default function WizardPage() {
               ← На главную
             </Link>
             <div className="flex items-center gap-1.5">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <div key={n} className="flex items-center gap-1.5">
-                  <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-                      step > n || step === 6
-                        ? "bg-gold text-brown-deep"
-                        : step === n
-                          ? "border-2 border-gold bg-white text-brown-deep"
-                          : "border border-line bg-white text-muted"
-                    }`}
-                    title={STEP_TITLES[n]}
-                  >
-                    {step > n || step === 6 ? "✓" : n}
+              {[1, 2, 3, 4, 5].map((n) => {
+                const done = step > n || step === 6;
+                const clickable = canGoTo(n);
+                return (
+                  <div key={n} className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={!clickable}
+                      onClick={() => clickable && setStep(n as 1 | 2 | 3 | 4 | 5)}
+                      title={
+                        clickable
+                          ? `Перейти: ${STEP_TITLES[n]}`
+                          : `${STEP_TITLES[n]} — пока недоступно`
+                      }
+                      aria-current={step === n ? "step" : undefined}
+                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                        done
+                          ? "bg-gold text-white"
+                          : step === n
+                            ? "border-2 border-gold bg-white text-brown-deep"
+                            : "border border-line bg-white text-muted"
+                      } ${
+                        clickable
+                          ? "cursor-pointer hover:scale-110 hover:shadow-gold"
+                          : "cursor-default opacity-60"
+                      }`}
+                    >
+                      {done ? "✓" : n}
+                    </button>
+                    {n < 5 && <div className="h-px w-4 bg-line" />}
                   </div>
-                  {n < 5 && <div className="h-px w-4 bg-line" />}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

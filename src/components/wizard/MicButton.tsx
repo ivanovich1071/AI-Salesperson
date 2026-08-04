@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { blobToWav16k, blobLoudness } from "@/lib/audioWav";
 
 type MicState = "idle" | "recording" | "transcribing";
 
@@ -59,7 +60,20 @@ export default function MicButton({
           setState("idle");
           return;
         }
-        await transcribe(blob, type.includes("wav") ? "recording.wav" : "recording.webm");
+        setState("transcribing");
+        try {
+          // Whisper на OpenRouter не декодирует webm/opus — конвертируем в WAV 16 кГц
+          const wav = await blobToWav16k(blob);
+          if ((await blobLoudness(wav)) < 0.006) {
+            setError("Не слышно голоса — проверьте микрофон и повторите.");
+            setState("idle");
+            return;
+          }
+          await transcribe(wav, "recording.wav");
+        } catch {
+          // Если конвертация не удалась — пробуем отправить исходную запись
+          await transcribe(blob, type.includes("wav") ? "recording.wav" : "recording.webm");
+        }
       };
       recorderRef.current = rec;
       rec.start();

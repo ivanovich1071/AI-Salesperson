@@ -156,6 +156,17 @@ export default function Screen1Company() {
               <MicButton onText={(t) => s.setField("goals", s.goals ? `${s.goals} ${t}` : t)} />
             </div>
           </div>
+          <div className="mt-2 flex justify-end">
+            <button
+              type="button"
+              disabled={!s.goals.trim()}
+              onClick={() => s.sendToChat(s.goals)}
+              className="rounded-2xl border border-line px-4 py-1.5 text-xs font-semibold text-brown-light transition-colors hover:border-gold hover:text-gold disabled:opacity-40"
+              title="Отправить текст AI-ассистенту в чат"
+            >
+              ➤ Отправить ассистенту
+            </button>
+          </div>
         </div>
       </div>
 

@@ -97,6 +97,12 @@ interface WizardState {
   // Отпечаток данных Шага 1, для которых сгенерированы AI-блоки
   generatedForFingerprint: string;
 
+  // Метка «чат попросил собрать предложение» (timestamp); слушает Screen2Questions
+  proposalRequestedAt: number;
+
+  // Текст, отправленный в чат из полей формы (кнопка «отправить ассистенту»)
+  outboundChat: { text: string; at: number } | null;
+
   chat: ChatMessage[];
 
   // actions
@@ -109,6 +115,8 @@ interface WizardState {
   setOther: (qid: string, text: string) => void; // поле «Другое»
   appendDiagnosticNote: (text: string) => void; // свободный ответ из чата
   mergeDiagnostic: (qid: string, selected: string[], other?: string) => void; // авто-заполнение из чата
+  requestProposal: () => void; // запрос из чата: собрать предложение и перейти на шаг 3
+  sendToChat: (text: string) => void; // отправить текст из поля формы ассистенту
   fingerprint: () => string;
   markGenerated: () => void;
   needsRegeneration: () => boolean;
@@ -136,6 +144,8 @@ const initialData = {
   objectionResponse: null as ObjectionResponseData | null,
   bookingDetails: null as BookingDetails | null,
   generatedForFingerprint: "",
+  proposalRequestedAt: 0,
+  outboundChat: null as { text: string; at: number } | null,
   chat: [GREETING] as ChatMessage[],
 };
 
@@ -212,6 +222,13 @@ export const useWizardStore = create<WizardState>()(
           };
         }),
 
+      requestProposal: () => set({ proposalRequestedAt: Date.now() }),
+
+      sendToChat: (text) => {
+        const t = text.trim();
+        if (t) set({ outboundChat: { text: t, at: Date.now() } });
+      },
+
       fingerprint: () => {
         const s = get();
         return JSON.stringify([
@@ -235,7 +252,7 @@ export const useWizardStore = create<WizardState>()(
       name: "ai-salesperson-wizard",
       partialize: (s) => {
         // не сохраняем функции; chat сохраняем, чтобы шаг назад не терял историю
-        const { setField, setStep, pushChat, replaceLastStatus, toggleOption, setSingle, setOther, appendDiagnosticNote, mergeDiagnostic, fingerprint, markGenerated, needsRegeneration, reset, ...data } = s;
+        const { setField, setStep, pushChat, replaceLastStatus, toggleOption, setSingle, setOther, appendDiagnosticNote, mergeDiagnostic, requestProposal, sendToChat, fingerprint, markGenerated, needsRegeneration, reset, ...data } = s;
         return data;
       },
     }

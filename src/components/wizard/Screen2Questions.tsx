@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useWizardStore } from "@/store/wizardStore";
 import { questionsForRole, QUESTIONNAIRE_INTRO } from "@/lib/diagnosticQuestions";
 import type { UserRole } from "@/lib/pricing";
@@ -13,6 +13,7 @@ export default function Screen2Questions() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [otherOpen, setOtherOpen] = useState<Record<string, boolean>>({});
+  const handledRequestRef = useRef(0);
 
   const questions = useMemo(
     () => questionsForRole((s.userRole as UserRole) || "Универсальные специалисты"),
@@ -124,6 +125,15 @@ export default function Screen2Questions() {
     }
   }
 
+  // Чат попросил собрать предложение → запускаем тот же расчёт, что и кнопка
+  useEffect(() => {
+    if (s.proposalRequestedAt && s.proposalRequestedAt !== handledRequestRef.current) {
+      handledRequestRef.current = s.proposalRequestedAt;
+      void buildProposal();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.proposalRequestedAt]);
+
   return (
     <div className="fade-in-up">
       <h1 className="text-3xl font-bold text-brown-deep">Уточним вашу задачу</h1>
@@ -191,6 +201,17 @@ export default function Screen2Questions() {
                           <MicButton
                             onText={(t) => s.setOther(q.id, a.other ? `${a.other} ${t}` : t)}
                           />
+                        </div>
+                        <div className="mt-2 flex justify-end">
+                          <button
+                            type="button"
+                            disabled={!a.other.trim()}
+                            onClick={() => s.sendToChat(`${q.text} — ${a.other.trim()}`)}
+                            className="rounded-2xl border border-line px-4 py-1.5 text-xs font-semibold text-brown-light transition-colors hover:border-gold hover:text-gold disabled:opacity-40"
+                            title="Отправить ответ AI-ассистенту в чат"
+                          >
+                            ➤ Отправить ассистенту
+                          </button>
                         </div>
                       </div>
                     )}
