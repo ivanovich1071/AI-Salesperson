@@ -80,7 +80,7 @@ export default function Screen1Company() {
       </p>
 
       {/* Блок эксперта */}
-      <div className="mt-8 flex items-center gap-5 rounded-3xl border border-gold-light bg-gradient-to-br from-[#FFFDF5] to-[#FFF9E6] p-5">
+      <div className="mt-8 flex items-center gap-5 rounded-3xl border border-gold-light bg-gradient-to-br from-[#f0fbfb] to-[#e2f5f5] p-5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/photo_2026-07-17_2.jpg"

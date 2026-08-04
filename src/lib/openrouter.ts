@@ -30,10 +30,12 @@ interface ChatMessage {
  */
 export async function chatCompletion(
   userMessages: ChatMessage[],
-  opts: { json?: boolean; temperature?: number } = {}
+  opts: { json?: boolean; temperature?: number; system?: string } = {}
 ): Promise<string> {
+  // По умолчанию — системный промпт AI-продажника + база знаний.
+  // Для технических задач (напр. извлечение анкеты) можно передать свой system.
   const messages: ChatMessage[] = [
-    { role: "system", content: buildSystemPrompt() },
+    { role: "system", content: opts.system ?? buildSystemPrompt() },
     ...userMessages,
   ];
 
@@ -80,9 +82,14 @@ export function extractJson(raw: string): string {
  */
 export async function chatJson<T>(
   userMessages: ChatMessage[],
-  parse: (data: unknown) => T
+  parse: (data: unknown) => T,
+  opts: { system?: string; temperature?: number } = {}
 ): Promise<T> {
-  const first = await chatCompletion(userMessages, { json: true });
+  const first = await chatCompletion(userMessages, {
+    json: true,
+    system: opts.system,
+    temperature: opts.temperature,
+  });
   try {
     return parse(JSON.parse(extractJson(first)));
   } catch (e) {
@@ -100,16 +107,49 @@ export async function chatJson<T>(
           )}. Верни ТОЛЬКО исправленный валидный JSON без каких-либо пояснений.`,
         },
       ],
-      { json: true, temperature: 0.2 }
+      { json: true, temperature: 0.2, system: opts.system }
     );
     return parse(JSON.parse(extractJson(retry)));
   }
 }
 
 /**
+ * Типичные «галлюцинации» Whisper на тишине/шуме/слишком коротком аудио.
+ * На таком входе модель выдаёт заученные фразы из титров роликов — их нужно
+ * отсекать, иначе в поле попадает мусор вроде «Продолжение следует...».
+ */
+const WHISPER_HALLUCINATIONS = [
+  "продолжение следует",
+  "спасибо за просмотр",
+  "спасибо за внимание",
+  "подписывайтесь на канал",
+  "подписывайтесь",
+  "субтитры",
+  "редактор субтитров",
+  "корректор",
+  "продолжение в следующей серии",
+  "не забудьте поставить лайк",
+  "ставьте лайки",
+  "всем пока",
+  "до новых встреч",
+  "dimatorzok",
+];
+
+/** Пустой результат, если распознан только мусор-галлюцинация (короткий и совпал со стоп-фразой). */
+function cleanTranscript(raw: string): string {
+  const text = (raw ?? "").trim();
+  if (!text) return "";
+  const norm = text.toLowerCase().replace(/[.,!?…"'«»\-–—]/g, " ").replace(/\s+/g, " ").trim();
+  if (norm.length <= 40 && WHISPER_HALLUCINATIONS.some((h) => norm.includes(h))) {
+    return "";
+  }
+  return text;
+}
+
+/**
  * Транскрибация аудио через OpenRouter (Whisper Large V3).
  * OpenAI-совместимый endpoint /audio/transcriptions.
- * Возвращает «сырой» текст без постобработки (по ТЗ).
+ * Фильтрует типичные галлюцинации Whisper на тишине (иначе в поле летит мусор).
  */
 export async function transcribeAudio(
   audio: Blob,
@@ -119,6 +159,7 @@ export async function transcribeAudio(
   form.append("file", audio, filename);
   form.append("model", whisperModel());
   form.append("language", "ru");
+  form.append("temperature", "0"); // меньше «фантазий» на неоднозначном аудио
 
   const res = await fetch(`${OPENROUTER_BASE}/audio/transcriptions`, {
     method: "POST",
@@ -132,5 +173,5 @@ export async function transcribeAudio(
   }
 
   const data = await res.json();
-  return (data?.text ?? "").trim();
+  return cleanTranscript(data?.text ?? "");
 }

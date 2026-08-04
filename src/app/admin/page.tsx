@@ -54,6 +54,52 @@ function buildTemplate(b: BookingRow): string {
   return lines.join("\n");
 }
 
+interface DiagMapRow {
+  id: string;
+  companyName: string;
+  userRole: string;
+  participantCount: number;
+  goals: string;
+  data: string; // JSON-строка
+  matchScore: number;
+  createdAt: string;
+}
+
+/** Текстовый шаблон карты диагностики (для копирования/пересылки эксперту) */
+function buildDiagTemplate(m: DiagMapRow): string {
+  let d: Record<string, unknown> = {};
+  try {
+    d = JSON.parse(m.data) as Record<string, unknown>;
+  } catch {}
+  const qa = (Array.isArray(d.qa) ? d.qa : []) as { question: string; answer: string }[];
+  const p = (d.proposal ?? {}) as Record<string, unknown>;
+  const modules = (Array.isArray(p.modules) ? p.modules : []) as string[];
+  const lines = [
+    "🧭 КАРТА ДИАГНОСТИКИ",
+    "",
+    `🏢 Компания: ${m.companyName}`,
+    `👤 Роль: ${m.userRole} · участников: ${m.participantCount}`,
+    `🎯 Задачи: ${m.goals || "—"}`,
+    `📈 Соответствие: ${m.matchScore}%`,
+    "",
+    "📋 Ответы диагностики:",
+    ...(qa.length ? qa.map((x) => `- ${x.question}: ${x.answer || "—"}`) : ["—"]),
+  ];
+  if (typeof d.notes === "string" && d.notes.trim()) {
+    lines.push("", `🗒 Свободные ответы из чата: ${d.notes.trim()}`);
+  }
+  if (modules.length || p.assemblyName) {
+    lines.push(
+      "",
+      "🎓 Предложение:",
+      `- Сборка: ${(p.assemblyName as string) ?? "—"} (${(p.totalHours as number) ?? "?"} ч)`,
+      `- Модули: ${modules.length ? modules.join("; ") : "—"}`,
+      `- Стоимость обучения: ${(p.trainingCost as number) ?? "?"} ${(p.currency as string) ?? "BYN"}`
+    );
+  }
+  return lines.join("\n");
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [user, setUser] = useState("admin");
@@ -66,11 +112,14 @@ export default function AdminPage() {
   const [newTimes, setNewTimes] = useState("10:00, 14:00, 16:00");
   const [notice, setNotice] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
+  const [diagMaps, setDiagMaps] = useState<DiagMapRow[]>([]);
+  const [selectedMap, setSelectedMap] = useState<DiagMapRow | null>(null);
 
   const loadData = useCallback(async () => {
-    const [bRes, sRes] = await Promise.all([
+    const [bRes, sRes, dRes] = await Promise.all([
       fetch("/api/bookings"),
       fetch("/api/slots"),
+      fetch("/api/diagnostics"),
     ]);
     if (bRes.status === 401) {
       setAuthed(false);
@@ -78,9 +127,11 @@ export default function AdminPage() {
     }
     const b = await bRes.json();
     const s = await sRes.json();
+    const dm = await dRes.json();
     setBookings(b.bookings || []);
     // /api/slots отдаёт только свободные; для админки этого достаточно (занятые видны в бронях)
     setSlots(s.slots || []);
+    setDiagMaps(dm.maps || []);
     setAuthed(true);
   }, []);
 
@@ -142,6 +193,15 @@ export default function AdminPage() {
       setNotice("Шаблон скопирован в буфер обмена ✓");
     } catch {
       setSelectedBooking(b);
+    }
+  }
+
+  async function copyDiagTemplate(m: DiagMapRow) {
+    try {
+      await navigator.clipboard.writeText(buildDiagTemplate(m));
+      setNotice("Карта диагностики скопирована ✓");
+    } catch {
+      setSelectedMap(m);
     }
   }
 
@@ -292,6 +352,87 @@ export default function AdminPage() {
               rows={14}
               className="mt-4 w-full rounded-2xl border border-line bg-milk p-4 font-mono text-xs"
               value={buildTemplate(selectedBooking)}
+            />
+          </section>
+        )}
+
+        {/* Карты диагностики */}
+        <section className="card mt-6 p-6">
+          <h2 className="text-lg font-bold text-brown-deep">Карты диагностики</h2>
+          <p className="mt-1 text-sm text-muted">
+            Сохранённые заготовки по клиентам — создаются при формировании предложения (до брони).
+          </p>
+          {diagMaps.length === 0 ? (
+            <p className="mt-4 text-sm text-muted">Пока нет сохранённых карт диагностики.</p>
+          ) : (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b-2 border-line text-left text-muted">
+                    <th className="p-2">Дата</th>
+                    <th className="p-2">Компания</th>
+                    <th className="p-2">Роль / участники</th>
+                    <th className="p-2">Задачи</th>
+                    <th className="p-2">Соотв.</th>
+                    <th className="p-2" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {diagMaps.map((m) => (
+                    <tr key={m.id} className="border-b border-line align-top">
+                      <td className="whitespace-nowrap p-2 text-muted">
+                        {new Date(m.createdAt).toLocaleString("ru-RU")}
+                      </td>
+                      <td className="p-2 font-medium text-brown-deep">{m.companyName}</td>
+                      <td className="p-2">
+                        {m.userRole}
+                        <br />
+                        <span className="text-muted">{m.participantCount} чел.</span>
+                      </td>
+                      <td className="max-w-[220px] truncate p-2" title={m.goals}>
+                        {m.goals || "—"}
+                      </td>
+                      <td className="p-2 font-semibold text-gold">{m.matchScore}%</td>
+                      <td className="p-2">
+                        <button
+                          className="rounded-2xl border border-line px-3 py-1.5 text-xs font-semibold text-brown-light hover:border-gold hover:text-gold"
+                          onClick={() => copyDiagTemplate(m)}
+                        >
+                          📋 Шаблон
+                        </button>
+                        <button
+                          className="ml-1 rounded-2xl border border-line px-3 py-1.5 text-xs text-brown-light hover:border-gold"
+                          onClick={() => setSelectedMap(m)}
+                        >
+                          👁
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {selectedMap && (
+          <section className="card mt-6 p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-brown-deep">
+                Карта диагностики — {selectedMap.companyName}
+              </h2>
+              <button
+                className="text-sm text-muted hover:text-gold"
+                onClick={() => setSelectedMap(null)}
+              >
+                ✕ Закрыть
+              </button>
+            </div>
+            <textarea
+              readOnly
+              rows={16}
+              className="mt-4 w-full rounded-2xl border border-line bg-milk p-4 font-mono text-xs"
+              value={buildDiagTemplate(selectedMap)}
             />
           </section>
         )}

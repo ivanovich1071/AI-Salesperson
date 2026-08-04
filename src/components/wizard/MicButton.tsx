@@ -24,6 +24,7 @@ export default function MicButton({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -49,12 +50,20 @@ export default function MicButton({
       };
       rec.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
+        const durationMs = Date.now() - startTimeRef.current;
         const type = rec.mimeType || "audio/webm";
         const blob = new Blob(chunksRef.current, { type });
+        // Слишком короткое/пустое аудио → Whisper галлюцинирует. Просим повторить.
+        if (durationMs < 900 || blob.size < 1200) {
+          setError("Слишком коротко — говорите чуть дольше и повторите.");
+          setState("idle");
+          return;
+        }
         await transcribe(blob, type.includes("wav") ? "recording.wav" : "recording.webm");
       };
       recorderRef.current = rec;
       rec.start();
+      startTimeRef.current = Date.now();
       setState("recording");
       setSeconds(0);
       timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);

@@ -20,6 +20,45 @@ export default function ChatPanel() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [chat.length, sending]);
 
+  // Разбор ответа из чата → авто-заполнение анкеты + свободные заметки (шаг 2)
+  async function applyDiagnosticsFromChat(text: string, role: string) {
+    try {
+      const res = await fetch("/api/ai/extract-diagnostics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role, message: text }),
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as {
+        matches?: { qid: string; options: string[]; other: string; single: boolean }[];
+        notes?: string;
+      };
+      const st = useWizardStore.getState();
+      let filled = 0;
+      for (const m of data.matches ?? []) {
+        if (m.single) {
+          if (m.options[0]) {
+            st.setSingle(m.qid, m.options[0]);
+            filled++;
+          }
+        } else {
+          st.mergeDiagnostic(m.qid, m.options ?? [], m.other ?? "");
+          if ((m.options?.length ?? 0) > 0 || (m.other ?? "").trim()) filled++;
+        }
+      }
+      const notes = (data.notes ?? "").trim();
+      if (notes) st.appendDiagnosticNote(notes);
+      if (filled > 0 || notes) {
+        pushChat(
+          "ai",
+          `📝 Отметил ваши ответы в анкете справа${filled ? ` (пунктов: ${filled})` : ""}. Можно сразу нажать «Сформировать предложение» или добавить ещё.`
+        );
+      }
+    } catch {
+      /* извлечение не должно ломать чат — тихо игнорируем */
+    }
+  }
+
   async function send() {
     const text = input.trim();
     if (!text || sending) return;
@@ -29,6 +68,10 @@ export default function ChatPanel() {
 
     // История для модели: только реплики ai/user (без статусов), последние 12
     const s = useWizardStore.getState();
+    // На шаге диагностики параллельно разбираем сообщение в анкету/заметки
+    if (s.step === 2 && s.userRole) {
+      void applyDiagnosticsFromChat(text, s.userRole);
+    }
     const history = [...s.chat, { id: "tmp", kind: "user" as const, text }]
       .filter((m) => m.kind === "ai" || m.kind === "user")
       .slice(-12)
@@ -74,7 +117,7 @@ export default function ChatPanel() {
   }
 
   return (
-    <div className="flex h-full flex-col border-r border-line bg-[#FFFDF9]">
+    <div className="flex h-full flex-col border-r border-line bg-white">
       {/* Лента сообщений */}
       <div ref={scrollRef} className="flex flex-1 flex-col gap-3 overflow-y-auto p-5">
         {chat.map((m) => (

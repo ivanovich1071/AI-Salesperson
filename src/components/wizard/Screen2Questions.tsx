@@ -26,7 +26,11 @@ export default function Screen2Questions() {
     const a = ans(qid);
     return a.selected.length > 0 || a.other.trim().length > 0;
   };
+  const answeredCount = questions.filter((q) => answered(q.id)).length;
   const allAnswered = questions.every((q) => answered(q.id));
+  // Кнопка активна уже при ≥1 отвеченном вопросе (чекбокс/«Другое»/через чат)
+  // или если ассистент сохранил свободные ответы из чата.
+  const canBuild = answeredCount >= 1 || s.diagnosticNotes.trim().length > 0;
 
   function toggleOther(qid: string) {
     setOtherOpen((prev) => {
@@ -37,7 +41,7 @@ export default function Screen2Questions() {
   }
 
   async function buildProposal() {
-    if (loading || !allAnswered) return;
+    if (loading || !canBuild) return;
     setLoading(true);
     setError("");
     s.pushChat("status", "🧩 Собираем персональную программу и считаем стоимость...");
@@ -53,6 +57,10 @@ export default function Screen2Questions() {
         const sa = ans(q.sub.id);
         if (sa.selected[0]) qa.push({ question: q.sub.text, answer: sa.selected[0] });
       }
+    }
+    // Свободные ответы, надиктованные/написанные в чат (не легли в конкретный вопрос)
+    if (s.diagnosticNotes.trim()) {
+      qa.push({ question: "Дополнительно из диалога с ассистентом", answer: s.diagnosticNotes.trim() });
     }
 
     try {
@@ -75,6 +83,35 @@ export default function Screen2Questions() {
       if (!res.ok) throw new Error(data?.error || "AI недоступен");
 
       s.setField("proposal", data);
+
+      // Сохраняем карту диагностики (шаблон) в БД → доступна в админке. Не блокируем UI.
+      void fetch("/api/diagnostics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: s.companyName,
+          userRole: s.userRole,
+          participantCount: s.participantCount,
+          goals: s.goals,
+          matchScore: data.matchScore ?? 0,
+          data: {
+            answers: s.diagnosticAnswers,
+            notes: s.diagnosticNotes,
+            qa,
+            proposal: {
+              assemblyName: data.assemblyName,
+              totalHours: data.totalHours,
+              modules: (data.trainingModules ?? []).map(
+                (m: { code: string; title: string }) => `${m.code}. ${m.title}`
+              ),
+              trainingCost: data.trainingCost?.total,
+              currency: data.trainingCost?.currency,
+              summary: data.summary,
+            },
+          },
+        }),
+      }).catch(() => {});
+
       s.replaceLastStatus("✨ Программа готова!");
       s.pushChat("ai", data.chatComment);
       s.setStep(3);
@@ -199,10 +236,10 @@ export default function Screen2Questions() {
         <button className="btn-secondary" onClick={() => s.setStep(1)}>
           ← Назад
         </button>
-        <button className="btn-primary" disabled={!allAnswered || loading} onClick={buildProposal}>
+        <button className="btn-primary" disabled={!canBuild || loading} onClick={buildProposal}>
           {loading ? (
             <>
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-brown-deep border-t-transparent" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               Формируем...
             </>
           ) : (
@@ -210,11 +247,16 @@ export default function Screen2Questions() {
           )}
         </button>
       </div>
-      {!allAnswered && (
+      {!canBuild ? (
         <p className="mt-3 text-right text-xs text-muted">
-          Ответьте на все вопросы (хотя бы один вариант или «Другое»), чтобы продолжить.
+          Ответьте хотя бы на один вопрос (вариант, «Другое» или через чат слева), чтобы
+          сформировать предложение.
         </p>
-      )}
+      ) : !allAnswered ? (
+        <p className="mt-3 text-right text-xs text-muted">
+          Можно формировать предложение уже сейчас. Чем больше ответов — тем точнее подбор.
+        </p>
+      ) : null}
     </div>
   );
 }

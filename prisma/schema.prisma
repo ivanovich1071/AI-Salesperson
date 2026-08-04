@@ -37,3 +37,19 @@ model Booking {
   status     String   @default("booked") // booked | done | cancelled
   createdAt  DateTime @default(now())
 }
+
+// Карта диагностики клиента (шаблон-заготовка). Сохраняется в момент
+// формирования предложения — до/без брони встречи. Виден в админке.
+model DiagnosticMap {
+  id               String   @id @default(cuid())
+  companyName      String
+  userRole         String
+  participantCount Int      @default(0)
+  goals            String   @default("")
+
+  // JSON-строка: ответы анкеты (qid→{selected,other}), свободные заметки из чата,
+  // краткая сводка предложения, модули, часы, стоимость обучения
+  data             String   @default("{}")
+  matchScore       Int      @default(0)
+  createdAt        DateTime @default(now())
+}

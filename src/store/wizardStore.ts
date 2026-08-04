@@ -80,6 +80,9 @@ interface WizardState {
 
   // Экран 2 — структурные ответы чекбокс-анкеты: qid → выбранные + «Другое»
   diagnosticAnswers: Record<string, { selected: string[]; other: string }>;
+  // Свободные ответы из диалога с ассистентом, не легшие в конкретный вопрос
+  // (идут в предложение и в карту диагностики).
+  diagnosticNotes: string;
 
   // Экран 3
   proposal: ProposalData | null;
@@ -104,6 +107,8 @@ interface WizardState {
   toggleOption: (qid: string, option: string) => void; // чекбокс: добавить/убрать
   setSingle: (qid: string, option: string) => void; // radio (под-вопрос): заменить
   setOther: (qid: string, text: string) => void; // поле «Другое»
+  appendDiagnosticNote: (text: string) => void; // свободный ответ из чата
+  mergeDiagnostic: (qid: string, selected: string[], other?: string) => void; // авто-заполнение из чата
   fingerprint: () => string;
   markGenerated: () => void;
   needsRegeneration: () => boolean;
@@ -125,6 +130,7 @@ const initialData = {
   participantCount: 10,
   goals: "",
   diagnosticAnswers: {} as Record<string, { selected: string[]; other: string }>,
+  diagnosticNotes: "",
   proposal: null as ProposalData | null,
   objection: "",
   objectionResponse: null as ObjectionResponseData | null,
@@ -181,6 +187,31 @@ export const useWizardStore = create<WizardState>()(
           return { diagnosticAnswers: { ...s.diagnosticAnswers, [qid]: { ...cur, other: text } } };
         }),
 
+      appendDiagnosticNote: (text) =>
+        set((s) => {
+          const t = text.trim();
+          if (!t) return {};
+          return { diagnosticNotes: s.diagnosticNotes ? `${s.diagnosticNotes}\n${t}` : t };
+        }),
+
+      mergeDiagnostic: (qid, selected, other) =>
+        set((s) => {
+          const cur = s.diagnosticAnswers[qid] ?? { selected: [], other: "" };
+          const merged = Array.from(new Set([...cur.selected, ...selected]));
+          const nextOther =
+            other && other.trim()
+              ? cur.other
+                ? `${cur.other} ${other.trim()}`
+                : other.trim()
+              : cur.other;
+          return {
+            diagnosticAnswers: {
+              ...s.diagnosticAnswers,
+              [qid]: { selected: merged, other: nextOther },
+            },
+          };
+        }),
+
       fingerprint: () => {
         const s = get();
         return JSON.stringify([
@@ -204,7 +235,7 @@ export const useWizardStore = create<WizardState>()(
       name: "ai-salesperson-wizard",
       partialize: (s) => {
         // не сохраняем функции; chat сохраняем, чтобы шаг назад не терял историю
-        const { setField, setStep, pushChat, replaceLastStatus, toggleOption, setSingle, setOther, fingerprint, markGenerated, needsRegeneration, reset, ...data } = s;
+        const { setField, setStep, pushChat, replaceLastStatus, toggleOption, setSingle, setOther, appendDiagnosticNote, mergeDiagnostic, fingerprint, markGenerated, needsRegeneration, reset, ...data } = s;
         return data;
       },
     }

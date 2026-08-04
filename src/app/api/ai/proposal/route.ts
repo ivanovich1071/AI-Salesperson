@@ -30,6 +30,26 @@ const NEXT_STEPS = [
 ];
 
 /**
+ * Детерминированная база «соответствия задачам» (0–100) — по полноте вводных.
+ * Комбинируется с оценкой AI (см. ниже), чтобы число не было захардкожено.
+ */
+function computeBaseMatch(
+  qa: { question: string; answer: string }[],
+  goals: string,
+  parsedWebsiteText: string,
+  moduleCount: number
+): number {
+  const answered = qa.filter((x) => x.answer && x.answer.trim().length > 0).length;
+  const coverage = qa.length > 0 ? answered / qa.length : 0; // доля отвеченных пунктов
+  let score = 55;
+  score += Math.round(coverage * 25); // до +25 за полноту анкеты
+  if (goals.trim().length > 20) score += 6; // содержательная формулировка задач
+  if (parsedWebsiteText.trim().length > 0) score += 4; // есть контекст с сайта
+  if (moduleCount >= 3) score += 5; // подобрана полноценная сборка
+  return Math.max(45, Math.min(96, score));
+}
+
+/**
  * POST /api/ai/proposal
  * Модули выбирает СИСТЕМА (Program Selector, Таблица 7), стоимость обучения
  * считает КОД (Pricing, Таблица 5). AI только объясняет выбор и оформляет предложение.
@@ -90,13 +110,23 @@ ${selection.publicCloudRestricted ? "ВАЖНО: у клиента запрещ�
   "summary": "Блок «Что мы увидели»: 3-5 предложений о ситуации компании по ответам анкеты",
   "moduleReasons": [${codes.map((c) => `{"code": "${c}", "reason": "почему модуль ${c} подходит (2-3 предложения)"}`).join(", ")}],
   "trainingFormat": "Как будет проходить обучение: очно/дистанционно, BYOD, принцип «демонстрация → применение → результат», конкретные инструменты из базы знаний",
-  "matchScore": 87,
+  "matchScore": <целое 0-100: твоя честная оценка, насколько подобранная программа покрывает задачи и ответы ИМЕННО этого клиента; оценивай по существу, НЕ ставь одно и то же число всегда>,
   "chatComment": "короткая реплика AI-продажника в чат о готовом предложении"
 }`,
         },
       ],
       (data) => ProposalSchema.parse(data)
     );
+
+    // Комбинированное соответствие: формула в коде + оценка AI (50/50)
+    const baseMatch = computeBaseMatch(
+      qa,
+      company.goals ?? "",
+      company.parsedWebsiteText ?? "",
+      codes.length
+    );
+    const aiMatch = Math.max(0, Math.min(100, proposal.matchScore));
+    const finalMatch = Math.max(45, Math.min(97, Math.round((baseMatch + aiMatch) / 2)));
 
     const reasonByCode = new Map(
       proposal.moduleReasons.map((r) => [r.code, r.reason])
@@ -131,7 +161,7 @@ ${selection.publicCloudRestricted ? "ВАЖНО: у клиента запрещ�
         description: DESIGN_DEVELOPMENT.description,
       },
       nextSteps: NEXT_STEPS,
-      matchScore: proposal.matchScore,
+      matchScore: finalMatch,
       chatComment: proposal.chatComment,
     });
   } catch (e) {

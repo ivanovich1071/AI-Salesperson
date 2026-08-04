@@ -291,7 +291,7 @@ export default function LandingPage() {
       {/* ===== HERO ===== */}
       <section
         id="home"
-        className="relative overflow-hidden bg-gradient-to-br from-brown-deep via-[#4E342E] to-brown-light pb-24 pt-36 text-milk"
+        className="relative overflow-hidden bg-gradient-to-br from-graphite via-teal-night to-teal-deep pb-24 pt-36 text-milk"
       >
         <div
           aria-hidden
@@ -673,7 +673,7 @@ export default function LandingPage() {
       {/* ===== CONTACT / CTA (вместо Google Forms) ===== */}
       <section
         id="contact"
-        className="bg-gradient-to-br from-brown-deep via-[#4E342E] to-brown-light py-20 text-milk"
+        className="bg-gradient-to-br from-graphite via-teal-night to-teal-deep py-20 text-milk"
       >
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center">
@@ -729,7 +729,7 @@ export default function LandingPage() {
       </section>
 
       {/* ===== FOOTER ===== */}
-      <footer className="bg-[#2C1B18] py-10 text-sm text-milk/70">
+      <footer className="bg-graphite py-10 text-sm text-milk/70">
         <div className="mx-auto max-w-6xl px-5">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-2 font-bold text-milk">
