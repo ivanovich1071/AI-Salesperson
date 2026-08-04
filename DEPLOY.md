@@ -1,71 +1,115 @@
-# Инструкция по деплою на сервер
+# Деплой ВайбМайнд — подробная инструкция
 
-Прод развёрнут на VPS (Ubuntu 24.04) за nginx с HTTPS.
+Прод: **https://81-177-214-84.nip.io** — VPS (Ubuntu 24.04), Next.js за nginx с HTTPS.
 
-> 🔐 **Доступы (пароль root, SSH-ключ) — в файле `DEPLOY_SECRETS.local.md`**, он в
-> `.gitignore` и в репозиторий НЕ попадает (репозиторий публичный). Если файла нет —
-> см. раздел «Доступы» ниже.
+> 🔑 **Пароль вводить не нужно.** Вход на сервер настроен по SSH-ключу
+> `~/.ssh/vibemind_deploy`. Пароль root лежит в `DEPLOY_SECRETS.local.md`
+> (файл в `.gitignore`, в репозиторий не попадает) и нужен только для аварийного
+> восстановления доступа — см. раздел «Если пропал ключ».
 
-## 1. Что где на сервере
+---
+
+## 1. Обычный релиз — один шаг
+
+Выберите любой удобный способ. Все три делают одно и то же.
+
+**Способ А — двойной клик (самый простой).**
+В папке проекта откройте файл **`Деплой.bat`** двойным кликом. Откроется окно,
+всё выполнится само, в конце появится «ГОТОВО! Сайт обновлён».
+
+**Способ Б — из терминала проекта:**
+
+```bash
+npm run deploy
+```
+
+**Способ В — если код уже запушен и надо просто пересобрать прод:**
+
+```bash
+npm run deploy -- --skip-push
+```
+
+### Что произойдёт автоматически
+
+| Шаг | Что делает | Время |
+|---|---|---|
+| 1 | Проверяет, что нет незакоммиченных правок, и пушит `main` на GitHub | ~5 сек |
+| 2 | Ждёт доступности SSH (порт 22 иногда придушен провайдером) | 0–10 мин |
+| 3 | На сервере: `git reset --hard origin/main` — код обновляется до `main` | ~5 сек |
+| 4 | `npm ci` — ставит зависимости | ~40 сек |
+| 5 | `npx prisma generate` + `npx prisma db push` — обновляет клиент и **создаёт новые таблицы**, если менялась схема | ~5 сек |
+| 6 | `npm run build` — прод-сборка Next.js | 3–5 мин |
+| 7 | `chown appuser` + `systemctl restart ai-salesperson` — перезапуск сервиса | ~10 сек |
+| 8 | Проверяет `/`, `/course`, `/app`, `/admin` — все должны ответить `200` | ~3 сек |
+
+Если всё хорошо, в конце будет:
+
+```
+    / → 200
+    /course → 200
+    /app → 200
+    /admin → 200
+Готово. Сайт обновлён: https://81-177-214-84.nip.io
+```
+
+> ⚠️ **Не закрывайте окно во время сборки.** На сервере 1 vCPU / 1 ГБ RAM,
+> шаг `npm run build` идёт 3–5 минут — это нормально.
+
+---
+
+## 2. Если что-то пошло не так
+
+Скрипт возвращает понятный код ошибки:
+
+| Код | Сообщение | Что делать |
+|---|---|---|
+| 1 | Есть незакоммиченные изменения / нет ключа | Закоммитьте правки (`git add -A && git commit -m "..."`), либо см. «Если пропал ключ» |
+| 2 | Сервер не отвечает по SSH | Провайдер придушил порт 22 после частых подключений. **Подождите 10 минут и запустите снова.** Сайт при этом продолжает работать |
+| 3 | Деплой упал на сервере | Посмотрите логи (ниже) |
+| 4 | Сайт отвечает не 200 | Посмотрите логи, при необходимости перезапустите сервис |
+
+**Посмотреть логи приложения:**
+
+```bash
+ssh -i ~/.ssh/vibemind_deploy root@81.177.214.84 "journalctl -u ai-salesperson -n 50 --no-pager"
+```
+
+**Перезапустить сервис вручную:**
+
+```bash
+ssh -i ~/.ssh/vibemind_deploy root@81.177.214.84 "systemctl restart ai-salesperson && systemctl is-active ai-salesperson"
+```
+
+> ⚠️ **Про порт 22.** Провайдер временно блокирует SSH после нескольких быстрых
+> подключений подряд. Не долбите повторно — подождите 5–10 минут и подключитесь
+> один раз. Веб-сайт (порты 80/443) работает всегда, независимо от SSH.
+
+---
+
+## 3. Что где на сервере
 
 | Параметр | Значение |
 |---|---|
 | IP | `81.177.214.84` |
-| Домен (HTTPS) | `https://81-177-214-84.nip.io` |
+| Домен (HTTPS) | `https://81-177-214-84.nip.io` (сервис `nip.io` резолвит имя прямо в IP — домен покупать не нужно) |
 | Каталог приложения | `/opt/ai-salesperson` |
 | Сервисный пользователь | `appuser` |
 | systemd-сервис | `ai-salesperson` (Next.js на порту 3100) |
-| Веб-сервер | nginx (80 → 443 редирект, проксирует на 127.0.0.1:3100) |
-| TLS-сертификат | Let's Encrypt (автопродление через `certbot.timer`) |
+| Веб-сервер | nginx (80 → 443 редирект, проксирует на `127.0.0.1:3100`) |
+| TLS-сертификат | Let's Encrypt, автопродление через `certbot.timer` |
 | База данных | SQLite `/opt/ai-salesperson/prod.db` |
 | Репозиторий | https://github.com/ivanovich1071/AI-Salesperson |
 
-## 2. Подключение по SSH
-
-```bash
-ssh root@81.177.214.84
-```
-
-Пароль — в `DEPLOY_SECRETS.local.md`. Рекомендуется вход по SSH-ключу (см. там же).
-
-> ⚠️ Провайдер иногда временно блокирует порт 22 после нескольких быстрых подключений
-> подряд. Если `ssh` завис — не долбите повторно, подождите 5–10 минут и подключитесь один
-> раз. Веб-сайт (порты 80/443) при этом работает всегда.
-
-## 3. Обновление прода (обычный релиз)
-
-После `git push` в `main` выполнить на сервере:
-
-```bash
-cd /opt/ai-salesperson
-git config --global --add safe.directory /opt/ai-salesperson   # один раз
-git fetch origin main && git reset --hard origin/main
-npm ci
-npx prisma generate
-npm run build
-chown -R appuser:appuser /opt/ai-salesperson
-systemctl restart ai-salesperson
-```
-
-Проверка:
-
-```bash
-systemctl is-active ai-salesperson
-curl -s -o /dev/null -w "%{http_code}\n" https://81-177-214-84.nip.io/
-```
-
-> На сервере 1 vCPU / 1 ГБ RAM — `npm run build` идёт 3–5 минут. Есть swap 2.5 ГБ.
-> Долгие шаги лучше запускать в фоне: `setsid nohup bash -c '…' > /root/deploy.log 2>&1 &`,
-> чтобы обрыв SSH не прервал сборку; следить через `tail -f /root/deploy.log`.
+---
 
 ## 4. Переменные окружения (`/opt/ai-salesperson/.env`)
 
-Не в git. Ключевые:
+Не в git, живут только на сервере. Ключевые:
 
 ```env
 OPENROUTER_API_KEY=...            # ключ OpenRouter
 OPENROUTER_MODEL=qwen/qwen3-235b-a22b-2507
-OPENROUTER_WHISPER_MODEL=openai/whisper-large-v3
+OPENROUTER_WHISPER_MODEL=openai/whisper-large-v3   # голосовой ввод
 DATABASE_URL=file:./prod.db
 ADMIN_USER=admin
 ADMIN_PASSWORD=demo2026
@@ -73,28 +117,55 @@ ADMIN_SESSION_SECRET=...          # случайная строка
 NEXT_PUBLIC_SITE_URL=https://81-177-214-84.nip.io
 ```
 
-После правки `.env` → `systemctl restart ai-salesperson`.
+После правки `.env` нужен перезапуск сервиса (команда в разделе 2).
+
+> ℹ️ **Про голосовой ввод.** Модель `openai/whisper-large-v3` работает через
+> OpenRouter, но её нет в каталоге `/api/v1/models` (там только chat-модели) —
+> это нормально. Важно: Whisper **не декодирует webm/opus**, поэтому фронтенд
+> конвертирует запись микрофона в **WAV 16 кГц моно** (`src/lib/audioWav.ts`)
+> перед отправкой. Не убирайте эту конвертацию — иначе модель «слышит тишину»
+> и возвращает галлюцинации вида «Продолжение следует…».
+
+---
 
 ## 5. Слоты календаря встреч
 
 ```bash
-cd /opt/ai-salesperson
-node scripts/seed-slots.mjs 2026-09-01 2026-09-30   # слоты на диапазон
-node scripts/seed-current-month.mjs                 # текущий месяц + чистка прошедших
+ssh -i ~/.ssh/vibemind_deploy root@81.177.214.84 "cd /opt/ai-salesperson && node scripts/seed-current-month.mjs"
 ```
 
 Автообновление 1-го числа каждого месяца настроено через cron (`crontab -l` от root).
 
-## 6. Полезные команды
+---
 
-```bash
-journalctl -u ai-salesperson -n 100 --no-pager   # логи приложения
-systemctl restart ai-salesperson                 # перезапуск
-nginx -t && systemctl reload nginx               # проверка/перезагрузка nginx
-certbot certificates                             # статус TLS-сертификата
-```
+## 6. Если пропал ключ (аварийное восстановление доступа)
 
-## 7. Первичная установка (если ставить с нуля на новый сервер)
+Нужно, только если деплой пишет «Нет ключа деплоя» или сервер перестал пускать.
+
+1. Создать новый ключ (в Git Bash), **без пароля** — просто жмите Enter:
+   ```bash
+   ssh-keygen -t ed25519 -f ~/.ssh/vibemind_deploy -N "" -C "vibemind-deploy"
+   ```
+2. Загрузить его на сервер — **вот здесь один раз спросит пароль root**
+   (он в `DEPLOY_SECRETS.local.md`):
+   ```bash
+   ssh-copy-id -i ~/.ssh/vibemind_deploy.pub root@81.177.214.84
+   ```
+   Если `ssh-copy-id` нет:
+   ```bash
+   cat ~/.ssh/vibemind_deploy.pub | ssh root@81.177.214.84 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+   ```
+3. Проверить, что пароль больше не нужен:
+   ```bash
+   ssh -i ~/.ssh/vibemind_deploy root@81.177.214.84 "echo ok"
+   ```
+
+> 💡 При вводе пароля в терминале символы **не отображаются** — это нормально,
+> просто наберите и нажмите Enter.
+
+---
+
+## 7. Первичная установка (только для нового сервера с нуля)
 
 1. `apt update && apt install -y curl git nginx ufw`
 2. Node.js 20: `curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt install -y nodejs`
@@ -119,12 +190,17 @@ certbot certificates                             # статус TLS-сертиф
    WantedBy=multi-user.target
    ```
    `systemctl daemon-reload && systemctl enable --now ai-salesperson`
-9. nginx: проксировать `location / { proxy_pass http://127.0.0.1:3100; … }`, `server_name` = домен.
+9. nginx: `location / { proxy_pass http://127.0.0.1:3100; … }`, `server_name` = домен.
 10. HTTPS: `apt install -y certbot python3-certbot-nginx && certbot --nginx -d <домен> --agree-tos -m <email> --redirect`
+
+---
 
 ## 8. Безопасность (рекомендуется)
 
-- Сменить пароль root: `passwd root` (текущий пароль несколько раз звучал в переписке).
-- Перейти на вход по SSH-ключу и отключить парольную аутентификацию.
-- Включить `ufw`: `ufw allow OpenSSH && ufw allow 80,443/tcp && ufw enable`
-  (сейчас выключен). ⚠️ Делать через VNC-консоль панели, а не по SSH, чтобы не потерять доступ.
+- **Сменить пароль root**: `passwd root` на сервере. Пароль несколько раз
+  передавался в переписке; вход по ключу уже работает, поэтому смена пароля
+  ничего не сломает. После смены обновите `DEPLOY_SECRETS.local.md`.
+- Отключить парольную аутентификацию SSH (после проверки, что ключ работает):
+  в `/etc/ssh/sshd_config` → `PasswordAuthentication no`, затем `systemctl restart ssh`.
+- Включить `ufw`: `ufw allow OpenSSH && ufw allow 80,443/tcp && ufw enable`.
+  ⚠️ Делать через VNC-консоль панели хостинга, а не по SSH, чтобы не потерять доступ.
