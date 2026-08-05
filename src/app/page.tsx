@@ -522,7 +522,7 @@ export default function VibeMindHome() {
           </div>
           <div className="mt-8 space-y-4 text-lg leading-relaxed text-graphite/75">
             <p>
-              <strong className="text-graphite">ВайбМайнд Лаб</strong> — социально
+              <strong className="text-graphite">ВайбМайнд</strong> — социально
               ответственная белорусская компания, которая помогает организациям{" "}
               <strong className="text-graphite">осмысленно внедрять ИИ</strong>. Мы обучаем,
               консультируем и сопровождаем изменения, чтобы современные технологии усиливали
