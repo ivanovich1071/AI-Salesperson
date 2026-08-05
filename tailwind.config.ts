@@ -26,6 +26,7 @@ const config: Config = {
           DEFAULT: "#1ca5a8", // цвет знака ВайбМайнд
           emerald: "#19c9a2",
           hover: "#22b9bc",
+          dark: "#0f7679", // бирюза для ТЕКСТА на светлом фоне (контраст ≥ 4.5)
           deep: "#073d3d",
           night: "#0e1e1f",
         },
