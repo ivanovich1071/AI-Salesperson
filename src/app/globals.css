@@ -36,10 +36,10 @@ body {
   /* ===== Компоненты страницы «ВайбМайнд» (бирюзовая гамма VibeZmest) ===== */
   .btn-teal {
     @apply inline-flex items-center gap-2 rounded-2xl px-8 py-4 text-base font-semibold text-white shadow-teal transition-all hover:-translate-y-0.5 disabled:opacity-50;
-    background: linear-gradient(135deg, #00b1b4, #00d9a6);
+    background: linear-gradient(135deg, #1ca5a8, #19c9a2);
   }
   .btn-teal:hover {
-    background: linear-gradient(135deg, #00c5c9, #00e4ae);
+    background: linear-gradient(135deg, #22b9bc, #25d9b0);
   }
   .btn-teal-outline {
     @apply inline-flex items-center gap-2 rounded-2xl border border-teal/50 px-8 py-4 text-base font-semibold text-teal transition-all hover:bg-teal/5;
@@ -49,7 +49,7 @@ body {
   }
   .vm-underline {
     @apply mx-auto mt-3 h-1 w-24 rounded-full;
-    background: linear-gradient(90deg, transparent, #00b1b4, #00d9a6, transparent);
+    background: linear-gradient(90deg, transparent, #1ca5a8, #19c9a2, transparent);
   }
   .vm-card {
     @apply rounded-3xl border border-teal/15 p-8 transition-all hover:-translate-y-1;

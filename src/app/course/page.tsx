@@ -89,141 +89,10 @@ const SKILLS = [
   },
 ];
 
-/* ===== Лаборатория решений — витрина «виртуальных сотрудников» ===== */
-type StatusTone = "live" | "partner" | "ready" | "github" | "soon";
-
-const STATUS_STYLES: Record<StatusTone, string> = {
-  live: "bg-emerald-100 text-emerald-700",
-  partner: "bg-gold-light text-brown-deep",
-  ready: "bg-amber-100 text-amber-700",
-  github: "bg-slate-100 text-slate-700",
-  soon: "bg-line text-muted",
-};
-
-type Product = {
-  emoji: string;
-  name: string;
-  role: string;
-  task: string;
-  abilities: string[];
-  tags: string[];
-  status: string;
-  tone: StatusTone;
-  liveUrl?: string;
-  liveLabel?: string;
-  note?: string;
-};
-
-// TODO: часть ссылок и текстов — черновики/заглушки, автор уточнит (см. Лаборатория_решений_план.txt)
-const PRODUCTS: Product[] = [
-  {
-    emoji: "🧑‍💼",
-    name: "Иван",
-    role: "Виртуальный менеджер по продажам",
-    task: "Ведёт первичные продажи и квалифицирует заявки без участия живого менеджера.",
-    abilities: [
-      "Отвечает на вопросы о продукте и снимает возражения",
-      "Квалифицирует лида и собирает контакты",
-      "Передаёт «тёплого» клиента менеджеру или записывает на встречу",
-    ],
-    tags: ["Канал: Telegram / веб", "Для: отделов продаж"],
-    status: "Живое демо",
-    tone: "live",
-    note: "Флагман лаборатории.",
-  },
-  {
-    emoji: "🛟",
-    name: "Бот SMAIPL",
-    role: "Виртуальный специалист техподдержки",
-    task: "Закрывает первую линию техподдержки пользователей в режиме 24/7.",
-    abilities: [
-      "Отвечает на типовые вопросы пользователей",
-      "Проводит по шагам решения проблемы",
-      "Эскалирует сложные обращения на человека",
-    ],
-    tags: ["Разработан для партнёра SMAIPL", "Для: продуктовых команд"],
-    status: "Внедрён у партнёра",
-    tone: "partner",
-    note: "Разработан для партнёра SMAIPL (smaipl.ru).",
-  },
-  {
-    emoji: "🧐",
-    name: "Рецензент",
-    role: "Виртуальный эксперт-рецензент",
-    task: "Проверяет тексты и документы по заданным критериям и даёт структурированную рецензию.",
-    abilities: [
-      "Оценивает материал по чек-листу критериев",
-      "Указывает слабые места и предлагает правки",
-      "Готовит итоговое заключение",
-    ],
-    tags: ["Канал: веб", "Для: экспертов и редакторов"],
-    status: "Готов к внедрению",
-    tone: "ready",
-  },
-  {
-    emoji: "🗓️",
-    name: "Запись на приём",
-    role: "Виртуальный администратор",
-    task: "Записывает клиентов на приём и управляет расписанием без администратора.",
-    abilities: [
-      "Показывает свободные слоты и оформляет запись",
-      "Отправляет подтверждение и напоминания",
-      "Переносит и отменяет визиты",
-    ],
-    tags: ["Канал: Telegram / веб", "Для: услуг и клиник"],
-    status: "Готов к внедрению",
-    tone: "ready",
-  },
-  {
-    emoji: "🤝",
-    name: "Проекты с Наталией",
-    role: "Совместные разработки",
-    task: "Серия совместных пилотов — состав и роли уточняются.",
-    abilities: ["Состав решений уточняется", "Кейсы будут добавлены"],
-    tags: ["Пилотные проекты"],
-    status: "Скоро",
-    tone: "soon",
-  },
-  {
-    emoji: "🧭",
-    name: "Retail Scout",
-    role: "Виртуальный скаут-аналитик по локациям",
-    task: "Оценивает, стоит ли открывать точку по конкретному адресу.",
-    abilities: [
-      "Гео-анализ: изохроны пешком/авто, конкуренты, демография",
-      "Скоринг локации 0–100 и отчёт; пакетная загрузка адресов",
-      "Внутри — пайплайн из 3 AI-агентов, результаты в реальном времени",
-    ],
-    tags: ["Стек: Node.js / React / OSM", "Для: развития розничной сети"],
-    status: "Исходники на GitHub",
-    tone: "github",
-    liveUrl: "https://github.com/ivanovich1071/Retail-Scout-Tool",
-    liveLabel: "Смотреть на GitHub",
-    note: "Живое демо временно снято с сервера, будет задеплоено позже.",
-  },
-  {
-    emoji: "🔎",
-    name: "AI Business Auditor",
-    role: "Виртуальный AI-консультант по внедрению",
-    task: "Сканирует компанию или сайт и показывает, где применимы ИИ-ассистенты.",
-    abilities: [
-      "Анализирует бизнес по сайту и вводным данным",
-      "Находит процессы под автоматизацию ИИ",
-      "Формирует рекомендации по внедрению",
-    ],
-    tags: ["Канал: веб", "Для: руководителей"],
-    status: "Живое",
-    tone: "live",
-    liveUrl: "http://62.60.234.40/",
-    liveLabel: "Открыть",
-    note: "Пока преимущественно для внутреннего использования.",
-  },
-];
 
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalCert, setModalCert] = useState<{ src: string; label: string } | null>(null);
-  const [modalProduct, setModalProduct] = useState<Product | null>(null);
 
   return (
     <main className="bg-milk">
@@ -339,8 +208,13 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="hidden justify-center lg:flex">
-            <div className="flex h-64 w-64 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold shadow-gold">
-              <BrainIcon className="h-32 w-32" />
+            <div className="flex h-64 w-64 items-center justify-center rounded-full border border-gold/40 bg-gold/10 shadow-gold">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/vibemind-icon.png"
+                alt="ВайбМайнд"
+                className="h-36 w-auto drop-shadow-lg"
+              />
             </div>
           </div>
         </div>
@@ -488,56 +362,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== ЛАБОРАТОРИЯ РЕШЕНИЙ ===== */}
+      {/* ===== ЛАБОРАТОРИЯ РЕШЕНИЙ — тизер (сама витрина живёт на главной) ===== */}
       <section id="solutions" className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center">
-            <h2 className="section-title">Лаборатория решений</h2>
-            <div className="title-underline" />
-            <p className="mx-auto mt-4 max-w-3xl text-muted">
-              Готовые AI-решения и виртуальные сотрудники — внедрим у вас, доработаем под
-              задачу или научим вашу команду собирать самим.
-            </p>
-          </div>
-
-          {/* Манифест */}
-          <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-line bg-milk p-8 shadow-soft">
-            <p className="leading-relaxed text-brown-light">
-              AI — главное слово года, и компании массово «лепят» ИИ-агентов, получая на
-              выходе лоскутное одеяло из разрозненных решений. Мы идём иначе: начинаем не с
-              кода, а с воркшопа — отсеиваем хайп, находим повторяемые процессы и
-              превращаем их в{" "}
-              <strong className="text-brown-deep">виртуальных сотрудников</strong>. Ниже —
-              те, кого мы уже собрали: с клиентами и для себя. Любого можно внедрить у вас,
-              доработать под ваши процессы — или научить вашу команду делать такое самой.
-              Мы не агентство: строим вместе и оставляем компетенции внутри компании.
-            </p>
-          </div>
-
-          {/* Витрина карточек */}
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {PRODUCTS.map((p) => (
-              <button
-                key={p.name}
-                onClick={() => setModalProduct(p)}
-                className="card group flex flex-col items-start p-6 text-left transition-transform hover:-translate-y-1"
-              >
-                <div className="flex w-full items-start justify-between gap-3">
-                  <span className="text-3xl">{p.emoji}</span>
-                  <span
-                    className={`rounded-2xl px-3 py-1 text-xs font-semibold ${STATUS_STYLES[p.tone]}`}
-                  >
-                    {p.status}
-                  </span>
-                </div>
-                <h3 className="mt-4 text-lg font-bold text-brown-deep">{p.name}</h3>
-                <p className="mt-1 text-sm text-muted">{p.role}</p>
-                <span className="mt-4 text-sm font-semibold text-gold group-hover:underline">
-                  Подробнее →
-                </span>
-              </button>
-            ))}
-          </div>
+        <div className="mx-auto max-w-4xl px-5 text-center">
+          <h2 className="section-title">Лаборатория решений</h2>
+          <div className="title-underline" />
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+            Кроме обучения мы собираем{" "}
+            <strong className="text-brown-deep">виртуальных сотрудников</strong> — готовые
+            AI-решения для продаж, техподдержки, записи клиентов и аналитики. Любого можно
+            внедрить у вас, доработать под ваши процессы или научить вашу команду собирать
+            такие решения самой.
+          </p>
+          <a href="/#solutions" className="btn-primary mt-8">
+            Смотреть решения →
+          </a>
         </div>
       </section>
 
@@ -559,7 +398,10 @@ export default function LandingPage() {
               />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-brown-deep">
+              <p className="text-sm font-semibold uppercase tracking-wide text-gold">
+                Ключевой спикер
+              </p>
+              <h3 className="mt-1 text-2xl font-bold text-brown-deep">
                 Вероника Николаевна Пунчик
               </h3>
               <p className="mt-1 font-semibold text-gold">
@@ -643,10 +485,11 @@ export default function LandingPage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 {[
                   "БелАЗ",
-                  "Синодальный отдел по делам молодежи Белорусской Православной Церкви",
-                  "NEWM-Limited (Ireland)",
-                  "ЭЛТИ-КУДИЦ (Москва)",
-                  "Спортивный менеджер со знаком качества (Брест)",
+                  "АО ЭЛТИ-КУДИЦ",
+                  "LLC Newm-Limited",
+                  "SMAIPL",
+                  "Клуб Правильного Питания",
+                  "и др.",
                 ].map((b) => (
                   <span
                     key={b}
@@ -665,6 +508,11 @@ export default function LandingPage() {
                   </span>
                 </a>
               </div>
+              <p className="mt-4 leading-relaxed text-muted">
+                Руководство проектной работой в командах различного масштаба и профиля — от
+                структурных подразделений предприятий до локальных профессиональных и
+                общественных сообществ.
+              </p>
             </div>
           </div>
         </div>
@@ -681,28 +529,23 @@ export default function LandingPage() {
             <div className="title-underline" />
             <p className="mx-auto mt-4 max-w-2xl text-milk/80">
               Сделайте первый шаг к интеграции искусственного интеллекта в свою
-              профессиональную сферу. Наш AI-продажник за несколько минут изучит вашу
+              профессиональную сферу. AI-ассистент ВайбМайнд за несколько минут изучит вашу
               компанию, подберёт модули, рассчитает стоимость и запишет на встречу с
-              Вероникой.
+              экспертом.
             </p>
             <Link href="/app?new=1" className="btn-primary mt-8">
               ✨ Пройти AI-диагностику и записаться →
             </Link>
           </div>
 
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Контакты компании (личные контакты эксперта убраны по правке заказчика) */}
+          <div className="mx-auto mt-14 grid max-w-2xl gap-6 sm:grid-cols-2">
             {[
-              { title: "Email", value: "pvnvna@yandex.by", href: "mailto:pvnvna@yandex.by" },
+              { title: "Телефон", value: "+375 29 7-200-700", href: "tel:+375297200700" },
               {
-                title: "GitHub",
-                value: "github.com/PedFund",
-                href: "https://github.com/PedFund",
-              },
-              { title: "Локация", value: "Минск, Беларусь" },
-              {
-                title: "Telegram-канал",
-                value: "ДоцентыИИноваторы",
-                href: "https://t.me/IInovatorsD",
+                title: "Telegram",
+                value: "@vibemindpro",
+                href: "https://t.me/vibemindpro",
               },
             ].map((c) => (
               <div
@@ -732,10 +575,11 @@ export default function LandingPage() {
       <footer className="bg-graphite py-10 text-sm text-milk/70">
         <div className="mx-auto max-w-6xl px-5">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-2 font-bold text-milk">
-              <span className="text-gold"><BrainIcon /></span>
-              Курс по нейросервисам и ИИ
-            </div>
+            <Link href="/" className="flex items-center gap-2 font-bold text-milk">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/vibemind-icon.png" alt="ВайбМайнд" className="h-8 w-auto" />
+              ВайбМайнд
+            </Link>
             <div className="flex flex-wrap justify-center gap-5">
               {NAV_LINKS.slice(0, 5).map((l) => (
                 <a key={l.href} href={l.href} className="hover:text-gold">
@@ -746,33 +590,9 @@ export default function LandingPage() {
                 Политика конфиденциальности
               </Link>
             </div>
-            <div className="flex gap-4">
-              <a href="mailto:pvnvna@yandex.by" aria-label="Email" className="hover:text-gold">
-                ✉️
-              </a>
-              <a
-                href="https://github.com/PedFund"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="hover:text-gold"
-              >
-                💻
-              </a>
-              <a
-                href="https://t.me/pvnvna"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Telegram"
-                className="hover:text-gold"
-              >
-                ✈️
-              </a>
-            </div>
           </div>
           <p className="mt-8 border-t border-milk/10 pt-6 text-center">
-            © 2025–2026 Вероника Пунчик | Плательщик НПД | УНП АА1103777. Все права
-            защищены.
+            © 2025–2026 ВайбМайнд. Все права защищены.
           </p>
         </div>
       </footer>
@@ -789,88 +609,6 @@ export default function LandingPage() {
             <p className="mt-3 text-center font-semibold text-brown-deep">
               {modalCert.label}
             </p>
-          </div>
-        </div>
-      )}
-
-      {/* ===== PRODUCT MODAL (Лаборатория решений) ===== */}
-      {modalProduct && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-brown-deep/80 p-6"
-          onClick={() => setModalProduct(null)}
-        >
-          <div
-            className="max-h-full w-full max-w-lg overflow-auto rounded-3xl bg-white p-8"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-4xl">{modalProduct.emoji}</span>
-                <div>
-                  <h3 className="text-xl font-bold text-brown-deep">{modalProduct.name}</h3>
-                  <p className="text-sm text-muted">{modalProduct.role}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setModalProduct(null)}
-                aria-label="Закрыть"
-                className="text-2xl leading-none text-muted hover:text-brown-deep"
-              >
-                ×
-              </button>
-            </div>
-
-            <span
-              className={`mt-4 inline-block rounded-2xl px-3 py-1 text-xs font-semibold ${STATUS_STYLES[modalProduct.tone]}`}
-            >
-              {modalProduct.status}
-            </span>
-
-            <p className="mt-4 text-brown-light">{modalProduct.task}</p>
-
-            <h4 className="mt-5 font-bold text-brown-deep">Что умеет</h4>
-            <ul className="mt-2 space-y-2">
-              {modalProduct.abilities.map((a) => (
-                <li key={a} className="flex gap-2 text-sm text-brown-light">
-                  <CheckIcon /> {a}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              {modalProduct.tags.map((t) => (
-                <span
-                  key={t}
-                  className="rounded-2xl bg-milk px-3 py-1 text-xs font-medium text-brown-light"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-
-            {modalProduct.note && (
-              <p className="mt-4 text-xs text-muted">{modalProduct.note}</p>
-            )}
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              {modalProduct.liveUrl && (
-                <a
-                  href={modalProduct.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary"
-                >
-                  {modalProduct.liveLabel ?? "Открыть"}
-                </a>
-              )}
-              <a
-                href="#contact"
-                onClick={() => setModalProduct(null)}
-                className={modalProduct.liveUrl ? "btn-secondary" : "btn-primary"}
-              >
-                Запросить демо
-              </a>
-            </div>
           </div>
         </div>
       )}

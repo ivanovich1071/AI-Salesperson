@@ -13,9 +13,9 @@ const config: Config = {
           light: "#35595a", // приглушённый тёмно-бирюзовый: вторичный текст
         },
         gold: {
-          DEFAULT: "#00b1b4", // основной акцент (бирюза)
-          light: "#cdecec", // светлый бирюзовый тинт: бейджи, hover, карточки
-          hover: "#00c5c9",
+          DEFAULT: "#1ca5a8", // основной акцент — бирюза с логотипа ВайбМайнд
+          light: "#d3ecec", // светлый бирюзовый тинт: бейджи, hover, карточки
+          hover: "#22b9bc",
         },
         milk: "#f5f7f8", // фон страниц (mist)
         ink: "#2e2e2e",
@@ -23,9 +23,9 @@ const config: Config = {
         line: "#dbe7e7",
         // Явные бирюзовые токены (используются на главной ВайбМайнд)
         teal: {
-          DEFAULT: "#00b1b4",
-          emerald: "#00d9a6",
-          hover: "#00c5c9",
+          DEFAULT: "#1ca5a8", // цвет знака ВайбМайнд
+          emerald: "#19c9a2",
+          hover: "#22b9bc",
           deep: "#073d3d",
           night: "#0e1e1f",
         },
@@ -38,8 +38,8 @@ const config: Config = {
       },
       boxShadow: {
         soft: "0 10px 30px -5px rgba(7, 61, 61, 0.10)",
-        gold: "0 4px 15px rgba(0, 177, 180, 0.3)",
-        teal: "0 4px 15px rgba(0, 177, 180, 0.3)",
+        gold: "0 4px 15px rgba(28, 165, 168, 0.3)",
+        teal: "0 4px 15px rgba(28, 165, 168, 0.3)",
       },
       fontFamily: {
         sans: [
