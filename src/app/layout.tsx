@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: "ВайбМайнд — внедрение ИИ в организациях",
     description:
       "Обучаем, консультируем и сопровождаем цифровую трансформацию рабочих процессов. Готовые AI-решения и корпоративный курс.",
-    images: ["/images/vibemind-logo.jpg"],
+    images: ["/images/vibemind-icon.png"],
   },
 };
 
