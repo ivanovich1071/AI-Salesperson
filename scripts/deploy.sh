@@ -39,25 +39,11 @@ if [ "${1:-}" != "--skip-push" ]; then
   git push origin main || { red "git push не прошёл"; exit 1; }
 fi
 
-# --- 1. Ждём доступности SSH (провайдер иногда придушивает порт 22) -------
-info "Проверяем связь с сервером"
-OPEN=""
-for i in 1 2 3 4 5 6; do
-  if ssh $SSH_OPTS -o ConnectTimeout=25 "$HOST" 'echo ok' 2>/dev/null | grep -q ok; then
-    OPEN=1; break
-  fi
-  echo "    порт 22 занят/закрыт — ждём 2 мин (попытка $i из 6)"
-  sleep 120
-done
-if [ -z "$OPEN" ]; then
-  red "Сервер не отвечает по SSH. Сайт при этом обычно работает."
-  red "Подождите 10 минут и запустите деплой снова (см. DEPLOY.md, раздел «Порт 22»)."
-  exit 2
-fi
-
-# --- 2. Деплой одним соединением (build долгий — держим сессию) ----------
-info "Разворачиваем на сервере (3–6 минут)"
-ssh $SSH_OPTS -o ConnectTimeout=30 -o ServerAliveInterval=30 -o ServerAliveCountMax=10 "$HOST" "
+# --- 1. Деплой одним соединением, с повторами ----------------------------
+# Провайдер придушивает порт 22 после частых подключений, поэтому НЕ тратим
+# отдельный коннект на пинг: сразу пробуем боевой деплой и повторяем при обрыве.
+# Все шаги идемпотентны (reset --hard, npm ci, build), повтор безопасен.
+REMOTE_CMD="
   set -e
   cd $APPDIR
   git config --global --add safe.directory $APPDIR 2>/dev/null || true
@@ -71,7 +57,26 @@ ssh $SSH_OPTS -o ConnectTimeout=30 -o ServerAliveInterval=30 -o ServerAliveCount
   systemctl restart ai-salesperson
   sleep 4
   systemctl is-active ai-salesperson
-" || { red "Деплой упал. Логи: ssh $HOST 'journalctl -u ai-salesperson -n 50 --no-pager'"; exit 3; }
+"
+
+DONE=""
+for i in 1 2 3 4 5; do
+  info "Разворачиваем на сервере (3–6 минут), попытка $i из 5"
+  if ssh $SSH_OPTS -o ConnectTimeout=30 -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
+       "$HOST" "$REMOTE_CMD"; then
+    DONE=1; break
+  fi
+  if [ "$i" -lt 5 ]; then
+    echo "    не достучались (вероятно, порт 22 придушен) — ждём 3 мин"
+    sleep 180
+  fi
+done
+if [ -z "$DONE" ]; then
+  red "Деплой не прошёл: сервер не пускает по SSH."
+  red "Подождите 10 минут и запустите снова. Сайт при этом продолжает работать."
+  red "Логи: ssh -i \$HOME/.ssh/vibemind_deploy root@81.177.214.84 'journalctl -u ai-salesperson -n 50 --no-pager'"
+  exit 3
+fi
 
 # --- 3. Проверяем, что сайт живой ----------------------------------------
 info "Проверяем сайт"
