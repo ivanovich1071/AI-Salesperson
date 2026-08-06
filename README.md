@@ -42,6 +42,24 @@ node scripts/seed-slots.mjs 2026-08-01 2026-08-14   # сгенерировать
 node scripts/seed-current-month.mjs                 # слоты на текущий месяц + чистка прошедших (для cron)
 ```
 
+## Тесты
+
+**82 E2E-сценария** на Playwright: переходы, кнопки, модалки, адаптив, доступность
+и визуальные эталоны — в реальном браузере, на десктопе и мобильном.
+
+```bash
+npx playwright install chromium   # один раз на новой машине
+npm run test:e2e                  # прогон + HTML-отчёт с видео падений
+npm run test:e2e:ui               # интерактивный режим
+```
+
+Тесты работают с **отдельной базой** (`test.db`) и **замоканным AI** — рабочие данные
+не засоряются, живой OpenRouter не дёргается. Прод они не трогают: можно спокойно
+пользоваться сайтом во время прогона.
+
+Подробности, статус и открытые вопросы — в **[TESTING.md](TESTING.md)**,
+соглашения для разработки — в `.claude/skills/testing/SKILL.md`.
+
 ## Деплой — в один шаг
 
 Пароль от сервера вводить **не нужно** (вход по SSH-ключу). Двойной клик по файлу
@@ -83,11 +101,15 @@ src/
 prisma/schema.prisma      # модели TimeSlot, Booking, DiagnosticMap (SQLite)
 knowledge/                # база знаний (RAG) — Obsidian-vault, авто-подгружается в промпт
 prompts/assistant-system.md  # системный промпт AI-консультанта
+e2e/                      # E2E-тесты (Playwright): сценарии, хелперы, моки AI
+playwright.config.ts      # конфиг тестов: desktop/mobile, тестовая БД, отчёты
 scripts/deploy.sh         # деплой на прод одной командой (npm run deploy)
 scripts/seed-slots.mjs    # генератор демо-слотов для календаря встреч
 Деплой.bat                # деплой двойным кликом (Windows)
 DEPLOY.md                 # подробная инструкция по деплою и восстановлению доступа
+TESTING.md                # план тестов, статус, что покрыто и что осталось
 .claude/skills/frontend/  # соглашения по фронтенду проекта (для Claude Code)
+.claude/skills/testing/   # соглашения по тестам (для Claude Code)
 ```
 
 Подробности архитектуры, палитры и соглашений по коду — в [.claude/CLAUDE.md](.claude/CLAUDE.md)
