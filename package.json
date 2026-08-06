@@ -11,6 +11,11 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "deploy": "bash scripts/deploy.sh",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:live": "cross-env LIVE_AI=1 playwright test smoke-live-ai",
+    "test:report": "playwright show-report",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -23,10 +28,13 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
+    "cross-env": "^10.1.0",
     "postcss": "^8.4.39",
     "prisma": "^5.17.0",
     "tailwindcss": "^3.4.6",

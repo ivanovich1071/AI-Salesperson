@@ -35,3 +35,9 @@ knowledge/.obsidian/workspace.json
 knowledge/.obsidian/workspace-mobile.json
 knowledge/.obsidian/cache
 knowledge/.obsidian/plugins
+
+# тесты
+test-results/
+playwright-report/
+prisma/test.db
+prisma/test.db-journal

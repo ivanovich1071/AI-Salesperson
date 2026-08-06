@@ -179,8 +179,9 @@ export default function Screen5Booking() {
 
       <div className="mt-8 space-y-5">
         <div>
-          <label className="label-base">Ваше имя *</label>
+          <label className="label-base" htmlFor="f-vashe-imya">Ваше имя *</label>
           <input
+            id="f-vashe-imya"
             className="input-base"
             placeholder="Иван Иванов"
             value={name}
@@ -188,12 +189,14 @@ export default function Screen5Booking() {
           />
         </div>
         <div>
-          <label className="label-base">Компания</label>
-          <input className="input-base bg-milk" value={s.companyName} readOnly />
+          <label className="label-base" htmlFor="f-kompaniya">Компания</label>
+          <input
+            id="f-kompaniya" className="input-base bg-milk" value={s.companyName} readOnly />
         </div>
         <div>
-          <label className="label-base">Email *</label>
+          <label className="label-base" htmlFor="f-email">Email *</label>
           <input
+            id="f-email"
             className="input-base"
             type="email"
             placeholder="ivan@company.by"
@@ -202,8 +205,9 @@ export default function Screen5Booking() {
           />
         </div>
         <div>
-          <label className="label-base">Телефон *</label>
+          <label className="label-base" htmlFor="f-telefon">Телефон *</label>
           <input
+            id="f-telefon"
             className="input-base"
             type="tel"
             placeholder="+375 (XX) XXX-XX-XX"

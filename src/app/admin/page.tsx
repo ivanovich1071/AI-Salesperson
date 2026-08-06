@@ -214,16 +214,18 @@ export default function AdminPage() {
           <p className="mt-1 text-sm text-muted">Управление слотами и заявками</p>
           <div className="mt-6 space-y-4">
             <div>
-              <label className="label-base">Логин</label>
+              <label className="label-base" htmlFor="f-login">Логин</label>
               <input
+                id="f-login"
                 className="input-base"
                 value={user}
                 onChange={(e) => setUser(e.target.value)}
               />
             </div>
             <div>
-              <label className="label-base">Пароль</label>
+              <label className="label-base" htmlFor="f-parol">Пароль</label>
               <input
+                id="f-parol"
                 className="input-base"
                 type="password"
                 value={password}
@@ -442,8 +444,9 @@ export default function AdminPage() {
           <h2 className="text-lg font-bold text-brown-deep">Свободные слоты</h2>
           <div className="mt-4 flex flex-wrap items-end gap-3">
             <div>
-              <label className="label-base">Дата</label>
+              <label className="label-base" htmlFor="f-data">Дата</label>
               <input
+                id="f-data"
                 className="input-base"
                 type="date"
                 value={newDate}
@@ -451,8 +454,9 @@ export default function AdminPage() {
               />
             </div>
             <div className="flex-1 min-w-[220px]">
-              <label className="label-base">Время (через запятую)</label>
+              <label className="label-base" htmlFor="f-vremya-cherez-zapyatuyu">Время (через запятую)</label>
               <input
+                id="f-vremya-cherez-zapyatuyu"
                 className="input-base"
                 placeholder="10:00, 14:00, 16:00"
                 value={newTimes}

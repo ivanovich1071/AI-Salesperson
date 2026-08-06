@@ -99,8 +99,9 @@ export default function Screen1Company() {
 
       <div className="mt-6 space-y-5">
         <div>
-          <label className="label-base">Название компании *</label>
+          <label className="label-base" htmlFor="f-nazvanie-kompanii">Название компании *</label>
           <input
+            id="f-nazvanie-kompanii"
             className="input-base"
             placeholder="Например, Брестский мясокомбинат"
             value={s.companyName}
@@ -108,8 +109,9 @@ export default function Screen1Company() {
           />
         </div>
         <div>
-          <label className="label-base">Сайт компании</label>
+          <label className="label-base" htmlFor="f-sayt-kompanii">Сайт компании</label>
           <input
+            id="f-sayt-kompanii"
             className="input-base"
             type="url"
             placeholder="https://company.by"
@@ -118,8 +120,9 @@ export default function Screen1Company() {
           />
         </div>
         <div>
-          <label className="label-base">Кто будет учиться? (Выберите роль) *</label>
+          <label className="label-base" htmlFor="f-kto-budet-uchitsya-vyberite-rol">Кто будет учиться? (Выберите роль) *</label>
           <select
+            id="f-kto-budet-uchitsya-vyberite-rol"
             className="input-base"
             value={s.userRole}
             onChange={(e) => s.setField("userRole", e.target.value)}
@@ -133,8 +136,9 @@ export default function Screen1Company() {
           </select>
         </div>
         <div>
-          <label className="label-base">Сколько сотрудников планируете обучить? *</label>
+          <label className="label-base" htmlFor="f-skolko-sotrudnikov-planiruete-obuc">Сколько сотрудников планируете обучить? *</label>
           <input
+            id="f-skolko-sotrudnikov-planiruete-obuc"
             className="input-base"
             type="number"
             min={1}
@@ -143,9 +147,10 @@ export default function Screen1Company() {
           />
         </div>
         <div>
-          <label className="label-base">Какие задачи хотите решить? *</label>
+          <label className="label-base" htmlFor="f-kakie-zadachi-hotite-reshit">Какие задачи хотите решить? *</label>
           <div className="relative">
             <textarea
+              id="f-kakie-zadachi-hotite-reshit"
               className="input-base pr-12"
               rows={4}
               placeholder="Например: проекты регулярно выходят за сроки, хотим создать единый стандарт работы с документами..."
