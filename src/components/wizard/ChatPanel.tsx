@@ -255,6 +255,7 @@ export default function ChatPanel() {
           <textarea
             className="max-h-28 flex-1 resize-none bg-transparent px-2 py-1 text-sm text-ink outline-none"
             rows={1}
+            aria-label="Сообщение AI-ассистенту"
             placeholder="Спросите ассистента или напишите комментарий..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
