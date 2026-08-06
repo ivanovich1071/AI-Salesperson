@@ -113,7 +113,7 @@ test.describe("степпер", () => {
 
 test.describe("чат ассистента", () => {
   // На мобильном чат живёт в нижнем листе поверх формы — сценарии проверяем на десктопе
-  test.skip(({ }, testInfo) => testInfo.project.name === "mobile", "чат проверяется на десктопе");
+  test.skip(({ isMobile }) => !!isMobile, "чат проверяется на десктопе");
   test("заполняет форму шага 1 из сообщения", async ({ page }) => {
     await openWizard(page);
     await sendChat(page, "ООО Ромашка, 8 продажников, ускорить подготовку КП");
