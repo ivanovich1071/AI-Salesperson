@@ -297,43 +297,43 @@ export default function VibeMindHome() {
       </nav>
 
       {/* ===== HERO ===== */}
-      {/* Светлый фон — под оригинальный логотип: в нём надпись «Вайб» чёрная
-          и на тёмном фоне не читалась. Текст секции, соответственно, тёмный. */}
       <header
         id="hero"
-        className="relative overflow-hidden pb-24 pt-36 text-graphite"
+        className="relative overflow-hidden pb-24 pt-36 text-white"
         style={{
           background:
-            "linear-gradient(90deg, #ffffff 0%, #f7fafa 45%, #e6f4f4 100%)",
+            "linear-gradient(90deg, #111111 0%, #111111 34%, #0e1e1f 66%, #073d3d 100%)",
         }}
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute right-[8%] top-[18%] h-96 w-96 rounded-full bg-teal/15 blur-3xl"
+          className="pointer-events-none absolute right-[8%] top-[18%] h-96 w-96 rounded-full bg-teal/20 blur-3xl"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-teal-emerald/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-teal-emerald/15 blur-3xl"
         />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-[2fr_3fr]">
           <div className="flex justify-center">
-            {/* Оригинальный логотип автора (прозрачный фон, цвета не менялись) */}
+            {/* Полный логотип на прозрачном фоне. Вариант -light: надпись «Вайб»
+                перекрашена в белый, иначе чёрный рукописный текст не читается
+                на тёмном фоне hero. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/vibemind-logo-full.png"
+              src="/images/vibemind-logo-light.png"
               alt="Логотип ВайбМайнд"
-              className="h-64 w-auto md:h-72"
+              className="h-64 w-auto drop-shadow-2xl md:h-72"
             />
           </div>
           <div>
-            <p className="text-lg font-medium italic text-teal-dark">
+            <p className="text-lg font-medium italic text-teal-emerald">
               Социально ответственный интеллектуальный белорусский бизнес
             </p>
-            <h1 className="mt-4 text-4xl font-extrabold leading-tight text-graphite md:text-5xl">
+            <h1 className="mt-4 text-4xl font-extrabold leading-tight md:text-5xl">
               Диагностируем, консультируем и сопровождаем цифровую трансформацию рабочих
               процессов
             </h1>
-            <p className="mt-6 text-lg leading-relaxed text-graphite/75">
+            <p className="mt-6 text-lg leading-relaxed text-white/80">
               Помогаем командам внедрять ИИ в реальную деятельность организации — от
               делегирования рутины и автоматизации до собственных виртуальных сотрудников.
             </p>
@@ -341,7 +341,10 @@ export default function VibeMindHome() {
               <a href="#contacts" className="btn-teal">
                 Обсудить задачу
               </a>
-              <Link href="/course" className="btn-teal-outline">
+              <Link
+                href="/course"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-8 py-4 font-semibold text-white transition-all hover:bg-white/10"
+              >
                 Корпоративный курс
               </Link>
             </div>
