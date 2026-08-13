@@ -4,6 +4,9 @@ import { transcribeAudio } from "@/lib/openrouter";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+/** Заголовку content-length верить нельзя — проверяем реальный размер файла. */
+const MAX_AUDIO_BYTES = 5 * 1024 * 1024;
+
 /**
  * POST /api/transcribe (multipart: audio)
  * Whisper Large V3 через OpenRouter. Возвращает «сырой» текст без постобработки.
@@ -16,6 +19,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Аудиозапись не получена. Попробуйте ещё раз или введите текст вручную." },
         { status: 400 }
+      );
+    }
+
+    if (audio.size > MAX_AUDIO_BYTES) {
+      return NextResponse.json(
+        { error: "Запись слишком длинная. Попробуйте сказать короче или введите текст вручную." },
+        { status: 413 }
       );
     }
 

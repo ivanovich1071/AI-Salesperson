@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as cheerio from "cheerio";
+import { safeFetchHtml } from "@/lib/safeFetch";
 
 export const runtime = "nodejs";
 
@@ -9,6 +10,9 @@ const MAX_TEXT_LENGTH = 6000;
  * POST /api/parse-site { url }
  * Пытается скачать сайт компании и извлечь текст (cheerio, очистка от script/style).
  * При любой ошибке возвращает мягкий фолбэк (ok: false) — процесс продолжается.
+ *
+ * Адрес приходит от пользователя, поэтому запрос идёт через safeFetchHtml:
+ * схема, приватные диапазоны, редиректы и размер ответа проверяются там.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -18,21 +22,8 @@ export async function POST(req: NextRequest) {
     }
 
     const normalized = url.startsWith("http") ? url : `https://${url}`;
+    const html = await safeFetchHtml(normalized);
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 10_000);
-    const res = await fetch(normalized, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36",
-      },
-    });
-    clearTimeout(timer);
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const html = await res.text();
     const $ = cheerio.load(html);
     $("script, style, noscript, svg, iframe, nav, footer").remove();
     const text = $("body").text().replace(/\s+/g, " ").trim();

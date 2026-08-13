@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   IconSpeed,
   IconKnowledge,
@@ -97,6 +98,8 @@ const STATUS_STYLES: Record<StatusTone, string> = {
 
 type Product = {
   Icon: (p: { className?: string }) => JSX.Element;
+  /** Обложка карточки. Нет фото — карточка показывает иконку, как раньше. */
+  photo?: string;
   name: string;
   role: string;
   task: string;
@@ -112,6 +115,7 @@ type Product = {
 const PRODUCTS: Product[] = [
   {
     Icon: IconSales,
+    photo: "/images/lab/ivan.jpg",
     name: "Иван",
     role: "Виртуальный менеджер по продажам в Телеграм",
     task: "Ведёт первичные продажи и квалифицирует заявки без участия живого менеджера.",
@@ -129,6 +133,7 @@ const PRODUCTS: Product[] = [
   },
   {
     Icon: IconSupport,
+    photo: "/images/lab/smaipl.jpg",
     name: "Бот SMAIPL",
     role: "Виртуальный специалист техподдержки на сайте",
     task: "Закрывает первую линию техподдержки пользователей в режиме 24/7.",
@@ -146,6 +151,7 @@ const PRODUCTS: Product[] = [
   },
   {
     Icon: IconReview,
+    photo: "/images/lab/reviewer.jpg",
     name: "Рецензент",
     role: "Виртуальный эксперт-рецензент",
     task: "Проверяет тексты и документы по заданным критериям и даёт структурированную рецензию.",
@@ -162,6 +168,7 @@ const PRODUCTS: Product[] = [
   },
   {
     Icon: IconBooking,
+    photo: "/images/lab/ilona.jpg",
     name: "Илона",
     role: "Виртуальный администратор — запись на приём",
     task: "Записывает клиентов на приём и управляет расписанием без администратора.",
@@ -195,6 +202,7 @@ const PRODUCTS: Product[] = [
   },
   {
     Icon: IconAudit,
+    photo: "/images/lab/auditor.jpg",
     name: "AI Business Auditor",
     role: "Виртуальный AI-консультант по внедрению",
     task: "Сканирует компанию или сайт и показывает, где применимы ИИ-ассистенты.",
@@ -463,17 +471,38 @@ export default function VibeMindHome() {
                 onClick={() => setModalProduct(p)}
                 className="vm-card group flex h-full flex-col items-start text-left"
               >
-                <div className="flex w-full items-start justify-between gap-3">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal/10 text-teal">
-                    <p.Icon className="h-6 w-6" />
-                  </span>
-                  <span
-                    className={`rounded-2xl px-3 py-1 text-xs font-semibold ${STATUS_STYLES[p.tone]}`}
-                  >
-                    {p.status}
-                  </span>
-                </div>
-                <h3 className="mt-4 text-lg font-bold text-graphite">{p.name}</h3>
+                {p.photo ? (
+                  // Обложка выходит за padding карточки: -mx-8/-mt-8 компенсируют p-8
+                  <div className="relative -mx-8 -mt-8 self-stretch overflow-hidden rounded-t-3xl">
+                    <Image
+                      src={p.photo}
+                      alt={p.role}
+                      width={800}
+                      height={600}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="aspect-[4/3] w-full object-cover"
+                    />
+                    <span
+                      className={`absolute right-3 top-3 rounded-2xl px-3 py-1 text-xs font-semibold shadow-sm ${STATUS_STYLES[p.tone]}`}
+                    >
+                      {p.status}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex w-full items-start justify-between gap-3">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal/10 text-teal">
+                      <p.Icon className="h-6 w-6" />
+                    </span>
+                    <span
+                      className={`rounded-2xl px-3 py-1 text-xs font-semibold ${STATUS_STYLES[p.tone]}`}
+                    >
+                      {p.status}
+                    </span>
+                  </div>
+                )}
+                <h3 className={`text-lg font-bold text-graphite ${p.photo ? "mt-6" : "mt-4"}`}>
+                  {p.name}
+                </h3>
                 <p className="mt-1 text-sm text-graphite/70">{p.role}</p>
                 <span className="mt-4 text-sm font-semibold text-teal group-hover:underline">
                   Подробнее →
@@ -617,11 +646,26 @@ export default function VibeMindHome() {
             className="max-h-full w-full max-w-lg overflow-auto rounded-3xl bg-white p-8"
             onClick={(e) => e.stopPropagation()}
           >
+            {modalProduct.photo && (
+              <div className="-mx-8 -mt-8 mb-6 overflow-hidden rounded-t-3xl">
+                <Image
+                  src={modalProduct.photo}
+                  alt={modalProduct.role}
+                  width={800}
+                  height={450}
+                  sizes="(max-width: 640px) 100vw, 512px"
+                  className="aspect-[16/9] w-full object-cover"
+                />
+              </div>
+            )}
+
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal/10 text-teal">
-                  <modalProduct.Icon className="h-6 w-6" />
-                </span>
+                {!modalProduct.photo && (
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal/10 text-teal">
+                    <modalProduct.Icon className="h-6 w-6" />
+                  </span>
+                )}
                 <div>
                   <h3 className="text-xl font-bold text-graphite">{modalProduct.name}</h3>
                   <p className="text-sm text-graphite/70">{modalProduct.role}</p>

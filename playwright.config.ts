@@ -79,6 +79,8 @@ export default defineConfig({
     env: {
       // Отдельная база: брони и карты диагностики из тестов не попадут в рабочую
       DATABASE_URL: "file:./test.db",
+      // Тесты дёргают роуты очередями — боевые лимиты частоты их уронят
+      RATE_LIMIT_DISABLED: "1",
       ADMIN_USER: "admin",
       ADMIN_PASSWORD: "demo2026",
       ADMIN_SESSION_SECRET: "e2e-test-secret",
