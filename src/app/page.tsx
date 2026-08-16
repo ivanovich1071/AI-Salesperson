@@ -346,11 +346,11 @@ export default function VibeMindHome() {
             />
           </div>
           <div>
-            <p className="text-lg font-medium italic text-teal-emerald">
+            {/* Строка над заголовком — в цвет знака ВайбМайнд (#1ca5a8, токен teal) */}
+            <p className="text-lg font-medium italic text-teal">
               Социально ответственный интеллектуальный белорусский бизнес
             </p>
-            {/* Заголовок — в цвет знака ВайбМайнд (#1ca5a8, токен teal) */}
-            <h1 className="mt-4 text-4xl font-extrabold leading-tight text-teal md:text-5xl">
+            <h1 className="mt-4 text-4xl font-extrabold leading-tight md:text-5xl">
               Диагностируем, консультируем и сопровождаем цифровую трансформацию рабочих
               процессов
             </h1>
