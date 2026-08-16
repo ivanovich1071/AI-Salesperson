@@ -66,7 +66,12 @@ export async function POST(req: NextRequest) {
     const codes = selection.modules;
 
     // === Pricing: детерминированный расчёт обучения ===
-    const cost = calculateTrainingCost(codes, company.participantCount);
+    // Треки сверх пакета в сумму не идут — уходят в «можно добавить»
+    const cost = calculateTrainingCost(
+      codes,
+      company.participantCount,
+      selection.extraTracks
+    );
     const hours = totalHours(codes);
     const bundle = assemblyName(codes);
 
@@ -98,7 +103,8 @@ ${qaText}
 
 СИСТЕМА УЖЕ ВЫБРАЛА УЧЕБНЫЕ МОДУЛИ по матрице направленности (состав менять НЕЛЬЗЯ):
 ${catalog}
-Сборка: «${bundle}», суммарно ${hours} ак. часов.
+Пакет: «${bundle}» (${cost.packageComposition}), ${hours} ак. часов.
+${selection.extraTracks.length > 0 ? `Сверх пакета клиенту можно предложить отдельно: ${selection.extraTracks.join(", ")} — упомяни это как возможность расширения, без цен.` : ""}
 ${selection.publicCloudRestricted ? "ВАЖНО: у клиента запрещены публичные облачные ИИ-сервисы — подчеркни работу в закрытом контуре и локальные/корпоративные инструменты." : ""}
 
 Для КАЖДОГО выбранного модуля напиши краткое объяснение, почему он подходит именно

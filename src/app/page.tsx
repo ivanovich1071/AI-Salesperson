@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import VideoSection from "@/components/landing/VideoSection";
 import {
   IconSpeed,
   IconKnowledge,
@@ -220,13 +221,21 @@ const PRODUCTS: Product[] = [
   },
   {
     Icon: IconPartnership,
+    photo: "/images/lab/otk.jpg",
     name: "Проекты с Наталией",
-    role: "Совместные разработки",
-    task: "Серия совместных пилотов — состав и роли уточняются.",
-    abilities: ["Состав решений уточняется", "Кейсы будут добавлены"],
-    tags: ["Пилотные проекты"],
-    status: "Скоро",
-    tone: "soon",
+    role: "Совместные разработки: «Ассистент ОТК»",
+    task: "Собирает карты обмера и задания на изготовление прямо по чертежу — за минуты вместо 2–6 часов ручной разметки.",
+    abilities: [
+      "Читает чертёж и размечает контролируемые размеры",
+      "Готовит размеченный JPG, карту обмера в Word и отчёт проверки",
+      "Нужен там, где контроль ведут вручную по бумажному бланку — без КИМ и сканеров",
+    ],
+    tags: ["Стек: Python / OpenRouter", "Для: ОТК и технологов"],
+    status: "Исходники на GitHub",
+    tone: "github",
+    liveUrl: "https://github.com/ivanovich1071/otk-assistant",
+    liveLabel: "Смотреть на GitHub",
+    note: "Совместная разработка с Наталией. Следующие пилоты серии — в работе.",
   },
 ];
 
@@ -340,7 +349,8 @@ export default function VibeMindHome() {
             <p className="text-lg font-medium italic text-teal-emerald">
               Социально ответственный интеллектуальный белорусский бизнес
             </p>
-            <h1 className="mt-4 text-4xl font-extrabold leading-tight md:text-5xl">
+            {/* Заголовок — в цвет знака ВайбМайнд (#1ca5a8, токен teal) */}
+            <h1 className="mt-4 text-4xl font-extrabold leading-tight text-teal md:text-5xl">
               Диагностируем, консультируем и сопровождаем цифровую трансформацию рабочих
               процессов
             </h1>
@@ -362,6 +372,9 @@ export default function VibeMindHome() {
           </div>
         </div>
       </header>
+
+      {/* ===== ВИДЕО О КОМПАНИИ ===== */}
+      <VideoSection />
 
       {/* ===== BENEFITS ===== */}
       <section id="benefits" className="py-20">

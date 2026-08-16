@@ -22,6 +22,15 @@ export interface CostBreakdown {
   total: number;
   currency: string;
   streams: number;
+  /** Пакет из протокола цен */
+  packageName: string;
+  packageComposition: string;
+  /** Что уже входит в цену пакета */
+  included: string[];
+  /** Треки сверх пакета: показываем как «можно добавить», в сумму не входят */
+  options: { label: string; amount: number }[];
+  /** true — точной суммы нет, `total` читается как «от» */
+  isEstimate: boolean;
 }
 
 export interface LabInfo {
@@ -250,6 +259,15 @@ export const useWizardStore = create<WizardState>()(
     }),
     {
       name: "ai-salesperson-wizard",
+      // v2 — переход на протокол пакетов. Предложение, посчитанное по старой
+      // помодульной схеме, показывать нельзя: цифры в нём уже неверные.
+      version: 2,
+      migrate: (state, version) => {
+        if (version < 2 && state && typeof state === "object") {
+          return { ...(state as object), proposal: null } as WizardState;
+        }
+        return state as WizardState;
+      },
       partialize: (s) => {
         // не сохраняем функции; chat сохраняем, чтобы шаг назад не терял историю
         const { setField, setStep, pushChat, replaceLastStatus, toggleOption, setSingle, setOther, appendDiagnosticNote, mergeDiagnostic, requestProposal, sendToChat, fingerprint, markGenerated, needsRegeneration, reset, ...data } = s;

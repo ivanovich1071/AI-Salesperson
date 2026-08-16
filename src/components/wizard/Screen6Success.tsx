@@ -62,12 +62,13 @@ export default function Screen6Success() {
           {s.proposal && (
             <>
               <li>
-                Рекомендованные модули ({s.proposal.assemblyName},{" "}
+                Рекомендованные модули (пакет «{s.proposal.assemblyName}»,{" "}
                 {s.proposal.totalHours} ч):{" "}
                 {s.proposal.trainingModules.map((m) => m.code).join(", ")}
               </li>
               <li>
                 Предварительная стоимость обучения:{" "}
+                {s.proposal.trainingCost.isEstimate && "от "}
                 {formatMoney(s.proposal.trainingCost.total)}
               </li>
             </>

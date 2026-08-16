@@ -1,5 +1,5 @@
 import type { ModuleCode } from "./pricing";
-import { getModule } from "./pricing";
+import { getModule, MAX_AUTO_TRACKS } from "./pricing";
 
 // ============================================================
 // PROGRAM SELECTOR (Таблица 7) — детерминированный автоподбор
@@ -45,11 +45,19 @@ export interface SelectionResult {
   modules: ModuleCode[];
   requiredLessons: ModuleCode[];
   optionalLessons: ModuleCode[];
+  /** Профильные треки сверх пакета — предлагаются опционально, в цену не входят */
+  extraTracks: ModuleCode[];
   publicCloudRestricted: boolean;
 }
 
 /**
  * Подбор модулей.
+ *
+ * Треков в программу попадает не больше MAX_AUTO_TRACKS: это потолок протокола
+ * цен (пакет «Углублённый»). Всё, что анкета нашла сверх — уходит в extraTracks
+ * и предлагается отдельной опцией, иначе одна щедрая анкета собирает программу
+ * на восемь модулей и смету, в которую никто не поверит.
+ *
  * @param role         роль участников (экран 1)
  * @param answersText  объединённый текст всех чекбокс-ответов (нижний регистр не обязателен)
  * @param hasManagers  участвуют ли руководители (роль = Руководители)
@@ -60,31 +68,42 @@ export function selectProgram(
   hasManagers: boolean
 ): SelectionResult {
   const text = (answersText || "").toLowerCase();
-  const modules = new Set<ModuleCode>();
-
-  // 1. Б1 — всегда
-  modules.add("Б1");
-
-  // 2. Б2 — при сигналах документы/данные/политика (базовое обучение — норма)
-  if (B2_KEYWORDS.some((k) => text.includes(k)) || role !== "Универсальные специалисты") {
-    modules.add("Б2");
-  }
-
-  // 3. Профильные модули роли
-  for (const code of ROLE_MODULES[role] ?? []) modules.add(code);
-
-  // 4. Сигналы из ответов → доп. модули
-  for (const { module, keywords } of SIGNAL_MODULES) {
-    if (keywords.some((k) => text.includes(k))) modules.add(module);
-  }
-
-  // 5. Руководители → управленческий контур
-  if (hasManagers || role === "Руководители") {
-    modules.add("П1");
-    modules.add("РУК");
-  }
-
+  const needsБ2 = B2_KEYWORDS.some((k) => text.includes(k));
+  const managers = hasManagers || role === "Руководители";
   const publicCloudRestricted = PUBLIC_BAN_KEYWORDS.some((k) => text.includes(k));
+
+  // Треки по приоритету: сначала профильные для роли, потом найденные по сигналам
+  const ranked: ModuleCode[] = [];
+  const addTrack = (code: ModuleCode) => {
+    if (!ranked.includes(code)) ranked.push(code);
+  };
+  for (const code of ROLE_MODULES[role] ?? []) addTrack(code);
+  for (const { module, keywords } of SIGNAL_MODULES) {
+    if (keywords.some((k) => text.includes(k))) addTrack(module);
+  }
+  if (managers) addTrack("П1");
+
+  // Чистая программа для руководителей: базовое обучение сотрудников не нужно,
+  // это пакет «Управление и внедрение» из протокола цен.
+  if (managers && !needsБ2 && ranked.length <= 1) {
+    const ordered = orderModules(["П1", "РУК"]);
+    return {
+      modules: ordered,
+      requiredLessons: [],
+      optionalLessons: ordered,
+      extraTracks: [],
+      publicCloudRestricted,
+    };
+  }
+
+  const tracks = ranked.slice(0, MAX_AUTO_TRACKS);
+  const extraTracks = orderModules(ranked.slice(MAX_AUTO_TRACKS));
+
+  const modules = new Set<ModuleCode>(["Б1"]);
+  // Б2 — при сигналах документы/данные/политика (базовое обучение — норма)
+  if (needsБ2 || role !== "Универсальные специалисты") modules.add("Б2");
+  for (const code of tracks) modules.add(code);
+  if (managers) modules.add("РУК");
 
   // Упорядочиваем: Б1, Б2, П* по номеру, РУК в конце
   const ordered = orderModules(Array.from(modules));
@@ -95,6 +114,7 @@ export function selectProgram(
     modules: ordered,
     requiredLessons: required,
     optionalLessons: optional,
+    extraTracks,
     publicCloudRestricted,
   };
 }

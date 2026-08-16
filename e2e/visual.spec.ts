@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { mockAi } from "./helpers/mockAi";
-import { openWizard, fillCompanyStep } from "./helpers/wizard";
+import {
+  openWizard,
+  fillCompanyStep,
+  answerFirstQuestion,
+  buildProposal,
+} from "./helpers/wizard";
 
 /**
  * Визуальные эталоны ключевых экранов — ловят «поехавшую» вёрстку
@@ -48,4 +53,12 @@ test("визард: шаг 2 (анкета)", async ({ page }) => {
   await openWizard(page);
   await fillCompanyStep(page);
   await expect(page).toHaveScreenshot("wizard-step2.png", { fullPage: true });
+});
+
+test("визард: шаг 3 (предложение и цена пакета)", async ({ page }) => {
+  await openWizard(page);
+  await fillCompanyStep(page);
+  await answerFirstQuestion(page);
+  await buildProposal(page);
+  await expect(page).toHaveScreenshot("wizard-step3.png", { fullPage: true });
 });

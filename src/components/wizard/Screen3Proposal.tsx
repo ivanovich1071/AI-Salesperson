@@ -86,7 +86,7 @@ export default function Screen3Proposal() {
       <div className="mt-8 flex items-baseline justify-between">
         <h3 className="font-bold text-brown-deep">Рекомендуемые учебные модули</h3>
         <span className="text-sm font-semibold text-gold">
-          {p.assemblyName} · {p.totalHours} ч
+          Пакет «{p.assemblyName}» · {p.totalHours} ч
         </span>
       </div>
       <div className="mt-3 space-y-4">
@@ -114,11 +114,14 @@ export default function Screen3Proposal() {
         <p className="mt-2 text-sm leading-relaxed text-brown-light">{p.trainingFormat}</p>
       </div>
 
-      {/* Блок 4: Расчёт стоимости обучения */}
+      {/* Блок 4: Стоимость по протоколу пакетов */}
       <div className="mt-6 rounded-3xl bg-brown-deep p-6 text-milk">
-        <h3 className="font-bold text-gold">Расчёт стоимости обучения</h3>
+        <h3 className="font-bold text-gold">
+          Пакет «{p.trainingCost.packageName}»
+        </h3>
         <p className="mt-1 text-xs text-milk/60">
-          Расчёт по потокам и профессиональным группам, не по числу участников.
+          {p.trainingCost.packageComposition}. Цена зависит от числа потоков, а не от
+          числа участников напрямую.
           {p.trainingCost.streams > 1 && ` Потоков: ${p.trainingCost.streams}.`}
         </p>
         <div className="mt-3 space-y-2 text-sm">
@@ -133,13 +136,52 @@ export default function Screen3Proposal() {
         </div>
         <div className="mt-4 flex justify-between border-t border-milk/20 pt-3 text-lg font-bold text-gold">
           <span>Стоимость обучения</span>
-          <span>{formatMoney(p.trainingCost.total)}</span>
+          <span>
+            {p.trainingCost.isEstimate && "от "}
+            {formatMoney(p.trainingCost.total)}
+          </span>
         </div>
+
+        {p.trainingCost.included.length > 0 && (
+          <p className="mt-3 text-xs text-milk/70">
+            <span className="font-semibold text-milk/90">В цену уже входит:</span>{" "}
+            {p.trainingCost.included.join(", ")}.
+          </p>
+        )}
+
+        {p.trainingCost.isEstimate && (
+          <p className="mt-2 text-xs font-semibold text-milk/80">
+            Программа такого масштаба собирается индивидуально — точную сумму
+            зафиксируем на встрече.
+          </p>
+        )}
+
         <p className="mt-2 text-xs text-milk/60">
-          Цены ориентировочные. Командировочные, аренда и платные аккаунты — отдельно.
-          Финальные условия — на встрече с экспертом.
+          Командировочные, аренда и платные аккаунты — отдельно. Финальные условия — на
+          встрече с экспертом.
         </p>
       </div>
+
+      {/* Треки сверх пакета: предлагаются отдельно и в сумму не входят */}
+      {p.trainingCost.options.length > 0 && (
+        <div className="card mt-6 p-6">
+          <h3 className="font-bold text-brown-deep">Можно добавить к программе</h3>
+          <p className="mt-1 text-xs text-muted">
+            Эти направления тоже подходят вашим задачам. В стоимость выше они не входят —
+            добавляются по решению компании.
+          </p>
+          <div className="mt-3 space-y-2 text-sm">
+            {p.trainingCost.options.map((o, i) => (
+              <div key={i} className="flex justify-between gap-4">
+                <span className="text-brown-light">{o.label}</span>
+                <span className="shrink-0 font-semibold text-gold">
+                  + {formatMoney(o.amount)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Отдельный продукт: Лаборатория AI-кейсов */}
       <div className="card mt-6 border-l-4 border-l-gold p-6">

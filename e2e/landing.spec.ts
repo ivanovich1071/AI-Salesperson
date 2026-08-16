@@ -46,6 +46,41 @@ test("CTA ведут на курс и в визард", async ({ page }, testInf
   await expect(page).toHaveURL(/\/course/);
 });
 
+test.describe("Ролик о компании", () => {
+  test("до прокрутки видео не грузится — только постер", async ({ page }) => {
+    const video = page.locator("#video video");
+    await expect(video).toHaveAttribute("preload", "none");
+    await expect(video).toHaveAttribute("poster", "/images/video-poster.jpg");
+    // readyState 0 = ни байта видео ещё не запрошено
+    expect(await video.evaluate((v: HTMLVideoElement) => v.readyState)).toBe(0);
+  });
+
+  test("на десктопе стартует сам и без звука, на мобильном ждёт тапа", async ({
+    page,
+  }, testInfo) => {
+    const video = page.locator("#video video");
+    await page.locator("#video").scrollIntoViewIfNeeded();
+
+    if (testInfo.project.name === "mobile") {
+      // Мобильный трафик не тратим без спроса
+      await page.waitForTimeout(1500);
+      expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+      return;
+    }
+
+    await expect
+      .poll(async () => video.evaluate((v: HTMLVideoElement) => v.paused), { timeout: 8000 })
+      .toBe(false);
+    expect(await video.evaluate((v: HTMLVideoElement) => v.muted)).toBe(true);
+
+    // Уехали со секции — ролик встал, чтобы не крутиться вхолостую
+    await page.locator("#contacts").scrollIntoViewIfNeeded();
+    await expect
+      .poll(async () => video.evaluate((v: HTMLVideoElement) => v.paused), { timeout: 5000 })
+      .toBe(true);
+  });
+});
+
 test.describe("Лаборатория решений", () => {
   test("показывает 7 карточек", async ({ page }) => {
     await expect(page.locator("#solutions button")).toHaveCount(7);

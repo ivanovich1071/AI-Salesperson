@@ -33,13 +33,28 @@ export const AI_FIXTURES = {
       },
     ],
     totalHours: 8,
-    assemblyName: "Базовая сборка",
+    assemblyName: "Профессиональный",
     trainingFormat: "Очно, BYOD, по принципу «демонстрация → применение → результат».",
     trainingCost: {
-      lines: [{ label: "Обучение, 1 поток", amount: 1300 }],
-      total: 1300,
+      lines: [
+        {
+          label: "Пакет «Профессиональный» — Б1 + Б2 + один профессиональный трек (12 ч, до 20 человек)",
+          amount: 6500,
+        },
+      ],
+      total: 6500,
       currency: "BYN",
       streams: 1,
+      packageName: "Профессиональный",
+      packageComposition: "Б1 + Б2 + один профессиональный трек",
+      included: [
+        "предварительная настройка программы",
+        "практические материалы",
+        "итоговая оценка",
+        "экспертное заключение для организации",
+      ],
+      options: [{ label: "П6. Маркетинг", amount: 1900 }],
+      isEstimate: false,
     },
     lab: {
       title: "Лаборатория AI-кейсов",

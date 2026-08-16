@@ -2,8 +2,11 @@
 // КАТАЛОГ УЧЕБНЫХ МОДУЛЕЙ И ЦЕНЫ (продуктовая модель «ВайбЗмест Лаб»)
 // Единственное место правки цен. Валюта — белорусский рубль (BYN).
 //
-// Принцип: стоимость зависит НЕ от числа участников напрямую, а от
-// количества потоков, профессиональных групп и повторов занятий.
+// Цена берётся из ПРОТОКОЛА ПАКЕТОВ (см. PACKAGES ниже), а не собирается
+// сложением модулей. Так расчёт не может уехать за опубликованный прайс:
+// сколько бы модулей ни подобрала анкета, итог остаётся ценой пакета плюс
+// понятные надбавки за дополнительные потоки и контур руководителей.
+//
 // AI цены НЕ придумывает — только оформляет посчитанные здесь цифры.
 // ============================================================
 
@@ -132,16 +135,113 @@ export function getModule(code: ModuleCode): TrainingModule | undefined {
   return MODULES.find((m) => m.code === code);
 }
 
-// --- Ценовые константы (Таблица 5), BYN ---
-export const PRICING = {
-  setup: 600, // подготовка и настройка программы, на договор
-  finalMeeting: 400, // итоговая встреча + краткие рекомендации, на организацию
-  base: {
-    Б1: { first: 1200, additional: 700 },
-    Б2: { first: 1400, additional: 1000 },
+// --- ПРОТОКОЛ ЦЕН: линейка пакетов ---
+// Цена пакета = один поток до 20 человек. Подготовка программы, практические
+// материалы, итоговая оценка и экспертное заключение уже внутри цены и
+// отдельными строками НЕ выводятся.
+
+export type PackageId =
+  | "intro"
+  | "safeStart"
+  | "professional"
+  | "advanced"
+  | "managers"
+  | "management";
+
+export interface TrainingPackage {
+  id: PackageId;
+  name: string;
+  /** Состав для показа клиенту */
+  composition: string;
+  hours: number;
+  /** BYN за один поток до 20 человек */
+  price: number;
+  /** Сколько профессиональных треков уже входит в пакет */
+  tracks: number;
+}
+
+export const PACKAGES: Record<PackageId, TrainingPackage> = {
+  intro: {
+    id: "intro",
+    name: "Знакомство",
+    composition: "Б1",
+    hours: 4,
+    price: 2400,
+    tracks: 0,
   },
-  prof: { first: 1400, additional: 1000 }, // любой П-модуль на проф-группу
-  РУК: 1200, // одна группа руководителей
+  safeStart: {
+    id: "safeStart",
+    name: "Безопасный старт",
+    composition: "Б1 + Б2",
+    hours: 8,
+    price: 4500,
+    tracks: 0,
+  },
+  professional: {
+    id: "professional",
+    name: "Профессиональный",
+    composition: "Б1 + Б2 + один профессиональный трек",
+    hours: 12,
+    price: 6500,
+    tracks: 1,
+  },
+  advanced: {
+    id: "advanced",
+    name: "Углублённый",
+    composition: "Б1 + Б2 + два профессиональных трека",
+    hours: 16,
+    price: 8400,
+    tracks: 2,
+  },
+  managers: {
+    id: "managers",
+    name: "Для руководителей",
+    composition: "РУК",
+    hours: 4,
+    price: 2800,
+    tracks: 0,
+  },
+  management: {
+    id: "management",
+    name: "Управление и внедрение",
+    composition: "П1 + РУК",
+    hours: 8,
+    price: 4900,
+    tracks: 1,
+  },
+};
+
+/** Что входит в цену любого учебного пакета */
+export const PACKAGE_INCLUDED = [
+  "предварительная настройка программы",
+  "практические материалы",
+  "итоговая оценка",
+  "экспертное заключение для организации",
+] as const;
+
+export const ADDONS = {
+  /** Трек сверх пакета: ровно разница «Углублённый» − «Профессиональный» */
+  extraTrack: 1900,
+  /** Контур руководителей поверх программы сотрудников — отдельная группа */
+  managersLoop: 2800,
+} as const;
+
+/**
+ * Доля цены пакета за каждый следующий поток (2-й, 3-й, дальше — хвост).
+ * Повтор практики дешевле первого проведения: программа уже собрана.
+ */
+const STREAM_FACTORS = [1, 0.6, 0.55] as const;
+const STREAM_FACTOR_TAIL = 0.5;
+
+/** Автоподбор не кладёт в итог больше двух треков — это потолок протокола */
+export const MAX_AUTO_TRACKS = 2;
+/** Больше 60 человек — точную сумму не показываем, только «от» */
+export const MAX_AUTO_STREAMS = 3;
+/** Страховка от любого неожиданного разбега */
+export const MAX_AUTO_TOTAL = 25000;
+
+// --- Прочие ориентиры прайса (в автоматический расчёт не входят) ---
+export const PRICING = {
   strategicSession: 1500,
   extendedDocumentFrom: 800,
 } as const;
@@ -167,11 +267,29 @@ export interface CostLine {
   label: string;
   amount: number;
 }
+export interface CostOption {
+  label: string;
+  amount: number;
+}
 export interface CostBreakdown {
   lines: CostLine[];
   total: number;
   currency: string;
   streams: number;
+  /** Название пакета из протокола цен */
+  packageName: string;
+  /** Состав пакета для показа клиенту */
+  packageComposition: string;
+  /** Что входит в цену пакета */
+  included: readonly string[];
+  /** Треки сверх пакета: показываем как опции, в сумму НЕ включаем */
+  options: CostOption[];
+  /**
+   * true — программа вышла за рамки протокола (больше 60 человек или
+   * необычно дорогая сборка). Тогда `total` — это «от», а точная сумма
+   * считается после встречи.
+   */
+  isEstimate: boolean;
 }
 
 /** Число потоков по числу участников (Таблица 4) */
@@ -180,74 +298,140 @@ export function streamsFor(participantCount: number): number {
   return Math.max(1, Math.ceil(n / STREAM_SIZE));
 }
 
+export interface PackageSelection {
+  pkg: TrainingPackage;
+  /** Профессиональные треки внутри пакета */
+  tracks: ModuleCode[];
+  /** Треки сверх пакета — предлагаются опционально */
+  extraTracks: ModuleCode[];
+  /** Нужен ли отдельный контур руководителей поверх программы сотрудников */
+  managersLoop: boolean;
+}
+
+/**
+ * Подбор пакета из протокола по набору модулей.
+ * Пакет — это готовая позиция прайса, поэтому недостающие базовые модули
+ * он «дотягивает» сам (например, трек всегда идёт вместе с Б1 и Б2).
+ */
+export function pickPackage(moduleCodes: ModuleCode[]): PackageSelection {
+  const set = new Set(moduleCodes);
+  const tracks = moduleCodes.filter((c) => getModule(c)?.kind === "prof");
+  const hasБаза = set.has("Б1") || set.has("Б2");
+  const hasРУК = set.has("РУК");
+
+  // Чисто управленческая программа: обучения сотрудников нет
+  if (hasРУК && !hasБаза) {
+    if (tracks.length === 0) {
+      return { pkg: PACKAGES.managers, tracks: [], extraTracks: [], managersLoop: false };
+    }
+    // П1 — профильный трек руководителей, поэтому он и попадает в пакет
+    const primary = tracks.includes("П1") ? "П1" : tracks[0];
+    return {
+      pkg: PACKAGES.management,
+      tracks: [primary],
+      extraTracks: tracks.filter((c) => c !== primary),
+      managersLoop: false,
+    };
+  }
+
+  const inPackage = tracks.slice(0, MAX_AUTO_TRACKS);
+  const extraTracks = tracks.slice(MAX_AUTO_TRACKS);
+  const managersLoop = hasРУК;
+
+  let pkg: TrainingPackage;
+  if (inPackage.length >= 2) pkg = PACKAGES.advanced;
+  else if (inPackage.length === 1) pkg = PACKAGES.professional;
+  else if (set.has("Б2")) pkg = PACKAGES.safeStart;
+  else pkg = PACKAGES.intro;
+
+  return { pkg, tracks: inPackage, extraTracks, managersLoop };
+}
+
+/** Округление до сотни: в прайсе нет цен вида 3 575 */
+function round100(amount: number): number {
+  return Math.round(amount / 100) * 100;
+}
+
+function streamFactor(index: number): number {
+  return STREAM_FACTORS[index - 1] ?? STREAM_FACTOR_TAIL;
+}
+
 /**
  * Детерминированный расчёт стоимости обучения (Уровень 1).
- * Каждый П-модуль = одна профессиональная группа. Базовые Б1/Б2 —
- * первый поток + доп. потоки. Лаборатория/проектирование сюда НЕ входят.
+ *
+ * Основа — цена пакета из протокола. Сверху только два вида надбавок:
+ * дополнительные потоки (каждые следующие 20 человек, дешевле первого)
+ * и отдельный контур руководителей. Треки сверх пакета в сумму не идут —
+ * они уходят в `options`. Лаборатория и проектирование считаются отдельно.
  */
 export function calculateTrainingCost(
   moduleCodes: ModuleCode[],
-  participantCount: number
+  participantCount: number,
+  /** Треки, отложенные автоподбором (см. selectProgram) — идут в опции */
+  deferredTracks: ModuleCode[] = []
 ): CostBreakdown {
   const streams = streamsFor(participantCount);
-  const extra = streams - 1;
-  const lines: CostLine[] = [];
+  const picked = pickPackage(moduleCodes);
+  const { pkg, managersLoop } = picked;
+  const extraTracks = Array.from(new Set([...picked.extraTracks, ...deferredTracks]));
+  const lines: CostLine[] = [
+    {
+      label: `Пакет «${pkg.name}» — ${pkg.composition} (${pkg.hours} ч, до ${STREAM_SIZE} человек)`,
+      amount: pkg.price,
+    },
+  ];
 
-  lines.push({ label: "Подготовка и настройка программы", amount: PRICING.setup });
-
-  const streamsLabel =
-    streams > 1 ? ` (${streams} потока × до ${STREAM_SIZE} чел.)` : "";
-
-  for (const code of moduleCodes) {
-    const m = getModule(code);
-    if (!m) continue;
-
-    if (code === "Б1" || code === "Б2") {
-      const p = PRICING.base[code];
-      lines.push({
-        label: `${code}. ${shortTitle(m)}${streamsLabel}`,
-        amount: p.first + extra * p.additional,
-      });
-    } else if (code === "РУК") {
-      lines.push({ label: `РУК. ${shortTitle(m)}`, amount: PRICING.РУК });
-    } else {
-      // профессиональный модуль = одна проф-группа
-      lines.push({
-        label: `${code}. ${shortTitle(m)}${streamsLabel}`,
-        amount: PRICING.prof.first + extra * PRICING.prof.additional,
-      });
-    }
+  // Свыше MAX_AUTO_STREAMS потоков расчёт превращается в оценку «от»:
+  // такие программы собираются вручную, а не автоматом.
+  const countedStreams = Math.min(streams, MAX_AUTO_STREAMS);
+  for (let i = 2; i <= countedStreams; i++) {
+    lines.push({
+      label: `Дополнительный поток №${i} (до ${STREAM_SIZE} человек)`,
+      amount: round100(pkg.price * streamFactor(i)),
+    });
   }
 
-  lines.push({ label: "Итоговая встреча и краткие рекомендации", amount: PRICING.finalMeeting });
+  if (managersLoop) {
+    lines.push({
+      label: "Контур руководителей: отдельная группа (РУК)",
+      amount: ADDONS.managersLoop,
+    });
+  }
 
   const total = lines.reduce((s, l) => s + l.amount, 0);
-  return { lines, total, currency: CURRENCY, streams };
+  const options: CostOption[] = extraTracks.map((code) => {
+    const m = getModule(code);
+    return {
+      label: `${code}. ${m ? shortTitle(m) : code}`,
+      amount: ADDONS.extraTrack,
+    };
+  });
+
+  return {
+    lines,
+    total,
+    currency: CURRENCY,
+    streams,
+    packageName: pkg.name,
+    packageComposition: pkg.composition,
+    included: PACKAGE_INCLUDED,
+    options,
+    isEstimate: streams > MAX_AUTO_STREAMS || total > MAX_AUTO_TOTAL,
+  };
 }
 
 function shortTitle(m: TrainingModule): string {
   return m.title.split(":")[0].split(",")[0].trim();
 }
 
-/** Суммарные часы программы */
+/** Часы программы — по пакету, а не по сумме подобранных модулей */
 export function totalHours(moduleCodes: ModuleCode[]): number {
-  return moduleCodes.reduce((s, c) => s + (getModule(c)?.hours ?? 0), 0);
+  return pickPackage(moduleCodes).pkg.hours;
 }
 
-/** Название готовой сборки (Таблица 3) по составу модулей */
+/** Название пакета из протокола цен по составу модулей */
 export function assemblyName(moduleCodes: ModuleCode[]): string {
-  const set = new Set(moduleCodes);
-  const profCount = moduleCodes.filter((c) => getModule(c)?.kind === "prof").length;
-  const hasБ1 = set.has("Б1");
-  const hasБ2 = set.has("Б2");
-  const hasРУК = set.has("РУК");
-
-  if (hasБ1 && hasБ2 && profCount >= 2) return "Углублённое профессиональное обучение";
-  if (hasБ1 && hasБ2 && profCount === 1) return "Профессиональное обучение";
-  if (hasБ1 && hasБ2) return "Базовое практическое обучение";
-  if (hasРУК && !hasБ1) return "Программа для руководителей";
-  if (hasБ1) return "Практическое знакомство";
-  return "Индивидуальная сборка";
+  return pickPackage(moduleCodes).pkg.name;
 }
 
 export function formatMoney(amount: number): string {
