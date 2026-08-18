@@ -21,7 +21,8 @@ SQLite + Prisma · OpenRouter (Qwen — текст/JSON, Whisper Large V3 — г
 | `/admin` | Админ-панель: заявки, слоты, шаблон для эксперта, **карты диагностики** |
 | `/privacy` | Политика конфиденциальности |
 
-**Прод:** https://81-177-214-84.nip.io (лендинг · `/course` · `/app` · `/admin` — admin/demo2026).
+**Прод:** https://vibemind.by (лендинг · `/course` · `/app` · `/admin` — admin/demo2026).
+Старый адрес `81-177-214-84.nip.io` отдаёт постоянный редирект на домен.
 
 ## Быстрый старт
 

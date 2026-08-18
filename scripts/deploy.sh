@@ -12,7 +12,8 @@
 set -u
 
 HOST="root@81.177.214.84"
-SITE="https://81-177-214-84.nip.io"
+SITE="https://vibemind.by"
+SITE_OLD="https://81-177-214-84.nip.io"   # запасной адрес, пока домен не разошёлся по DNS
 APPDIR="/opt/ai-salesperson"
 KEY="$HOME/.ssh/vibemind_deploy"
 SSH_OPTS="-i $KEY -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
@@ -80,9 +81,15 @@ fi
 
 # --- 3. Проверяем, что сайт живой ----------------------------------------
 info "Проверяем сайт"
+# Домен могли ещё не прописать в DNS (записи вносит владелец домена) — тогда
+# проверяем по старому адресу, чтобы деплой не падал на ровном месте.
+if ! curl -s -o /dev/null -m 10 "$SITE"; then
+  echo "    $SITE не отвечает — проверяем по старому адресу $SITE_OLD"
+  SITE="$SITE_OLD"
+fi
 FAIL=0
 for p in / /course /app /admin; do
-  code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE$p")
+  code=$(curl -sL -o /dev/null -w '%{http_code}' "$SITE$p")
   if [ "$code" = "200" ]; then grn "    $p → $code"; else red "    $p → $code"; FAIL=1; fi
 done
 

@@ -1,6 +1,6 @@
 # Деплой ВайбМайнд — подробная инструкция
 
-Прод: **https://81-177-214-84.nip.io** — VPS (Ubuntu 24.04), Next.js за nginx с HTTPS.
+Прод: **https://vibemind.by** — VPS (Ubuntu 24.04), Next.js за nginx с HTTPS.
 
 > 🔑 **Пароль вводить не нужно.** Вход на сервер настроен по SSH-ключу
 > `~/.ssh/vibemind_deploy`. Пароль root лежит в `DEPLOY_SECRETS.local.md`
@@ -49,7 +49,7 @@ npm run deploy -- --skip-push
     /course → 200
     /app → 200
     /admin → 200
-Готово. Сайт обновлён: https://81-177-214-84.nip.io
+Готово. Сайт обновлён: https://vibemind.by
 ```
 
 > ⚠️ **Не закрывайте окно во время сборки.** На сервере 1 vCPU / 1 ГБ RAM,
@@ -91,7 +91,7 @@ ssh -i ~/.ssh/vibemind_deploy root@81.177.214.84 "systemctl restart ai-salespers
 | Параметр | Значение |
 |---|---|
 | IP | `81.177.214.84` |
-| Домен (HTTPS) | `https://81-177-214-84.nip.io` (сервис `nip.io` резолвит имя прямо в IP — домен покупать не нужно) |
+| Домен (HTTPS) | `https://vibemind.by` — канонический адрес. `www.vibemind.by` и старый `81-177-214-84.nip.io` отдают 301 на него. DNS домена ведёт hoster.by (A-записи на `81.177.214.84`) |
 | Каталог приложения | `/opt/ai-salesperson` |
 | Сервисный пользователь | `appuser` |
 | systemd-сервис | `ai-salesperson` (Next.js на порту 3100) |
@@ -114,7 +114,7 @@ DATABASE_URL=file:./prod.db
 ADMIN_USER=admin
 ADMIN_PASSWORD=demo2026
 ADMIN_SESSION_SECRET=...          # случайная строка
-NEXT_PUBLIC_SITE_URL=https://81-177-214-84.nip.io
+NEXT_PUBLIC_SITE_URL=https://vibemind.by
 ```
 
 После правки `.env` нужен перезапуск сервиса (команда в разделе 2).
