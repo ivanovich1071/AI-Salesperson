@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { BookingInputSchema } from "@/lib/schemas";
 import { isAdminRequest } from "@/lib/adminAuth";
+import { formatBookingMessage, notifyTelegram } from "@/lib/telegram";
 
 export const runtime = "nodejs";
 
@@ -35,6 +36,27 @@ export async function POST(req: NextRequest) {
         },
       }),
     ]);
+
+    // Уведомление уходит в фоне: клиент не должен ждать Telegram.
+    const summary = input.summary as {
+      userRole?: string;
+      participantCount?: number;
+      modules?: string[];
+    };
+    notifyTelegram(
+      formatBookingMessage({
+        name: input.name,
+        company: input.company,
+        email: input.email,
+        phone: input.phone,
+        date: slot.date,
+        time: slot.time,
+        totalCost: input.totalCost,
+        role: summary?.userRole,
+        participants: summary?.participantCount,
+        modules: summary?.modules,
+      })
+    );
 
     return NextResponse.json({
       booking: { id: booking.id, date: slot.date, time: slot.time },

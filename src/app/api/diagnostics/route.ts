@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { isAdminRequest } from "@/lib/adminAuth";
+import {
+  diagnosticsNotifyEnabled,
+  formatDiagnosticMessage,
+  notifyTelegram,
+} from "@/lib/telegram";
 
 export const runtime = "nodejs";
 
@@ -32,6 +37,19 @@ export async function POST(req: NextRequest) {
         matchScore: input.matchScore,
       },
     });
+    if (diagnosticsNotifyEnabled()) {
+      const proposal = (input.data as { proposal?: { trainingCost?: number } })?.proposal;
+      notifyTelegram(
+        formatDiagnosticMessage({
+          companyName: input.companyName,
+          userRole: input.userRole,
+          participantCount: input.participantCount,
+          matchScore: input.matchScore,
+          totalCost: proposal?.trainingCost,
+        })
+      );
+    }
+
     return NextResponse.json({ id: map.id });
   } catch (e) {
     console.error("[diagnostics POST]", e);
