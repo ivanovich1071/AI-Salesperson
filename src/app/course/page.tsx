@@ -586,6 +586,9 @@ export default function LandingPage() {
                   {l.label}
                 </a>
               ))}
+              <Link href="/faq" className="hover:text-gold">
+                Вопросы и ответы
+              </Link>
               <Link href="/privacy" className="hover:text-gold">
                 Политика конфиденциальности
               </Link>

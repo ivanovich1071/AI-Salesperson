@@ -12,6 +12,7 @@ const PAGES = [
   { name: "курс", url: "/course" },
   { name: "визард", url: "/app?new=1" },
   { name: "политика конфиденциальности", url: "/privacy" },
+  { name: "вопросы и ответы", url: "/faq" },
 ];
 
 /**

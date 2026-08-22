@@ -1,0 +1,40 @@
+name: GEO audit
+
+# Видимость сайта для ИИ-поисковиков ломается тихо: кто-то поправил robots.txt,
+# CDN включил защиту от ботов, роут отдал 500 — и сайт просто перестаёт
+# появляться в ответах ChatGPT и Perplexity. Поэтому проверяем регулярно, а не
+# только после правок.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Адрес для проверки
+        default: https://vibemind.by
+        required: false
+  schedule:
+    # каждый понедельник в 06:00 UTC
+    - cron: "0 6 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - "src/app/robots.ts"
+      - "src/app/sitemap.ts"
+      - "src/lib/seo/**"
+      - "src/app/llms.txt/**"
+      - "src/app/llms-full.txt/**"
+      - "src/app/identity.json/**"
+      - "src/app/ai.json/**"
+      - "src/app/ai-policy.txt/**"
+      - "scripts/geo-audit.mjs"
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: GEO-аудит боевого сайта
+        run: node scripts/geo-audit.mjs "${{ inputs.url || 'https://vibemind.by' }}" --min-score 80

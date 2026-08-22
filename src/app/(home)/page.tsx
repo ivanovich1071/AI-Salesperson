@@ -641,6 +641,9 @@ export default function VibeMindHome() {
                   {l.label}
                 </a>
               ))}
+              <Link href="/faq" className="hover:text-teal">
+                Вопросы и ответы
+              </Link>
               <Link href="/privacy" className="hover:text-teal">
                 Политика конфиденциальности
               </Link>

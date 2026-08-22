@@ -119,6 +119,19 @@ NEXT_PUBLIC_SITE_URL=https://vibemind.by
 
 После правки `.env` нужен перезапуск сервиса (команда в разделе 2).
 
+> ⚠️ **`NEXT_PUBLIC_SITE_URL` обязателен и вшивается на сборке.** Из него
+> собираются canonical, `sitemap.xml`, `robots.txt`, JSON-LD и `llms.txt`. Если
+> переменной нет или в ней остался `localhost`, сайт технически работает, но
+> выпадает из поисковой выдачи и из ответов ChatGPT, Perplexity и Gemini.
+> После каждого деплоя проверяйте:
+>
+> ```bash
+> npm run geo:audit -- https://vibemind.by
+> ```
+>
+> Ожидаемый результат — GEO-score 90+ и зелёная проверка «адреса в sitemap ведут
+> на этот же домен».
+
 > ℹ️ **Про голосовой ввод.** Модель `openai/whisper-large-v3` работает через
 > OpenRouter, но её нет в каталоге `/api/v1/models` (там только chat-модели) —
 > это нормально. Важно: Whisper **не декодирует webm/opus**, поэтому фронтенд

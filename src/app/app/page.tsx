@@ -11,6 +11,33 @@ import Screen4Objection from "@/components/wizard/Screen4Objection";
 import Screen5Booking from "@/components/wizard/Screen5Booking";
 import Screen6Success from "@/components/wizard/Screen6Success";
 
+/**
+ * Заголовок и краткое описание страницы.
+ *
+ * Визард — клиентский компонент за `mounted`-гейтом, поэтому до гидратации
+ * краулер (особенно Яндекс, который плохо исполняет JS) видел только спиннер:
+ * страница без h1 и без единого слова текста. Этот блок рендерится в обеих
+ * ветках, визуально скрыт — степпер и чат остаются единственным, что видит
+ * человек.
+ */
+function PageIntro() {
+  return (
+    <div className="sr-only">
+      <h1>AI-диагностика: подбор программы корпоративного обучения по ИИ</h1>
+      <p>
+        Ответьте на несколько вопросов о компании, задачах и ролях сотрудников —
+        AI-диагностика ВайбМайнд подберёт модули корпоративного курса по
+        нейросетям, рассчитает стоимость обучения и предложит время встречи.
+      </p>
+      <p>
+        Подробнее о программе — на странице{" "}
+        <Link href="/course">корпоративного курса</Link>, ответы на частые
+        вопросы — в разделе <Link href="/faq">вопросов и ответов</Link>.
+      </p>
+    </div>
+  );
+}
+
 const STEP_TITLES: Record<number, string> = {
   1: "Компания",
   2: "Диагностика",
@@ -46,6 +73,7 @@ export default function WizardPage() {
   if (!mounted) {
     return (
       <div className="flex h-screen items-center justify-center bg-milk">
+        <PageIntro />
         <span className="h-8 w-8 animate-spin rounded-full border-[3px] border-gold border-t-transparent" />
       </div>
     );
@@ -73,6 +101,8 @@ export default function WizardPage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-milk lg:flex-row">
+      <PageIntro />
+
       {/* Левая колонка: чат + футер (десктоп) */}
       <aside className="hidden w-1/4 min-w-[300px] lg:block">
         <ChatPanel />

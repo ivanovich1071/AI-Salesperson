@@ -19,7 +19,9 @@ SQLite + Prisma · OpenRouter (Qwen — текст/JSON, Whisper Large V3 — г
 | `/course` | Лендинг корпоративного курса Вероники Пунчик + секция «Лаборатория решений» |
 | `/app` | Визард AI-диагностики: компания → анкета/чат → предложение → возражение → бронь. В чате можно **писать или диктовать** ответы — AI сам заполняет анкету |
 | `/admin` | Админ-панель: заявки, слоты, шаблон для эксперта, **карты диагностики** |
+| `/faq` | Вопросы и ответы — страница-«витрина фактов» для ИИ-поисковиков (разметка `FAQPage`) |
 | `/privacy` | Политика конфиденциальности |
+| `/robots.txt`, `/sitemap.xml`, `/llms.txt`, `/llms-full.txt`, `/identity.json`, `/ai.json`, `/.well-known/ai.txt` | Машиночитаемые файлы для поисковиков и ИИ-ассистентов (см. раздел «Видимость в ИИ-поисковиках») |
 
 **Прод:** https://vibemind.by (лендинг · `/course` · `/app` · `/admin` — admin/demo2026).
 Старый адрес `81-177-214-84.nip.io` отдаёт постоянный редирект на домен.
@@ -99,6 +101,7 @@ npm run deploy
 ```
 src/
 ├── app/                 # страницы (App Router) и API-роуты (app/api/**/route.ts)
+└── lib/seo/             # факты о компании для машин: profile.ts, faq.ts, jsonLd.ts, llms.ts
 ├── components/landing/   # секции лендинга (ролик о компании)
 ├── components/wizard/    # 6 экранов визарда + чат-панель + голосовой ввод
 ├── store/wizardStore.ts  # Zustand-стор состояния визарда (persist в localStorage)
@@ -111,6 +114,7 @@ prompts/assistant-system.md  # системный промпт AI-консуль
 e2e/                      # E2E-тесты (Playwright): сценарии, хелперы, моки AI
 playwright.config.ts      # конфиг тестов: desktop/mobile, тестовая БД, отчёты
 scripts/deploy.sh         # деплой на прод одной командой (npm run deploy)
+scripts/geo-audit.mjs     # аудит видимости сайта для ИИ-поисковиков (npm run geo:audit)
 scripts/seed-slots.mjs    # генератор демо-слотов для календаря встреч
 scripts/telegram-setup.mjs # настройка уведомлений: проверка бота, поиск chat_id
 Деплой.bat                # деплой двойным кликом (Windows)
@@ -123,6 +127,31 @@ ROADMAP.md                # план развития: безопасность,
 
 Подробности архитектуры, палитры и соглашений по коду — в [.claude/CLAUDE.md](.claude/CLAUDE.md)
 и [.claude/skills/frontend/SKILL.md](.claude/skills/frontend/SKILL.md).
+
+## Видимость в ИИ-поисковиках (GEO)
+
+Сайт настроен так, чтобы ChatGPT Search, Perplexity, Claude, Gemini и Copilot
+могли его обойти, понять и процитировать:
+
+- `robots.txt` разрешает 18 ИИ-краулеров поимённо (GPTBot, ClaudeBot,
+  PerplexityBot, Google-Extended, Bingbot и др.), закрыты только `/admin` и `/api`;
+- машиночитаемая идентичность: `llms.txt`, `llms-full.txt`, `identity.json`,
+  `ai.json`, `/.well-known/ai.txt`;
+- разметка Schema.org: Organization, WebSite, ItemList решений, Course, Person,
+  FAQPage, BreadcrumbList;
+- страница `/faq` с вопросами в формулировках пользователей — именно её цитируют
+  модели, отвечая «где заказать внедрение ИИ в Беларуси».
+
+Все факты — в `src/lib/seo/profile.ts` и `src/lib/seo/faq.ts`; остальное
+собирается из них. Проверка после деплоя:
+
+```bash
+npm run geo:audit -- https://vibemind.by
+```
+
+⚠️ `NEXT_PUBLIC_SITE_URL` вшивается на сборке. Если в проде он не задан или
+остался `localhost`, sitemap, canonical и JSON-LD уводят краулеров на локальные
+адреса — сайт выпадает из выдачи. Аудит это ловит отдельной проверкой.
 
 ## База знаний и системный промпт
 

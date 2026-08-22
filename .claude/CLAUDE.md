@@ -11,6 +11,7 @@
 Подробные фронтенд-соглашения (палитра, компоненты, стор, стиль кода) — в [.claude/skills/frontend/SKILL.md](skills/frontend/SKILL.md).
 - **`/admin`** — админка (admin/demo2026): брони, слоты, шаблон сообщения для эксперта.
 - **`/privacy`** — политика конфиденциальности (РБ 99-З + РФ 152-ФЗ).
+- **`/faq`** — вопросы и ответы. Страница написана под ИИ-поисковики: вопросы в формулировках пользователя, ответ целиком в первом предложении, разметка `FAQPage`. Контент — в `src/lib/seo/faq.ts`, не в вёрстке.
 
 ## Стек
 
@@ -27,6 +28,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind (палитра в `tailwind.c
 | OpenRouter-клиент (chat, JSON-retry, whisper) | `src/lib/openrouter.ts` |
 | Zod-схемы AI-ответов и входных данных | `src/lib/schemas.ts` |
 | Админ-сессия (HMAC-cookie) | `src/lib/adminAuth.ts` |
+| Факты о компании для машин (GEO) | `src/lib/seo/profile.ts` — ЕДИНСТВЕННОЕ место правки названия, контактов, услуг, модулей и продуктов. Из него собираются `/llms.txt`, `/llms-full.txt`, `/identity.json`, `/ai.json`, разметка Schema.org и sitemap |
 
 ## Команды
 
@@ -54,6 +56,7 @@ npm run deploy     # деплой на прод (пароль не нужен, �
 | `e2e/admin.spec.ts` | неверный и верный логин · брони · карты диагностики · добавление и удаление слотов |
 | `e2e/a11y.spec.ts` | axe-аудит 4 страниц (контраст-проверки временно пропущены — см. TESTING.md) |
 | `e2e/visual.spec.ts` | скриншот-эталоны главной, курса и экранов визарда |
+| `e2e/geo.spec.ts` | видимость для ИИ-поисковиков: robots.txt пускает GPTBot/ClaudeBot/PerplexityBot · sitemap · llms.txt · identity.json · ai.json · /.well-known/ai.txt · разметка Organization/WebSite/Course/Person/FAQPage · все вопросы FAQ видны в HTML |
 
 **Три правила, без которых тесты ломаются:**
 1. AI всегда мокается (`mockAi(page)` в `beforeEach`) — живой OpenRouter медленный,
@@ -63,6 +66,43 @@ npm run deploy     # деплой на прод (пароль не нужен, �
    между тестами.
 
 Ключи — в `.env` (не в git): `OPENROUTER_API_KEY`, модели `OPENROUTER_MODEL` / `OPENROUTER_WHISPER_MODEL`.
+
+## GEO — видимость в ИИ-поисковиках
+
+Сайт настроен так, чтобы ChatGPT Search, Perplexity, Claude, Gemini и Copilot
+могли его обойти, понять и процитировать. Все факты берутся из
+`src/lib/seo/profile.ts` и `src/lib/seo/faq.ts` — правь только там, файлы ниже
+собираются из них автоматически.
+
+| Адрес | Что отдаёт | Код |
+|---|---|---|
+| `/robots.txt` | 18 ИИ-краулеров разрешены поимённо, `/admin` и `/api` закрыты | `src/app/robots.ts` |
+| `/sitemap.xml` | публичные страницы с приоритетами | `src/app/sitemap.ts` |
+| `/llms.txt` | краткий «паспорт» компании для языковых моделей | `src/app/llms.txt/route.ts` |
+| `/llms-full.txt` | весь публичный контент одним Markdown | `src/app/llms-full.txt/route.ts` |
+| `/identity.json` | карточка организации в Schema.org | `src/app/identity.json/route.ts` |
+| `/ai.json`, `/.well-known/ai.txt` | правила цитирования и запреты для моделей | `src/app/ai.json/route.ts`, `src/app/ai-policy.txt/route.ts` |
+
+JSON-LD вставляется компонентом `src/components/seo/JsonLd.tsx`: Organization +
+WebSite + ItemList решений в корневом layout, Course + Person на `/course`,
+FAQPage на `/faq`. Схемы собираются в `src/lib/seo/jsonLd.ts`.
+
+**Критично при деплое:** `NEXT_PUBLIC_SITE_URL` подставляется на **сборке**.
+Если на сервере переменная не задана или осталась `localhost`, в sitemap,
+canonical и JSON-LD уедут локальные адреса — краулеры уйдут в никуда. Проверка:
+
+```bash
+npm run geo:audit -- https://vibemind.by
+```
+
+Скрипт (`scripts/geo-audit.mjs`, без зависимостей) печатает GEO-score и список
+починок; он же стоит в `.github/workflows/geo-audit.yml` (еженедельно + при
+правках SEO-файлов, порог 80). Общие правила GEO вынесены в глобальный скилл
+`~/.claude/skills/geo-optimizer/`.
+
+**Чего не делать:** размечать `FAQPage` вопросами, которых нет в видимом HTML;
+публиковать в разметке цены (они считаются индивидуально — в `ai.json` стоит
+явный запрет моделям их выдумывать); добавлять скрытый текст «для нейросетей».
 
 ## Принципы (из ТЗ)
 

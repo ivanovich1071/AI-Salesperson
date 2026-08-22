@@ -53,6 +53,19 @@ const nextConfig = {
       },
     ];
   },
+
+  /**
+   * Агенты ИИ ищут правила использования контента в `/.well-known/ai.txt`.
+   * Отдельным маршрутом это не сделать: каталог, имя которого начинается с
+   * точки, Next в маршруты не берёт. Поэтому — rewrite на реальный роут
+   * `/ai-policy.txt` (src/app/ai-policy.txt/route.ts).
+   */
+  async rewrites() {
+    return [
+      { source: "/.well-known/ai.txt", destination: "/ai-policy.txt" },
+      { source: "/ai.txt", destination: "/ai-policy.txt" },
+    ];
+  },
 };
 
 export default nextConfig;
