@@ -45,7 +45,7 @@ export default function Screen6Success() {
           <p className="text-lg font-bold text-brown-deep">Вероника Пунчик</p>
           <p className="text-brown-light">{dateLabel}</p>
           <p className="mt-1 text-sm text-muted">
-            📹 Онлайн (ссылка придёт на {b?.email || "ваш email"})
+            📹 Онлайн (ссылка придет на {b?.email || "ваш email"})
           </p>
         </div>
       </div>

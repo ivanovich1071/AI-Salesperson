@@ -65,6 +65,9 @@ interface DiagMapRow {
   createdAt: string;
 }
 
+/** Сколько ближайших слотов показывать, пока не нажата «Показать все» */
+const SLOT_PREVIEW_COUNT = 20;
+
 /** Текстовый шаблон карты диагностики (для копирования/пересылки эксперту) */
 function buildDiagTemplate(m: DiagMapRow): string {
   let d: Record<string, unknown> = {};
@@ -114,6 +117,7 @@ export default function AdminPage() {
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
   const [diagMaps, setDiagMaps] = useState<DiagMapRow[]>([]);
   const [selectedMap, setSelectedMap] = useState<DiagMapRow | null>(null);
+  const [showAllSlots, setShowAllSlots] = useState(false);
 
   const loadData = useCallback(async () => {
     const [bRes, sRes, dRes] = await Promise.all([
@@ -129,7 +133,7 @@ export default function AdminPage() {
     const s = await sRes.json();
     const dm = await dRes.json();
     setBookings(b.bookings || []);
-    // /api/slots отдаёт только свободные; для админки этого достаточно (занятые видны в бронях)
+    // /api/slots отдает только свободные; для админки этого достаточно (занятые видны в бронях)
     setSlots(s.slots || []);
     setDiagMaps(dm.maps || []);
     setAuthed(true);
@@ -362,10 +366,10 @@ export default function AdminPage() {
         <section className="card mt-6 p-6">
           <h2 className="text-lg font-bold text-brown-deep">Карты диагностики</h2>
           <p className="mt-1 text-sm text-muted">
-            Сохранённые заготовки по клиентам — создаются при формировании предложения (до брони).
+            Сохраненные заготовки по клиентам — создаются при формировании предложения (до брони).
           </p>
           {diagMaps.length === 0 ? (
-            <p className="mt-4 text-sm text-muted">Пока нет сохранённых карт диагностики.</p>
+            <p className="mt-4 text-sm text-muted">Пока нет сохраненных карт диагностики.</p>
           ) : (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm">
@@ -477,23 +481,41 @@ export default function AdminPage() {
               Свободных слотов нет — добавьте даты, чтобы клиенты могли записаться.
             </p>
           ) : (
-            <div className="mt-5 flex flex-wrap gap-2">
-              {slots.map((slot) => (
-                <span
-                  key={slot.id}
-                  className="flex items-center gap-2 rounded-2xl border border-line bg-white px-4 py-2 text-sm"
-                >
-                  <strong className="text-brown-deep">{slot.date}</strong> {slot.time}
-                  <button
-                    className="text-red-500 hover:text-red-700"
-                    title="Удалить слот"
-                    onClick={() => deleteSlot(slot.id)}
+            <>
+              <p className="mt-5 text-sm text-muted">
+                Всего свободных слотов: {slots.length}
+                {slots.length > SLOT_PREVIEW_COUNT &&
+                  (showAllSlots
+                    ? " — показаны все"
+                    : ` — показаны ближайшие ${SLOT_PREVIEW_COUNT}`)}
+                .
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(showAllSlots ? slots : slots.slice(0, SLOT_PREVIEW_COUNT)).map((slot) => (
+                  <span
+                    key={slot.id}
+                    className="flex items-center gap-2 rounded-2xl border border-line bg-white px-4 py-2 text-sm"
                   >
-                    ✕
-                  </button>
-                </span>
-              ))}
-            </div>
+                    <strong className="text-brown-deep">{slot.date}</strong> {slot.time}
+                    <button
+                      className="text-red-500 hover:text-red-700"
+                      title="Удалить слот"
+                      onClick={() => deleteSlot(slot.id)}
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))}
+              </div>
+              {slots.length > SLOT_PREVIEW_COUNT && (
+                <button
+                  className="btn-secondary mt-4 !px-5 !py-2.5 text-sm"
+                  onClick={() => setShowAllSlots((v) => !v)}
+                >
+                  {showAllSlots ? "Свернуть" : `Показать все (${slots.length})`}
+                </button>
+              )}
+            </>
           )}
         </section>
       </div>

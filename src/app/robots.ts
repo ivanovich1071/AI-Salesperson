@@ -7,7 +7,7 @@ import { SITE_URL } from "@/lib/seo/profile";
  * Главное здесь — явное разрешение для краулеров ИИ-поисковиков. По умолчанию
  * robots.txt их не упоминает, и часть площадок (а также правила на CDN) трактует
  * молчание как запрет: сайт просто не попадает в ответы ChatGPT, Perplexity и
- * Gemini. Поэтому каждый агент перечислен поимённо.
+ * Gemini. Поэтому каждый агент перечислен поименно.
  *
  * Закрыты только `/admin` и `/api`: админка и роуты, которые тратят деньги на
  * OpenRouter и пишут в базу.
@@ -42,7 +42,7 @@ const AI_CRAWLERS = [
   // Apple Intelligence
   "Applebot",
   "Applebot-Extended",
-  // Meta AI, Amazon, Common Crawl (на нём учится часть моделей), Cohere
+  // Meta AI, Amazon, Common Crawl (на нем учится часть моделей), Cohere
   "Meta-ExternalAgent",
   "Amazonbot",
   "CCBot",

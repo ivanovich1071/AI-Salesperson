@@ -29,7 +29,7 @@ test.describe("Протокол цен: типовые сборки", () => {
     { name: "Знакомство", modules: ["Б1"], people: 15, pkg: "Знакомство", total: 2400 },
     { name: "Безопасный старт", modules: ["Б1", "Б2"], people: 20, pkg: "Безопасный старт", total: 4500 },
     { name: "Профессиональный", modules: ["Б1", "Б2", "П3"], people: 20, pkg: "Профессиональный", total: 6500 },
-    { name: "Углублённый", modules: ["Б1", "Б2", "П3", "П6"], people: 20, pkg: "Углублённый", total: 8400 },
+    { name: "Углубленный", modules: ["Б1", "Б2", "П3", "П6"], people: 20, pkg: "Углубленный", total: 8400 },
     { name: "Для руководителей", modules: ["РУК"], people: 10, pkg: "Для руководителей", total: 2800 },
     { name: "Управление и внедрение", modules: ["П1", "РУК"], people: 12, pkg: "Управление и внедрение", total: 4900 },
   ];
@@ -54,7 +54,7 @@ test("контур руководителей поверх обучения со
 
 test("треки сверх пакета уходят в опции и в сумму не входят", () => {
   const cost = calculateTrainingCost(["Б1", "Б2", "П3", "П6", "П5"], 20);
-  expect(cost.packageName).toBe("Углублённый");
+  expect(cost.packageName).toBe("Углубленный");
   expect(cost.total).toBe(8400);
   expect(cost.options).toHaveLength(1);
   expect(cost.options[0].label).toContain("П5");

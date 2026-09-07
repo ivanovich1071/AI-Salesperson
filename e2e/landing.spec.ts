@@ -127,18 +127,20 @@ test("контакты: телефон и телеграм компании", as
 });
 
 test.describe("блок «Как мы работаем»", () => {
-  test("на десктопе стрелки СТОЯТ МЕЖДУ карточками", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name === "mobile", "на мобильном стрелки скрыты");
+  test("четыре равноправные карточки без нумерации и стрелок", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === "mobile", "на мобильном карточки в столбик");
 
+    const cards = page.locator("#process .rounded-3xl");
+    await expect(cards).toHaveCount(4);
+
+    // Стрелки-цепочка 1→2→3→4 убраны: это точки входа, а не этапы
     const arrows = page.locator("#process div[aria-hidden]").filter({ hasText: "→" });
-    await expect(arrows).toHaveCount(3);
+    await expect(arrows).toHaveCount(0);
 
-    // Регрессия, которую ловим: из-за lg:flex-col стрелка падала ПОД карточку
-    const card = await page.locator("#process .rounded-3xl").first().boundingBox();
-    const arrow = await arrows.first().boundingBox();
-    expect(arrow!.x).toBeGreaterThan(card!.x + card!.width - 5); // правее карточки
-    expect(arrow!.y).toBeGreaterThan(card!.y); // и на её высоте, а не под ней
-    expect(arrow!.y).toBeLessThan(card!.y + card!.height);
+    // Подзаголовок и теги-«чтобы» на месте
+    await expect(page.locator("#process")).toContainText("Выберите нужный вам этап");
+    await expect(page.locator("#process")).toContainText("Чтобы разобраться");
+    await expect(page.locator("#process")).toContainText("Чтобы поручить задачу нам");
   });
 
   test("карточки одной высоты", async ({ page }, testInfo) => {

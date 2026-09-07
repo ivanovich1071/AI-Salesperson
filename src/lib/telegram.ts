@@ -1,14 +1,14 @@
 /**
  * Уведомления в Telegram.
  *
- * Односторонний канал: сайт шлёт сообщения боту, бот пересылает их в личку
+ * Односторонний канал: сайт шлет сообщения боту, бот пересылает их в личку
  * или в группу. Никаких вебхуков и постоянных соединений — обычный HTTPS-запрос
  * к Bot API. Это сознательно: на сервере один процесс Node, и держать ради
  * уведомлений вторую службу с long polling не за что.
  *
  * Правило: уведомление никогда не ломает основной сценарий. Если Telegram
- * недоступен, токен не задан или сеть отвалилась — бронь всё равно сохраняется,
- * а в лог уходит строка. Клиент об этом не узнаёт.
+ * недоступен, токен не задан или сеть отвалилась — бронь все равно сохраняется,
+ * а в лог уходит строка. Клиент об этом не узнает.
  */
 
 const API_TIMEOUT_MS = 5000;
@@ -82,7 +82,7 @@ export async function sendTelegramMessage(text: string): Promise<number> {
 }
 
 /**
- * Уведомление «в фоне»: вызывающий код не ждёт ответа Telegram.
+ * Уведомление «в фоне»: вызывающий код не ждет ответа Telegram.
  * Нужно, чтобы клиент не смотрел лишние секунды на спиннер брони.
  */
 export function notifyTelegram(text: string): void {
@@ -116,7 +116,7 @@ export function formatBookingMessage(b: BookingNotification): string {
 
   if (b.role) lines.push(`<b>Роль:</b> ${escapeHtml(b.role)}`);
   if (b.participants) lines.push(`<b>Участников:</b> ${b.participants}`);
-  if (b.totalCost > 0) lines.push(`<b>Расчёт:</b> ${formatMoney(b.totalCost)} BYN`);
+  if (b.totalCost > 0) lines.push(`<b>Расчет:</b> ${formatMoney(b.totalCost)} BYN`);
   if (b.modules?.length) lines.push(`<b>Модули:</b> ${escapeHtml(b.modules.join(", "))}`);
 
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vibemind.by";
@@ -135,18 +135,18 @@ export interface DiagnosticNotification {
 
 /**
  * Текст уведомления о новой карте диагностики. Короче, чем о брони:
- * такие события случаются чаще, и большинство из них до встречи не дойдёт.
+ * такие события случаются чаще, и большинство из них до встречи не дойдет.
  */
 export function formatDiagnosticMessage(d: DiagnosticNotification): string {
   const parts = [
-    "📋 <b>Кто-то прошёл диагностику</b>",
+    "📋 <b>Кто-то прошел диагностику</b>",
     "",
     `<b>Компания:</b> ${escapeHtml(d.companyName)}`,
     `<b>Роль:</b> ${escapeHtml(d.userRole)}`,
   ];
   if (d.participantCount) parts.push(`<b>Участников:</b> ${d.participantCount}`);
   if (d.matchScore) parts.push(`<b>Соответствие задачам:</b> ${d.matchScore}%`);
-  if (d.totalCost) parts.push(`<b>Расчёт:</b> ${formatMoney(d.totalCost)} BYN`);
+  if (d.totalCost) parts.push(`<b>Расчет:</b> ${formatMoney(d.totalCost)} BYN`);
   parts.push("", "<i>Встреча пока не забронирована.</i>");
   return parts.join("\n");
 }

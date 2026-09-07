@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
  * формально «работает».
  *
  * Хранилище — в памяти процесса: сервер один, Redis разворачивать незачем.
- * При перезапуске счётчики обнуляются, и это нормально: защита от вала, а не учёт.
+ * При перезапуске счетчики обнуляются, и это нормально: защита от вала, а не учет.
  */
 
 const WINDOW_MS = 60_000;
@@ -33,7 +33,7 @@ const RULES: Rule[] = [
   { key: "transcribe", match: (p) => p.startsWith("/api/transcribe"), limit: 5, maxBody: 5 * 1024 * 1024 },
   // Все обращения к модели
   { key: "ai", match: (p) => p.startsWith("/api/ai/"), limit: 20, maxBody: JSON_BODY },
-  // Бронь слота — бот может забрать всё расписание
+  // Бронь слота — бот может забрать все расписание
   { key: "bookings", match: (p) => p.startsWith("/api/bookings"), limit: 5, maxBody: JSON_BODY },
   // Публичный роут, пишет в базу
   { key: "diagnostics", match: (p) => p.startsWith("/api/diagnostics"), limit: 5, maxBody: JSON_BODY },
@@ -69,7 +69,7 @@ function tooMany(retryAfterSec: number) {
 }
 
 export function middleware(req: NextRequest) {
-  // E2E-прогон дёргает роуты очередями — лимиты его гарантированно уронят
+  // E2E-прогон дергает роуты очередями — лимиты его гарантированно уронят
   if (process.env.RATE_LIMIT_DISABLED === "1") return NextResponse.next();
 
   const path = req.nextUrl.pathname;

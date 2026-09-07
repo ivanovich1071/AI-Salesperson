@@ -41,6 +41,11 @@ test("слоты: добавление и удаление", async ({ page }) =>
   await page.getByRole("button", { name: /Добавить/i }).click();
 
   await expect(page.getByText(/Добавлено слотов: 2/)).toBeVisible({ timeout: 10_000 });
+
+  // Список свёрнут до ближайших 20 слотов — дальние даты видны только после «Показать все»
+  const showAll = page.getByRole("button", { name: /Показать все/ });
+  if (await showAll.isVisible()) await showAll.click();
+
   await expect(added).toHaveCount(2);
 
   // Удаляем один — второй остаётся

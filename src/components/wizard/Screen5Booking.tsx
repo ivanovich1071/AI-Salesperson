@@ -109,7 +109,7 @@ export default function Screen5Booking() {
     <div className="fade-in-up">
       <h1 className="text-3xl font-bold text-brown-deep">Обсудим программу с экспертом</h1>
       <p className="mt-2 text-muted">
-        30 минут. Без обязательств. Разберём вашу задачу и уточним программу под структуру
+        30 минут. Без обязательств. Разберем вашу задачу и уточним программу под структуру
         команды.
       </p>
 
@@ -124,7 +124,7 @@ export default function Screen5Booking() {
           <a href="mailto:pvnvna@yandex.by" className="font-semibold text-gold">
             pvnvna@yandex.by
           </a>{" "}
-          — и мы подберём время вручную.
+          — и мы подберем время вручную.
         </div>
       ) : (
         <>

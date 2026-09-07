@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error("[bookings POST]", e);
     return NextResponse.json(
-      { error: "Не удалось забронировать встречу. Проверьте данные и попробуйте ещё раз." },
+      { error: "Не удалось забронировать встречу. Проверьте данные и попробуйте еще раз." },
       { status: 400 }
     );
   }

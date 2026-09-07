@@ -119,13 +119,13 @@ export default function Screen2Questions() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Не удалось сформировать предложение.";
       setError(msg);
-      s.replaceLastStatus("⚠️ Не удалось сформировать предложение. Попробуйте ещё раз.");
+      s.replaceLastStatus("⚠️ Не удалось сформировать предложение. Попробуйте еще раз.");
     } finally {
       setLoading(false);
     }
   }
 
-  // Чат попросил собрать предложение → запускаем тот же расчёт, что и кнопка
+  // Чат попросил собрать предложение → запускаем тот же расчет, что и кнопка
   useEffect(() => {
     if (s.proposalRequestedAt && s.proposalRequestedAt !== handledRequestRef.current) {
       handledRequestRef.current = s.proposalRequestedAt;

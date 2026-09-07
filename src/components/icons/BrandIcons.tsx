@@ -162,7 +162,7 @@ export function IconReview(p: IconProps) {
   );
 }
 
-/** Запись на приём — календарь с отметкой */
+/** Запись на прием — календарь с отметкой */
 export function IconBooking(p: IconProps) {
   return (
     <Svg {...p}>

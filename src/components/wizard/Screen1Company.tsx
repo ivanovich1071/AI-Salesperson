@@ -25,7 +25,7 @@ export default function Screen1Company() {
       s.setField("objectionResponse", null);
     }
 
-    // Отражаем введённые данные в чате как сообщение пользователя
+    // Отражаем введенные данные в чате как сообщение пользователя
     s.pushChat(
       "user",
       `Компания «${s.companyName}», роль: ${s.userRole}, участников: ${s.participantCount}.` +

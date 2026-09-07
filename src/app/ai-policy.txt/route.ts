@@ -3,10 +3,10 @@ import { ORG, SITE_URL } from "@/lib/seo/profile";
 /**
  * Человекочитаемые правила для ИИ-систем.
  *
- * Отдаётся по двум адресам: /ai-policy.txt и /.well-known/ai.txt (rewrite в
+ * Отдается по двум адресам: /ai-policy.txt и /.well-known/ai.txt (rewrite в
  * next.config.mjs). Второй адрес — общепринятое место, где агенты ищут такие
  * правила; отдельным route его не сделать, каталог с точкой в начале Next
- * не берёт в маршруты.
+ * не берет в маршруты.
  */
 export const dynamic = "force-static";
 export const revalidate = 86400;

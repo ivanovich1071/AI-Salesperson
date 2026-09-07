@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     const audio = form.get("audio");
     if (!(audio instanceof Blob) || audio.size === 0) {
       return NextResponse.json(
-        { error: "Аудиозапись не получена. Попробуйте ещё раз или введите текст вручную." },
+        { error: "Аудиозапись не получена. Попробуйте еще раз или введите текст вручную." },
         { status: 400 }
       );
     }
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Не удалось распознать речь. Пожалуйста, введите текст вручную — это займёт минуту.",
+          "Не удалось распознать речь. Пожалуйста, введите текст вручную — это займет минуту.",
       },
       { status: 502 }
     );

@@ -9,7 +9,7 @@ type MicState = "idle" | "recording" | "transcribing";
  * Голосовой ввод (ТЗ, раздел 6):
  * 1) иконка микрофона → старт записи (MediaRecorder);
  * 2) красная кнопка «■ Стоп» + мигающий индикатор + таймер, запись до ручного стопа;
- * 3) «Распознаём речь...» → Whisper → текст вставляется в поле.
+ * 3) «Распознаем речь...» → Whisper → текст вставляется в поле.
  * Текстовый фолбэк всегда доступен: это просто кнопка рядом с textarea.
  */
 export default function MicButton({
@@ -101,7 +101,7 @@ export default function MicButton({
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "transcribe failed");
       if (data.text) onText(data.text);
-      else setError("Речь не распознана — попробуйте ещё раз или введите текст.");
+      else setError("Речь не распознана — попробуйте еще раз или введите текст.");
     } catch (e) {
       setError(
         e instanceof Error && e.message.length < 120
@@ -144,7 +144,7 @@ export default function MicButton({
       {state === "transcribing" && (
         <span className="flex items-center gap-2 text-xs font-medium text-gold">
           <span className="h-3 w-3 animate-spin rounded-full border-2 border-gold border-t-transparent" />
-          Распознаём речь...
+          Распознаем речь...
         </span>
       )}
       {error && <span className="text-xs text-red-600">{error}</span>}

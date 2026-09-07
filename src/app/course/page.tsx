@@ -177,7 +177,7 @@ export default function LandingPage() {
               Делегирование задач ИИ: от рутины к экспертным решениям
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-milk/85">
-              Обучение сотрудников: от делегирования ИИ документов, отчётов, писем и сбора
+              Обучение сотрудников: от делегирования ИИ документов, отчетов, писем и сбора
               аналитики — до создания чат-ботов, автоматизированных пайплайнов и
               медиаконтента. Авторский корпоративный курс с сопровождением эксперта по ИИ,
               к.п.н., члена Комитета по искусственному интеллекту{" "}
@@ -204,7 +204,7 @@ export default function LandingPage() {
             </div>
             <p className="mt-4 text-sm text-milk/60">
               За несколько минут AI изучит вашу задачу и подготовит персональную программу
-              обучения с расчётом стоимости
+              обучения с расчетом стоимости
             </p>
           </div>
           <div className="hidden justify-center lg:flex">
@@ -301,7 +301,7 @@ export default function LandingPage() {
             <div className="title-underline" />
             <p className="mx-auto mt-4 max-w-2xl text-muted">
               От практического обучения до проектирования решений. Персональную программу
-              под вашу команду с расчётом стоимости подберёт AI-диагностика.
+              под вашу команду с расчетом стоимости подберет AI-диагностика.
             </p>
           </div>
           <div className="mt-12 grid gap-8 lg:grid-cols-3">
@@ -362,7 +362,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== ЛАБОРАТОРИЯ РЕШЕНИЙ — тизер (сама витрина живёт на главной) ===== */}
+      {/* ===== ЛАБОРАТОРИЯ РЕШЕНИЙ — тизер (сама витрина живет на главной) ===== */}
       <section id="solutions" className="bg-white py-20">
         <div className="mx-auto max-w-4xl px-5 text-center">
           <h2 className="section-title">Лаборатория решений</h2>
@@ -463,10 +463,10 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Партнёры */}
+          {/* Партнеры */}
           <div className="mt-12 space-y-6">
             <div>
-              <h4 className="font-bold text-brown-deep">Партнёры и организации:</h4>
+              <h4 className="font-bold text-brown-deep">Партнеры и организации:</h4>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a href="https://smaipl.ru/" target="_blank" rel="noopener noreferrer">
                   <span className="rounded-2xl bg-gold-light px-4 py-2 text-sm font-semibold text-brown-deep">
@@ -530,7 +530,7 @@ export default function LandingPage() {
             <p className="mx-auto mt-4 max-w-2xl text-milk/80">
               Сделайте первый шаг к интеграции искусственного интеллекта в свою
               профессиональную сферу. AI-ассистент ВайбМайнд за несколько минут изучит вашу
-              компанию, подберёт модули, рассчитает стоимость и запишет на встречу с
+              компанию, подберет модули, рассчитает стоимость и запишет на встречу с
               экспертом.
             </p>
             <Link href="/app?new=1" className="btn-primary mt-8">

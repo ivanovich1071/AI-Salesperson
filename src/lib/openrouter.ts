@@ -67,7 +67,7 @@ export async function chatCompletion(
   return content;
 }
 
-/** Вырезает JSON из ответа модели (на случай markdown-обёртки или reasoning-префикса) */
+/** Вырезает JSON из ответа модели (на случай markdown-обертки или reasoning-префикса) */
 export function extractJson(raw: string): string {
   const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
   const candidate = fenced ? fenced[1] : raw;
@@ -99,7 +99,7 @@ export async function chatJson<T>(
         { role: "assistant", content: first },
         {
           role: "user",
-          content: `Твой предыдущий ответ не прошёл валидацию JSON-схемы: ${String(
+          content: `Твой предыдущий ответ не прошел валидацию JSON-схемы: ${String(
             e
           ).slice(
             0,
@@ -115,7 +115,7 @@ export async function chatJson<T>(
 
 /**
  * Типичные «галлюцинации» Whisper на тишине/шуме/слишком коротком аудио.
- * На таком входе модель выдаёт заученные фразы из титров роликов — их нужно
+ * На таком входе модель выдает заученные фразы из титров роликов — их нужно
  * отсекать, иначе в поле попадает мусор вроде «Продолжение следует...».
  */
 const WHISPER_HALLUCINATIONS = [

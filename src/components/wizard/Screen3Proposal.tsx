@@ -16,7 +16,7 @@ export default function Screen3Proposal() {
       <div className="fade-in-up">
         <h1 className="text-3xl font-bold text-brown-deep">Персональная программа</h1>
         <p className="mt-4 text-muted">
-          Предложение ещё не сформировано. Вернитесь к диагностике.
+          Предложение еще не сформировано. Вернитесь к диагностике.
         </p>
         <button className="btn-secondary mt-6" onClick={() => s.setStep(2)}>
           ← К вопросам

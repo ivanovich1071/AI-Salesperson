@@ -8,7 +8,7 @@ export default function Screen4Objection() {
 
   return (
     <div className="fade-in-up">
-      <h1 className="text-3xl font-bold text-brown-deep">Давайте разберём этот вопрос</h1>
+      <h1 className="text-3xl font-bold text-brown-deep">Давайте разберем этот вопрос</h1>
 
       <div className="mt-6 rounded-2xl border-l-4 border-l-gold bg-gold-light p-4">
         <strong className="text-brown-deep">Вы отметили:</strong>{" "}
@@ -36,7 +36,7 @@ export default function Screen4Objection() {
         </div>
       ) : (
         <p className="mt-6 text-muted">
-          Ответ не был подготовлен — эксперт разберёт ваш вопрос лично на встрече.
+          Ответ не был подготовлен — эксперт разберет ваш вопрос лично на встрече.
         </p>
       )}
 

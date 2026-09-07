@@ -5,6 +5,16 @@ export const WORK_HOURS = [
   "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
 ];
 
+// Диапазоны, когда слоты не создаются вообще (отъезд/отпуск спикера).
+// 06–28.10.2026 — Вероника преподает в Китае. После возвращения запись можно снять.
+export const BLACKOUT_RANGES = [
+  { from: "2026-10-06", to: "2026-10-28" },
+];
+
+function isBlackout(iso) {
+  return BLACKOUT_RANGES.some((r) => iso >= r.from && iso <= r.to);
+}
+
 function* days(fromIso, toIso) {
   const d = new Date(`${fromIso}T00:00:00`);
   const end = new Date(`${toIso}T00:00:00`);
@@ -31,6 +41,7 @@ function toIsoDate(d) {
 /**
  * Создаёт слоты на будние дни в диапазоне [fromIso, toIso] (обе даты включительно),
  * рабочее время 9:00–17:00, случайные 4–6 слотов в день (upsert — без дублей).
+ * Даты из BLACKOUT_RANGES пропускаются (спикер недоступен).
  */
 export async function generateSlots(prisma, fromIso, toIso) {
   let created = 0;
@@ -39,6 +50,7 @@ export async function generateSlots(prisma, fromIso, toIso) {
     if (dow === 0 || dow === 6) continue; // выходные пропускаем
 
     const iso = toIsoDate(day);
+    if (isBlackout(iso)) continue; // спикер недоступен — слоты не создаем
     const count = 4 + Math.floor(Math.random() * 3); // 4–6 слотов
     for (const time of pickRandom(WORK_HOURS, count)) {
       await prisma.timeSlot.upsert({

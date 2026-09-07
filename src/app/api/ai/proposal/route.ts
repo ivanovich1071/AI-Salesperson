@@ -19,7 +19,7 @@ export const maxDuration = 90;
 const QAItem = z.object({ question: z.string(), answer: z.string() });
 const InputSchema = z.object({
   company: CompanyInfoSchema,
-  qa: z.array(QAItem), // объединённые ответы анкеты: вопрос + (чекбоксы + «Другое»)
+  qa: z.array(QAItem), // объединенные ответы анкеты: вопрос + (чекбоксы + «Другое»)
 });
 
 const NEXT_STEPS = [
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     const selection = selectProgram(company.userRole, answersText, hasManagers);
     const codes = selection.modules;
 
-    // === Pricing: детерминированный расчёт обучения ===
+    // === Pricing: детерминированный расчет обучения ===
     // Треки сверх пакета в сумму не идут — уходят в «можно добавить»
     const cost = calculateTrainingCost(
       codes,
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       [
         {
           role: "user",
-          content: `Клиент прошёл диагностику (чекбокс-анкета). Оформи персональное предложение.
+          content: `Клиент прошел диагностику (чекбокс-анкета). Оформи персональное предложение.
 
 ДАННЫЕ КЛИЕНТА:
 - Компания: ${company.companyName}
@@ -175,7 +175,7 @@ ${selection.publicCloudRestricted ? "ВАЖНО: у клиента запрещ�
     return NextResponse.json(
       {
         error:
-          "Не удалось сформировать предложение. Попробуйте ещё раз — мы уже сохранили ваши ответы.",
+          "Не удалось сформировать предложение. Попробуйте еще раз — мы уже сохранили ваши ответы.",
       },
       { status: 502 }
     );
