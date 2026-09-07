@@ -48,11 +48,11 @@ test("сквозной путь: компания → анкета → пред�
 
   // Шаг 3: предложение с расчётом
   await expect(page.getByText("84%")).toBeVisible();
-  // Цена подаётся пакетом из протокола, а не суммой модулей
+  // Сборка подписана пакетом, цена — часы × ставка за группу
   await expect(page.getByText(/Пакет «Профессиональный»/).first()).toBeVisible();
+  await expect(page.getByText(/12 ак\. часов × 250/).first()).toBeVisible();
   // toLocaleString разделяет разряды неразрывным пробелом — regex это учитывает
-  await expect(page.getByText(/6[\s  ]500[\s  ]BYN/).first()).toBeVisible();
-  await expect(page.getByText(/Можно добавить к программе/)).toBeVisible();
+  await expect(page.getByText(/3[\s  ]000[\s  ]BYN/).first()).toBeVisible();
 
   // Шаг 5: выбор слота и контакты
   await page.getByRole("button", { name: /Выбрать время встречи/i }).click();

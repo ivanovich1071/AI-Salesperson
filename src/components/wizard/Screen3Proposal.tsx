@@ -114,15 +114,15 @@ export default function Screen3Proposal() {
         <p className="mt-2 text-sm leading-relaxed text-brown-light">{p.trainingFormat}</p>
       </div>
 
-      {/* Блок 4: Стоимость по протоколу пакетов */}
+      {/* Блок 4: Стоимость — часы × ставка */}
       <div className="mt-6 rounded-3xl bg-brown-deep p-6 text-milk">
         <h3 className="font-bold text-gold">
           Пакет «{p.trainingCost.packageName}»
         </h3>
         <p className="mt-1 text-xs text-milk/60">
-          {p.trainingCost.packageComposition}. Цена зависит от числа потоков, а не от
-          числа участников напрямую.
-          {p.trainingCost.streams > 1 && ` Потоков: ${p.trainingCost.streams}.`}
+          {p.trainingCost.packageComposition}. {p.trainingCost.hours} ак. часов ×{" "}
+          {p.trainingCost.rate} {p.trainingCost.currency}/ч за группу до 25 человек.
+          {p.trainingCost.streams > 1 && ` Групп: ${p.trainingCost.streams}.`}
         </p>
         <div className="mt-3 space-y-2 text-sm">
           {p.trainingCost.lines.map((l, i) => (
@@ -161,27 +161,6 @@ export default function Screen3Proposal() {
           встрече с экспертом.
         </p>
       </div>
-
-      {/* Треки сверх пакета: предлагаются отдельно и в сумму не входят */}
-      {p.trainingCost.options.length > 0 && (
-        <div className="card mt-6 p-6">
-          <h3 className="font-bold text-brown-deep">Можно добавить к программе</h3>
-          <p className="mt-1 text-xs text-muted">
-            Эти направления тоже подходят вашим задачам. В стоимость выше они не входят —
-            добавляются по решению компании.
-          </p>
-          <div className="mt-3 space-y-2 text-sm">
-            {p.trainingCost.options.map((o, i) => (
-              <div key={i} className="flex justify-between gap-4">
-                <span className="text-brown-light">{o.label}</span>
-                <span className="shrink-0 font-semibold text-gold">
-                  + {formatMoney(o.amount)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Отдельный продукт: Лаборатория AI-кейсов */}
       <div className="card mt-6 border-l-4 border-l-gold p-6">

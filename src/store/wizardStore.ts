@@ -22,13 +22,15 @@ export interface CostBreakdown {
   total: number;
   currency: string;
   streams: number;
-  /** Пакет из протокола цен */
+  /** Часы программы — сумма часов подобранных модулей */
+  hours: number;
+  /** Ставка за академический час, по которой считалась программа */
+  rate: number;
+  /** Название сборки (подпись для клиента) */
   packageName: string;
   packageComposition: string;
-  /** Что уже входит в цену пакета */
+  /** Что уже входит в цену */
   included: string[];
-  /** Треки сверх пакета: показываем как «можно добавить», в сумму не входят */
-  options: { label: string; amount: number }[];
   /** true — точной суммы нет, `total` читается как «от» */
   isEstimate: boolean;
 }

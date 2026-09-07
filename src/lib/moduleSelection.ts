@@ -1,10 +1,12 @@
 import type { ModuleCode } from "./pricing";
-import { getModule, MAX_AUTO_TRACKS } from "./pricing";
+import { getModule } from "./pricing";
 
 // ============================================================
 // PROGRAM SELECTOR (Таблица 7) — детерминированный автоподбор
 // учебных модулей по роли + сигналам из чекбокс-ответов.
 // AI модули НЕ выбирает: получает готовый список и объясняет выбор.
+// Все найденные профильные модули входят в программу целиком —
+// стоимость считается от суммы часов (см. pricing.ts).
 // ============================================================
 
 // Базовый план по роли (какие П-модули профильны для роли)
@@ -45,21 +47,16 @@ export interface SelectionResult {
   modules: ModuleCode[];
   requiredLessons: ModuleCode[];
   optionalLessons: ModuleCode[];
-  /** Профильные треки сверх пакета — предлагаются опционально, в цену не входят */
-  extraTracks: ModuleCode[];
   publicCloudRestricted: boolean;
 }
 
 /**
- * Подбор модулей.
- *
- * Треков в программу попадает не больше MAX_AUTO_TRACKS: это потолок протокола
- * цен (пакет «Углублённый»). Всё, что анкета нашла сверх — уходит в extraTracks
- * и предлагается отдельной опцией, иначе одна щедрая анкета собирает программу
- * на восемь модулей и смету, в которую никто не поверит.
+ * Подбор модулей: профильные треки по роли и сигналам анкеты входят
+ * в программу целиком — цена автоматически считается от суммы часов
+ * (ставка за час зависит только от объема программы).
  *
  * @param role         роль участников (экран 1)
- * @param answersText  объединённый текст всех чекбокс-ответов (нижний регистр не обязателен)
+ * @param answersText  объединенный текст всех чекбокс-ответов (нижний регистр не обязателен)
  * @param hasManagers  участвуют ли руководители (роль = Руководители)
  */
 export function selectProgram(
@@ -84,25 +81,21 @@ export function selectProgram(
   if (managers) addTrack("П1");
 
   // Чистая программа для руководителей: базовое обучение сотрудников не нужно,
-  // это пакет «Управление и внедрение» из протокола цен.
+  // это сборка «Управление и внедрение».
   if (managers && !needsБ2 && ranked.length <= 1) {
     const ordered = orderModules(["П1", "РУК"]);
     return {
       modules: ordered,
       requiredLessons: [],
       optionalLessons: ordered,
-      extraTracks: [],
       publicCloudRestricted,
     };
   }
 
-  const tracks = ranked.slice(0, MAX_AUTO_TRACKS);
-  const extraTracks = orderModules(ranked.slice(MAX_AUTO_TRACKS));
-
   const modules = new Set<ModuleCode>(["Б1"]);
   // Б2 — при сигналах документы/данные/политика (базовое обучение — норма)
   if (needsБ2 || role !== "Универсальные специалисты") modules.add("Б2");
-  for (const code of tracks) modules.add(code);
+  for (const code of ranked) modules.add(code);
   if (managers) modules.add("РУК");
 
   // Упорядочиваем: Б1, Б2, П* по номеру, РУК в конце
@@ -114,7 +107,6 @@ export function selectProgram(
     modules: ordered,
     requiredLessons: required,
     optionalLessons: optional,
-    extraTracks,
     publicCloudRestricted,
   };
 }
