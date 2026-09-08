@@ -24,13 +24,29 @@ interface ChatMessage {
 }
 
 /**
+ * Лимит на длину ответа модели.
+ *
+ * Задавать его ОБЯЗАТЕЛЬНО. OpenRouter балансирует запросы между провайдерами
+ * модели, и часть из них при отсутствии max_tokens подставляет размер контекста
+ * целиком (для qwen3-235b это 131072). Тогда «вход + ответ» заведомо превышает
+ * контекст, и провайдер отвечает 400 даже на запрос в триста токенов — а по коду
+ * это выглядит как случайные падения AI-роутов.
+ */
+const DEFAULT_MAX_TOKENS = 1200;
+
+/**
  * Запрос к текстовой модели (Qwen) через OpenRouter.
  * Системный промпт (prompts/assistant-system.md) + база знаний (knowledge/)
  * добавляются автоматически.
  */
 export async function chatCompletion(
   userMessages: ChatMessage[],
-  opts: { json?: boolean; temperature?: number; system?: string } = {}
+  opts: {
+    json?: boolean;
+    temperature?: number;
+    system?: string;
+    maxTokens?: number;
+  } = {}
 ): Promise<string> {
   // По умолчанию — системный промпт AI-продажника + база знаний.
   // Для технических задач (напр. извлечение анкеты) можно передать свой system.
@@ -52,6 +68,7 @@ export async function chatCompletion(
       model: textModel(),
       messages,
       temperature: opts.temperature ?? 0.4,
+      max_tokens: opts.maxTokens ?? DEFAULT_MAX_TOKENS,
       ...(opts.json ? { response_format: { type: "json_object" } } : {}),
     }),
   });
@@ -83,12 +100,13 @@ export function extractJson(raw: string): string {
 export async function chatJson<T>(
   userMessages: ChatMessage[],
   parse: (data: unknown) => T,
-  opts: { system?: string; temperature?: number } = {}
+  opts: { system?: string; temperature?: number; maxTokens?: number } = {}
 ): Promise<T> {
   const first = await chatCompletion(userMessages, {
     json: true,
     system: opts.system,
     temperature: opts.temperature,
+    maxTokens: opts.maxTokens,
   });
   try {
     return parse(JSON.parse(extractJson(first)));
@@ -107,7 +125,7 @@ export async function chatJson<T>(
           )}. Верни ТОЛЬКО исправленный валидный JSON без каких-либо пояснений.`,
         },
       ],
-      { json: true, temperature: 0.2, system: opts.system }
+      { json: true, temperature: 0.2, system: opts.system, maxTokens: opts.maxTokens }
     );
     return parse(JSON.parse(extractJson(retry)));
   }

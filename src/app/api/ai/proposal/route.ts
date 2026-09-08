@@ -115,7 +115,8 @@ ${selection.publicCloudRestricted ? "ВАЖНО: у клиента запрещ�
 }`,
         },
       ],
-      (data) => ProposalSchema.parse(data)
+      (data) => ProposalSchema.parse(data),
+      { maxTokens: 3000 } // самый объемный ответ: summary + обоснование каждого модуля
     );
 
     // Комбинированное соответствие: формула в коде + оценка AI (50/50)

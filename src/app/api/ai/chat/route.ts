@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
 
     const reply = await chatCompletion(
       [{ role: "system", content: ctxLines }, ...trimmed],
-      { temperature: 0.5 }
+      { temperature: 0.5, maxTokens: 800 } // ответ в чате — 2-4 предложения
     );
 
     return NextResponse.json({ reply: sanitizeReply(reply) });

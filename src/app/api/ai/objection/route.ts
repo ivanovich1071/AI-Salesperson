@@ -53,7 +53,8 @@ export async function POST(req: NextRequest) {
 }`,
         },
       ],
-      (data) => ObjectionResponseSchema.parse(data)
+      (data) => ObjectionResponseSchema.parse(data),
+      { maxTokens: 1500 } // JSON из четырех текстовых блоков
     );
 
     return NextResponse.json(result);
