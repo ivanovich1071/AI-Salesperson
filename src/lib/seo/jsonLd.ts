@@ -9,8 +9,9 @@
 // Все факты приходят из profile.ts и faq.ts — здесь только форма.
 // ============================================================
 
-import { AUTHOR, COURSE, ORG, PRODUCTS, SERVICES, SITE_URL } from "./profile";
+import { AUTHOR, COURSE, ORG, SERVICES, SITE_URL } from "./profile";
 import { FAQ } from "./faq";
+import type { LabSolution } from "@/lib/lab/schema";
 
 /** Относительный путь → абсолютный URL (Schema.org требует абсолютные). */
 export const abs = (path: string): string =>
@@ -133,14 +134,17 @@ export function courseLd() {
   };
 }
 
-/** Витрина «Лаборатория решений» — готовые AI-ассистенты как перечень услуг. */
-export function productsLd() {
+/**
+ * Витрина «Лаборатория решений» — готовые AI-ассистенты как перечень услуг.
+ * Карточки приходят из базы (правятся в админке), поэтому список — параметром.
+ */
+export function productsLd(items: LabSolution[]) {
   return {
     "@type": "ItemList",
-    "@id": `${SITE_URL}/#solutions`,
+    "@id": `${SITE_URL}/solutions#solutions`,
     name: "Лаборатория решений ВайбМайнд: готовые AI-ассистенты",
-    numberOfItems: PRODUCTS.length,
-    itemListElement: PRODUCTS.map((p, i) => ({
+    numberOfItems: items.length,
+    itemListElement: items.map((p, i) => ({
       "@type": "ListItem",
       position: i + 1,
       item: {
@@ -148,7 +152,8 @@ export function productsLd() {
         name: p.name,
         alternateName: p.role,
         description: `${p.task} Статус: ${p.status}.`,
-        url: p.url,
+        url: p.liveUrl ?? `${SITE_URL}/solutions`,
+        ...(p.photo ? { image: abs(p.photo) } : {}),
         provider: { "@id": ORG_ID },
       },
     })),

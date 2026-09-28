@@ -28,7 +28,6 @@ test("якорная навигация ведёт к секциям", async ({ 
   for (const [label, id] of [
     ["Преимущества", "benefits"],
     ["Как мы работаем", "process"],
-    ["Решения", "solutions"],
     ["О компании", "about"],
   ] as const) {
     await page.locator("nav").getByRole("link", { name: label, exact: true }).click();
@@ -81,9 +80,19 @@ test.describe("Ролик о компании", () => {
   });
 });
 
-test.describe("Лаборатория решений", () => {
-  test("показывает 7 карточек", async ({ page }) => {
-    await expect(page.locator("#solutions button")).toHaveCount(7);
+test.describe("Лаборатория решений (тизер на главной)", () => {
+  test("показывает 3 карточки и ведёт на всю витрину", async ({ page }) => {
+    await expect(page.locator("#solutions button")).toHaveCount(3);
+    await page.locator("#solutions").getByRole("link", { name: /Все решения/ }).click();
+    await expect(page).toHaveURL(/\/solutions$/);
+    // «Не меньше»: admin-solutions.spec.ts параллельно добавляет свои карточки
+    await expect(page.locator("#solutions button").nth(6)).toBeVisible();
+  });
+
+  test("пункт меню «Решения» ведёт на /solutions", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === "mobile", "на мобильном меню в бургере");
+    await page.locator("nav").getByRole("link", { name: "Решения", exact: true }).click();
+    await expect(page).toHaveURL(/\/solutions$/);
   });
 
   test("карточка открывает модалку и закрывается", async ({ page }) => {
@@ -176,8 +185,8 @@ test("мобильное бургер-меню открывается и вед�
   const burger = page.getByRole("button", { name: "Меню" });
   await expect(burger).toBeVisible();
   await burger.click();
-  const menuLink = page.locator("nav ul").getByRole("link", { name: "Решения" });
+  const menuLink = page.locator("nav ul").getByRole("link", { name: "О компании" });
   await expect(menuLink).toBeVisible();
   await menuLink.click();
-  await expect(page.locator("#solutions")).toBeInViewport();
+  await expect(page.locator("#about")).toBeInViewport();
 });

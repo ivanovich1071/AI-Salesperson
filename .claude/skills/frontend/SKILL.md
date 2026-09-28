@@ -28,7 +28,8 @@ Dev-сервер: `npm run dev` → **порт 3100** (не 3000 — задан�
 | Маршрут | Файл | Тип |
 |---|---|---|
 | `/` | `src/app/page.tsx` | Клиентский компонент — **лендинг компании «ВайбМайнд»** (структура VibeZmest, бирюза). CTA ведут на `/course` и `/app?new=1` |
-| `/course` | `src/app/course/page.tsx` (+ `layout.tsx` с метатегами) | Клиентский компонент — лендинг корпоративного курса Вероники Пунчик + секция «Лаборатория решений» |
+| `/course` | `src/app/course/page.tsx` (+ `layout.tsx` с метатегами) | Клиентский компонент — лендинг корпоративного курса Вероники Пунчик + тизер «Лаборатории решений» |
+| `/solutions` | `src/app/solutions/page.tsx` | Серверный компонент — витрина «Лаборатории решений». Карточки из базы (`src/lib/lab/solutions.ts`), UI — `src/components/lab/`, правка — вкладка в `/admin` (`src/components/admin/LabSolutionsAdmin.tsx`) |
 | `/app` | `src/app/app/page.tsx` | Клиентский компонент (визард, `"use client"`) |
 | `/admin` | `src/app/admin/page.tsx` | Клиентский компонент (логин + дашборд) |
 | `/privacy` | `src/app/privacy/page.tsx` | Серверный компонент (статичный текст) |
@@ -95,7 +96,8 @@ src/
 │   ├── page.tsx              # лендинг «ВайбМайнд» (компания, бирюза, секции по id)
 │   ├── layout.tsx            # root layout + метатеги «ВайбМайнд»
 │   ├── globals.css           # Tailwind + фирменные @layer components (.btn-primary + .btn-teal/.vm-*)
-│   ├── course/page.tsx        # лендинг курса Вероники + секция «Лаборатория решений»
+│   ├── course/page.tsx        # лендинг курса Вероники + тизер «Лаборатории решений»
+│   ├── solutions/page.tsx     # витрина «Лаборатории решений» (карточки из базы)
 │   ├── course/layout.tsx      # server-метатеги курса
 │   ├── app/page.tsx           # визард — оркестрирует ChatPanel + Screen1..6
 │   ├── admin/page.tsx         # админка (self-contained, без отдельных компонентов)

@@ -1,0 +1,3 @@
+# Скрипты исполняются на Linux-сервере (deploy.sh передает deploy-entry.sh по SSH
+# прямо из рабочей копии) — CRLF сломал бы bash
+*.sh text eol=lf

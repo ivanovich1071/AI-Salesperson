@@ -362,7 +362,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== ЛАБОРАТОРИЯ РЕШЕНИЙ — тизер (сама витрина живет на главной) ===== */}
+      {/* ===== ЛАБОРАТОРИЯ РЕШЕНИЙ — тизер (сама витрина живет на /solutions) ===== */}
       <section id="solutions" className="bg-white py-20">
         <div className="mx-auto max-w-4xl px-5 text-center">
           <h2 className="section-title">Лаборатория решений</h2>
@@ -374,7 +374,7 @@ export default function LandingPage() {
             внедрить у вас, доработать под ваши процессы или научить вашу команду собирать
             такие решения самой.
           </p>
-          <a href="/#solutions" className="btn-primary mt-8">
+          <a href="/solutions" className="btn-primary mt-8">
             Смотреть решения →
           </a>
         </div>

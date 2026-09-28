@@ -1,0 +1,96 @@
+name: Деплой на vibemind.by
+
+# Любой пуш в main (ваш или Вероники) сам выкатывается на прод.
+# Сначала проверка: если правка ломает сборку, до сервера она не доходит,
+# а сайт продолжает работать на прошлой версии.
+#
+# Нужны секреты репозитория (Settings → Secrets and variables → Actions):
+#   DEPLOY_SSH_KEY — приватный ключ деплоя. Его публичная часть лежит на сервере
+#                    с ограничением command="/usr/local/bin/vibemind-deploy":
+#                    ключом можно только запустить деплой, консоли он не дает.
+#   DEPLOY_HOST    — root@81.177.214.84
+# Подробности — DEPLOY.md, раздел «Автодеплой из GitHub».
+
+on:
+  push:
+    branches: [main]
+    # Правки только в документации и тестах сайт не меняют.
+    # knowledge/ здесь нет намеренно: это содержимое промптов ассистента.
+    paths-ignore:
+      - "*.md"
+      - "e2e/**"
+      - ".github/workflows/geo-audit.yml"
+  workflow_dispatch:
+
+# Два пуша подряд выкатываются по очереди, а не одновременно
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Проверка сборки
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Зависимости
+        run: npm ci
+      - name: Типы
+        run: npx tsc --noEmit
+      - name: Сборка
+        # Базы здесь нет — витрина собирается на стартовом наборе карточек
+        env:
+          DATABASE_URL: file:./ci.db
+        run: npm run build
+
+  deploy:
+    name: Выкатка на сервер
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/deploy
+      - name: Ключ деплоя
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::Нет секрета DEPLOY_SSH_KEY — см. DEPLOY.md, «Автодеплой из GitHub»"
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Ключ сервера закреплен в репозитории: подменить сервер по дороге не выйдет
+          cp .github/deploy/known_hosts ~/.ssh/known_hosts
+      - name: Деплой (с повторами — провайдер придушивает порт 22)
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          for i in 1 2 3 4 5; do
+            echo "Попытка $i из 5"
+            # Команду выбирает сервер (command= в authorized_keys), здесь ее не передаем
+            if ssh -T -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes \
+                 -o ConnectTimeout=30 -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
+                 "$HOST"; then
+              exit 0
+            fi
+            [ "$i" -lt 5 ] && { echo "Не достучались — ждем 3 минуты"; sleep 180; }
+          done
+          echo "::error::Сервер не пустил по SSH. Сайт работает на прошлой версии; перезапустите workflow позже."
+          exit 1
+      - name: Сайт отвечает
+        run: |
+          FAIL=0
+          for p in / /solutions /course /app; do
+            code=$(curl -sL -o /dev/null -m 30 -w '%{http_code}' "https://vibemind.by$p")
+            echo "$p → $code"
+            [ "$code" = "200" ] || FAIL=1
+          done
+          exit $FAIL

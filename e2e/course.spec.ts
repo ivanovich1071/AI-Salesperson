@@ -44,10 +44,10 @@ test("обновлённый список «Внедрено»", async ({ page }
   await expect(block).toContainText(/Руководство проектной работой/);
 });
 
-test("тизер «Лаборатории» ведёт на главную", async ({ page }) => {
+test("тизер «Лаборатории» ведёт на страницу решений", async ({ page }) => {
   const link = page.locator("#solutions").getByRole("link", { name: /Смотреть решения/i });
-  await expect(link).toHaveAttribute("href", "/#solutions");
-  // Витрина карточек живёт на главной, здесь их быть не должно
+  await expect(link).toHaveAttribute("href", "/solutions");
+  // Витрина карточек живёт на /solutions, здесь их быть не должно
   await expect(page.locator("#solutions button")).toHaveCount(0);
 });
 

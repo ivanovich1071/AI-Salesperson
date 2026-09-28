@@ -33,8 +33,8 @@ test("блок «Как мы работаем» (стрелки между ка�
   await expect(page.locator("#process")).toHaveScreenshot("process.png");
 });
 
-test("витрина «Лаборатория решений»", async ({ page }) => {
-  await page.goto("/");
+test("витрина «Лаборатория решений» (/solutions)", async ({ page }) => {
+  await page.goto("/solutions");
   await expect(page.locator("#solutions")).toHaveScreenshot("solutions.png");
 });
 

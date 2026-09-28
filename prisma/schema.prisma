@@ -38,6 +38,29 @@ model Booking {
   createdAt  DateTime @default(now())
 }
 
+// Карточка витрины «Лаборатория решений» (/solutions). Правится в админке,
+// стартовый набор заливает scripts/seed-lab.mjs из src/lib/lab/defaults.json.
+model LabSolution {
+  id          String   @id @default(cuid())
+  name        String
+  role        String
+  task        String
+  abilities   String   @default("[]") // JSON-массив строк: «Что умеет»
+  tags        String   @default("[]") // JSON-массив строк
+  status      String // текст плашки: «Живое демо», «Готов к внедрению»…
+  tone        String   @default("ready") // цвет плашки: live | partner | ready | github | soon
+  liveUrl     String?
+  liveLabel   String?
+  note        String?
+  icon        String   @default("lab") // иконка для карточки без фото (src/components/lab/icons.ts)
+  photo       String? // /images/lab/… (из репозитория) или /uploads/lab/… (загружено в админке)
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  updatedBy   String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 // Карта диагностики клиента (шаблон-заготовка). Сохраняется в момент
 // формирования предложения — до/без брони встречи. Виден в админке.
 model DiagnosticMap {

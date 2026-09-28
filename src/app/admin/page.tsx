@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { formatMoney } from "@/lib/pricing";
+import LabSolutionsAdmin from "@/components/admin/LabSolutionsAdmin";
 
 interface SlotRow {
   id: string;
@@ -118,6 +119,8 @@ export default function AdminPage() {
   const [diagMaps, setDiagMaps] = useState<DiagMapRow[]>([]);
   const [selectedMap, setSelectedMap] = useState<DiagMapRow | null>(null);
   const [showAllSlots, setShowAllSlots] = useState(false);
+  const [tab, setTab] = useState<"requests" | "solutions">("requests");
+  const [me, setMe] = useState("");
 
   const loadData = useCallback(async () => {
     const [bRes, sRes, dRes] = await Promise.all([
@@ -143,6 +146,17 @@ export default function AdminPage() {
   useEffect(() => {
     loadData().catch(() => {});
   }, [loadData]);
+
+  // Кто вошел — в шапке; правки карточек подписываются этим логином
+  useEffect(() => {
+    if (!authed) return;
+    fetch("/api/admin/login")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setMe(d?.user ?? ""))
+      .catch(() => {});
+  }, [authed]);
+
+  const onUnauthorized = useCallback(() => setAuthed(false), []);
 
   async function login() {
     setLoginError("");
@@ -215,7 +229,7 @@ export default function AdminPage() {
       <main className="flex min-h-screen items-center justify-center bg-milk px-5">
         <div className="card w-full max-w-sm p-8">
           <h1 className="text-2xl font-bold text-brown-deep">Вход в админ-панель</h1>
-          <p className="mt-1 text-sm text-muted">Управление слотами и заявками</p>
+          <p className="mt-1 text-sm text-muted">Заявки, слоты и карточки «Лаборатории решений»</p>
           <div className="mt-6 space-y-4">
             <div>
               <label className="label-base" htmlFor="f-login">Логин</label>
@@ -258,7 +272,10 @@ export default function AdminPage() {
     <main className="min-h-screen bg-milk px-5 py-10">
       <div className="mx-auto max-w-5xl">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-brown-deep">Панель управления</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-brown-deep">Панель управления</h1>
+            {me && <p className="mt-1 text-sm text-muted">Вы вошли как {me}</p>}
+          </div>
           <div className="flex gap-3">
             <Link href="/" className="btn-secondary !px-5 !py-2.5 text-sm">
               На сайт
@@ -275,249 +292,279 @@ export default function AdminPage() {
           </p>
         )}
 
-        {/* Брони */}
-        <section className="card mt-8 p-6">
-          <h2 className="text-lg font-bold text-brown-deep">Забронированные встречи</h2>
-          {bookings.length === 0 ? (
-            <p className="mt-4 text-sm text-muted">Пока нет ни одной заявки.</p>
-          ) : (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b-2 border-line text-left text-muted">
-                    <th className="p-2">Дата/Время</th>
-                    <th className="p-2">Компания</th>
-                    <th className="p-2">Контакт</th>
-                    <th className="p-2">Сумма</th>
-                    <th className="p-2">Статус</th>
-                    <th className="p-2" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.map((b) => (
-                    <tr key={b.id} className="border-b border-line align-top">
-                      <td className="p-2 font-medium text-brown-deep">
-                        {b.slot.date}
-                        <br />
-                        {b.slot.time}
-                      </td>
-                      <td className="p-2">{b.company}</td>
-                      <td className="p-2">
-                        {b.name}
-                        <br />
-                        <span className="text-muted">{b.email}</span>
-                        <br />
-                        <span className="text-muted">{b.phone}</span>
-                      </td>
-                      <td className="p-2 font-semibold text-gold">
-                        {formatMoney(b.totalCost)}
-                      </td>
-                      <td className="p-2">
-                        <span className="rounded-full bg-gold-light px-3 py-1 text-xs font-semibold text-brown-deep">
-                          {b.status === "booked" ? "Забронировано" : b.status}
-                        </span>
-                      </td>
-                      <td className="p-2">
-                        <button
-                          className="rounded-2xl border border-line px-3 py-1.5 text-xs font-semibold text-brown-light hover:border-gold hover:text-gold"
-                          onClick={() => copyTemplate(b)}
-                        >
-                          📋 Шаблон
-                        </button>
-                        <button
-                          className="ml-1 rounded-2xl border border-line px-3 py-1.5 text-xs text-brown-light hover:border-gold"
-                          onClick={() => setSelectedBooking(b)}
-                        >
-                          👁
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        {/* Шаблон сообщения */}
-        {selectedBooking && (
-          <section className="card mt-6 p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-brown-deep">
-                Шаблон сообщения для эксперта
-              </h2>
-              <button
-                className="text-sm text-muted hover:text-gold"
-                onClick={() => setSelectedBooking(null)}
-              >
-                ✕ Закрыть
-              </button>
-            </div>
-            <textarea
-              readOnly
-              rows={14}
-              className="mt-4 w-full rounded-2xl border border-line bg-milk p-4 font-mono text-xs"
-              value={buildTemplate(selectedBooking)}
-            />
-          </section>
-        )}
-
-        {/* Карты диагностики */}
-        <section className="card mt-6 p-6">
-          <h2 className="text-lg font-bold text-brown-deep">Карты диагностики</h2>
-          <p className="mt-1 text-sm text-muted">
-            Сохраненные заготовки по клиентам — создаются при формировании предложения (до брони).
-          </p>
-          {diagMaps.length === 0 ? (
-            <p className="mt-4 text-sm text-muted">Пока нет сохраненных карт диагностики.</p>
-          ) : (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b-2 border-line text-left text-muted">
-                    <th className="p-2">Дата</th>
-                    <th className="p-2">Компания</th>
-                    <th className="p-2">Роль / участники</th>
-                    <th className="p-2">Задачи</th>
-                    <th className="p-2">Соотв.</th>
-                    <th className="p-2" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {diagMaps.map((m) => (
-                    <tr key={m.id} className="border-b border-line align-top">
-                      <td className="whitespace-nowrap p-2 text-muted">
-                        {new Date(m.createdAt).toLocaleString("ru-RU")}
-                      </td>
-                      <td className="p-2 font-medium text-brown-deep">{m.companyName}</td>
-                      <td className="p-2">
-                        {m.userRole}
-                        <br />
-                        <span className="text-muted">{m.participantCount} чел.</span>
-                      </td>
-                      <td className="max-w-[220px] truncate p-2" title={m.goals}>
-                        {m.goals || "—"}
-                      </td>
-                      <td className="p-2 font-semibold text-gold">{m.matchScore}%</td>
-                      <td className="p-2">
-                        <button
-                          className="rounded-2xl border border-line px-3 py-1.5 text-xs font-semibold text-brown-light hover:border-gold hover:text-gold"
-                          onClick={() => copyDiagTemplate(m)}
-                        >
-                          📋 Шаблон
-                        </button>
-                        <button
-                          className="ml-1 rounded-2xl border border-line px-3 py-1.5 text-xs text-brown-light hover:border-gold"
-                          onClick={() => setSelectedMap(m)}
-                        >
-                          👁
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        {selectedMap && (
-          <section className="card mt-6 p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-brown-deep">
-                Карта диагностики — {selectedMap.companyName}
-              </h2>
-              <button
-                className="text-sm text-muted hover:text-gold"
-                onClick={() => setSelectedMap(null)}
-              >
-                ✕ Закрыть
-              </button>
-            </div>
-            <textarea
-              readOnly
-              rows={16}
-              className="mt-4 w-full rounded-2xl border border-line bg-milk p-4 font-mono text-xs"
-              value={buildDiagTemplate(selectedMap)}
-            />
-          </section>
-        )}
-
-        {/* Слоты */}
-        <section className="card mt-6 p-6">
-          <h2 className="text-lg font-bold text-brown-deep">Свободные слоты</h2>
-          <div className="mt-4 flex flex-wrap items-end gap-3">
-            <div>
-              <label className="label-base" htmlFor="f-data">Дата</label>
-              <input
-                id="f-data"
-                className="input-base"
-                type="date"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-              />
-            </div>
-            <div className="flex-1 min-w-[220px]">
-              <label className="label-base" htmlFor="f-vremya-cherez-zapyatuyu">Время (через запятую)</label>
-              <input
-                id="f-vremya-cherez-zapyatuyu"
-                className="input-base"
-                placeholder="10:00, 14:00, 16:00"
-                value={newTimes}
-                onChange={(e) => setNewTimes(e.target.value)}
-              />
-            </div>
+        {/* Разделы */}
+        <div className="mt-6 flex gap-2" role="tablist">
+          {(
+            [
+              ["requests", "Заявки и слоты"],
+              ["solutions", "Лаборатория решений"],
+            ] as const
+          ).map(([key, label]) => (
             <button
-              className="btn-primary !px-6 !py-3"
-              disabled={!newDate}
-              onClick={addSlots}
+              key={key}
+              role="tab"
+              aria-selected={tab === key}
+              className={`rounded-2xl px-5 py-2.5 text-sm font-semibold transition-colors ${
+                tab === key
+                  ? "bg-brown-deep text-white"
+                  : "border border-line bg-white text-brown-light hover:border-gold"
+              }`}
+              onClick={() => setTab(key)}
             >
-              + Добавить
+              {label}
             </button>
-          </div>
+          ))}
+        </div>
 
-          {slots.length === 0 ? (
-            <p className="mt-4 text-sm text-muted">
-              Свободных слотов нет — добавьте даты, чтобы клиенты могли записаться.
-            </p>
-          ) : (
-            <>
-              <p className="mt-5 text-sm text-muted">
-                Всего свободных слотов: {slots.length}
-                {slots.length > SLOT_PREVIEW_COUNT &&
-                  (showAllSlots
-                    ? " — показаны все"
-                    : ` — показаны ближайшие ${SLOT_PREVIEW_COUNT}`)}
-                .
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {(showAllSlots ? slots : slots.slice(0, SLOT_PREVIEW_COUNT)).map((slot) => (
-                  <span
-                    key={slot.id}
-                    className="flex items-center gap-2 rounded-2xl border border-line bg-white px-4 py-2 text-sm"
-                  >
-                    <strong className="text-brown-deep">{slot.date}</strong> {slot.time}
-                    <button
-                      className="text-red-500 hover:text-red-700"
-                      title="Удалить слот"
-                      onClick={() => deleteSlot(slot.id)}
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))}
-              </div>
-              {slots.length > SLOT_PREVIEW_COUNT && (
-                <button
-                  className="btn-secondary mt-4 !px-5 !py-2.5 text-sm"
-                  onClick={() => setShowAllSlots((v) => !v)}
-                >
-                  {showAllSlots ? "Свернуть" : `Показать все (${slots.length})`}
-                </button>
+        {tab === "solutions" && <LabSolutionsAdmin onUnauthorized={onUnauthorized} />}
+
+        {tab === "requests" && (
+          <>
+            {/* Брони */}
+            <section className="card mt-8 p-6">
+              <h2 className="text-lg font-bold text-brown-deep">Забронированные встречи</h2>
+              {bookings.length === 0 ? (
+                <p className="mt-4 text-sm text-muted">Пока нет ни одной заявки.</p>
+              ) : (
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b-2 border-line text-left text-muted">
+                        <th className="p-2">Дата/Время</th>
+                        <th className="p-2">Компания</th>
+                        <th className="p-2">Контакт</th>
+                        <th className="p-2">Сумма</th>
+                        <th className="p-2">Статус</th>
+                        <th className="p-2" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bookings.map((b) => (
+                        <tr key={b.id} className="border-b border-line align-top">
+                          <td className="p-2 font-medium text-brown-deep">
+                            {b.slot.date}
+                            <br />
+                            {b.slot.time}
+                          </td>
+                          <td className="p-2">{b.company}</td>
+                          <td className="p-2">
+                            {b.name}
+                            <br />
+                            <span className="text-muted">{b.email}</span>
+                            <br />
+                            <span className="text-muted">{b.phone}</span>
+                          </td>
+                          <td className="p-2 font-semibold text-gold">
+                            {formatMoney(b.totalCost)}
+                          </td>
+                          <td className="p-2">
+                            <span className="rounded-full bg-gold-light px-3 py-1 text-xs font-semibold text-brown-deep">
+                              {b.status === "booked" ? "Забронировано" : b.status}
+                            </span>
+                          </td>
+                          <td className="p-2">
+                            <button
+                              className="rounded-2xl border border-line px-3 py-1.5 text-xs font-semibold text-brown-light hover:border-gold hover:text-gold"
+                              onClick={() => copyTemplate(b)}
+                            >
+                              📋 Шаблон
+                            </button>
+                            <button
+                              className="ml-1 rounded-2xl border border-line px-3 py-1.5 text-xs text-brown-light hover:border-gold"
+                              onClick={() => setSelectedBooking(b)}
+                            >
+                              👁
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
-            </>
-          )}
-        </section>
+            </section>
+
+            {/* Шаблон сообщения */}
+            {selectedBooking && (
+              <section className="card mt-6 p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-brown-deep">
+                    Шаблон сообщения для эксперта
+                  </h2>
+                  <button
+                    className="text-sm text-muted hover:text-gold"
+                    onClick={() => setSelectedBooking(null)}
+                  >
+                    ✕ Закрыть
+                  </button>
+                </div>
+                <textarea
+                  readOnly
+                  rows={14}
+                  className="mt-4 w-full rounded-2xl border border-line bg-milk p-4 font-mono text-xs"
+                  value={buildTemplate(selectedBooking)}
+                />
+              </section>
+            )}
+
+            {/* Карты диагностики */}
+            <section className="card mt-6 p-6">
+              <h2 className="text-lg font-bold text-brown-deep">Карты диагностики</h2>
+              <p className="mt-1 text-sm text-muted">
+                Сохраненные заготовки по клиентам — создаются при формировании предложения (до брони).
+              </p>
+              {diagMaps.length === 0 ? (
+                <p className="mt-4 text-sm text-muted">Пока нет сохраненных карт диагностики.</p>
+              ) : (
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b-2 border-line text-left text-muted">
+                        <th className="p-2">Дата</th>
+                        <th className="p-2">Компания</th>
+                        <th className="p-2">Роль / участники</th>
+                        <th className="p-2">Задачи</th>
+                        <th className="p-2">Соотв.</th>
+                        <th className="p-2" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {diagMaps.map((m) => (
+                        <tr key={m.id} className="border-b border-line align-top">
+                          <td className="whitespace-nowrap p-2 text-muted">
+                            {new Date(m.createdAt).toLocaleString("ru-RU")}
+                          </td>
+                          <td className="p-2 font-medium text-brown-deep">{m.companyName}</td>
+                          <td className="p-2">
+                            {m.userRole}
+                            <br />
+                            <span className="text-muted">{m.participantCount} чел.</span>
+                          </td>
+                          <td className="max-w-[220px] truncate p-2" title={m.goals}>
+                            {m.goals || "—"}
+                          </td>
+                          <td className="p-2 font-semibold text-gold">{m.matchScore}%</td>
+                          <td className="p-2">
+                            <button
+                              className="rounded-2xl border border-line px-3 py-1.5 text-xs font-semibold text-brown-light hover:border-gold hover:text-gold"
+                              onClick={() => copyDiagTemplate(m)}
+                            >
+                              📋 Шаблон
+                            </button>
+                            <button
+                              className="ml-1 rounded-2xl border border-line px-3 py-1.5 text-xs text-brown-light hover:border-gold"
+                              onClick={() => setSelectedMap(m)}
+                            >
+                              👁
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+
+            {selectedMap && (
+              <section className="card mt-6 p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-brown-deep">
+                    Карта диагностики — {selectedMap.companyName}
+                  </h2>
+                  <button
+                    className="text-sm text-muted hover:text-gold"
+                    onClick={() => setSelectedMap(null)}
+                  >
+                    ✕ Закрыть
+                  </button>
+                </div>
+                <textarea
+                  readOnly
+                  rows={16}
+                  className="mt-4 w-full rounded-2xl border border-line bg-milk p-4 font-mono text-xs"
+                  value={buildDiagTemplate(selectedMap)}
+                />
+              </section>
+            )}
+
+            {/* Слоты */}
+            <section className="card mt-6 p-6">
+              <h2 className="text-lg font-bold text-brown-deep">Свободные слоты</h2>
+              <div className="mt-4 flex flex-wrap items-end gap-3">
+                <div>
+                  <label className="label-base" htmlFor="f-data">Дата</label>
+                  <input
+                    id="f-data"
+                    className="input-base"
+                    type="date"
+                    value={newDate}
+                    onChange={(e) => setNewDate(e.target.value)}
+                  />
+                </div>
+                <div className="flex-1 min-w-[220px]">
+                  <label className="label-base" htmlFor="f-vremya-cherez-zapyatuyu">Время (через запятую)</label>
+                  <input
+                    id="f-vremya-cherez-zapyatuyu"
+                    className="input-base"
+                    placeholder="10:00, 14:00, 16:00"
+                    value={newTimes}
+                    onChange={(e) => setNewTimes(e.target.value)}
+                  />
+                </div>
+                <button
+                  className="btn-primary !px-6 !py-3"
+                  disabled={!newDate}
+                  onClick={addSlots}
+                >
+                  + Добавить
+                </button>
+              </div>
+
+              {slots.length === 0 ? (
+                <p className="mt-4 text-sm text-muted">
+                  Свободных слотов нет — добавьте даты, чтобы клиенты могли записаться.
+                </p>
+              ) : (
+                <>
+                  <p className="mt-5 text-sm text-muted">
+                    Всего свободных слотов: {slots.length}
+                    {slots.length > SLOT_PREVIEW_COUNT &&
+                      (showAllSlots
+                        ? " — показаны все"
+                        : ` — показаны ближайшие ${SLOT_PREVIEW_COUNT}`)}
+                    .
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {(showAllSlots ? slots : slots.slice(0, SLOT_PREVIEW_COUNT)).map((slot) => (
+                      <span
+                        key={slot.id}
+                        className="flex items-center gap-2 rounded-2xl border border-line bg-white px-4 py-2 text-sm"
+                      >
+                        <strong className="text-brown-deep">{slot.date}</strong> {slot.time}
+                        <button
+                          className="text-red-500 hover:text-red-700"
+                          title="Удалить слот"
+                          onClick={() => deleteSlot(slot.id)}
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  {slots.length > SLOT_PREVIEW_COUNT && (
+                    <button
+                      className="btn-secondary mt-4 !px-5 !py-2.5 text-sm"
+                      onClick={() => setShowAllSlots((v) => !v)}
+                    >
+                      {showAllSlots ? "Свернуть" : `Показать все (${slots.length})`}
+                    </button>
+                  )}
+                </>
+              )}
+            </section>
+          </>
+        )}
       </div>
     </main>
   );

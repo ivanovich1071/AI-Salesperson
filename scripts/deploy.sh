@@ -2,7 +2,10 @@
 # ---------------------------------------------------------------------------
 # Деплой ВайбМайнд на прод одной командой (без пароля — вход по SSH-ключу).
 #
-#   npm run deploy            — обычный релиз
+# ОБЫЧНО ЭТОТ СКРИПТ НЕ НУЖЕН: пуш в main сам выкатывается через GitHub Actions
+# (.github/workflows/deploy.yml). Это запасной путь — если Actions недоступен.
+#
+#   npm run deploy            — запушить и выкатить вручную
 #   npm run deploy -- --skip-push   — не пушить, задеплоить то, что уже в origin/main
 #
 # Что делает: пушит main → ждёт порт 22 → на сервере обновляет код, ставит
@@ -44,27 +47,15 @@ fi
 # Провайдер придушивает порт 22 после частых подключений, поэтому НЕ тратим
 # отдельный коннект на пинг: сразу пробуем боевой деплой и повторяем при обрыве.
 # Все шаги идемпотентны (reset --hard, npm ci, build), повтор безопасен.
-REMOTE_CMD="
-  set -e
-  cd $APPDIR
-  git config --global --add safe.directory $APPDIR 2>/dev/null || true
-  git fetch origin main -q && git reset --hard origin/main
-  echo \"    версия: \$(git rev-parse --short HEAD) \$(git log -1 --pretty=%s)\"
-  npm ci
-  npx prisma generate
-  npx prisma db push --skip-generate    # создаёт новые таблицы, если схема менялась
-  npm run build
-  chown -R appuser:appuser $APPDIR
-  systemctl restart ai-salesperson
-  sleep 4
-  systemctl is-active ai-salesperson
-"
+# Серверная часть — scripts/deploy-entry.sh → scripts/server-deploy.sh, те же, что
+# запускает GitHub Actions. Вход передаем через stdin: так выполняется локальная
+# версия, даже если на сервере еще лежит старая.
 
 DONE=""
 for i in 1 2 3 4 5; do
   info "Разворачиваем на сервере (3–6 минут), попытка $i из 5"
   if ssh $SSH_OPTS -o ConnectTimeout=30 -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
-       "$HOST" "$REMOTE_CMD"; then
+       "$HOST" 'bash -s' < scripts/deploy-entry.sh; then
     DONE=1; break
   fi
   if [ "$i" -lt 5 ]; then
@@ -88,7 +79,7 @@ if ! curl -s -o /dev/null -m 10 "$SITE"; then
   SITE="$SITE_OLD"
 fi
 FAIL=0
-for p in / /course /app /admin; do
+for p in / /solutions /course /app /admin; do
   code=$(curl -sL -o /dev/null -w '%{http_code}' "$SITE$p")
   if [ "$code" = "200" ]; then grn "    $p → $code"; else red "    $p → $code"; FAIL=1; fi
 done

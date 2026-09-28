@@ -30,4 +30,7 @@ export default function globalSetup() {
   const from = iso(today);
   const to = iso(new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000));
   run(`node scripts/seed-slots.mjs ${from} ${to}`);
+
+  // Стартовые карточки «Лаборатории решений» — тот же сид, что на проде
+  run("node scripts/seed-lab.mjs");
 }

@@ -5,11 +5,13 @@
 // того, чтобы вытаскивать смысл из верстки. Короткая версия — навигация и факты,
 // полная — весь публичный контент, чтобы ассистенту не пришлось домысливать.
 //
-// Тексты не дублируются вручную: все собирается из profile.ts и faq.ts.
+// Тексты не дублируются вручную: все собирается из profile.ts и faq.ts,
+// карточки «Лаборатории решений» — из базы (их правят в админке).
 // ============================================================
 
-import { AUTHOR, COURSE, KEY_PAGES, ORG, PRODUCTS, SERVICES, SITE_URL } from "./profile";
+import { AUTHOR, COURSE, KEY_PAGES, ORG, SERVICES, SITE_URL } from "./profile";
 import { FAQ } from "./faq";
+import type { LabSolution } from "@/lib/lab/schema";
 
 const abs = (p: string) => (p.startsWith("http") ? p : `${SITE_URL}${p}`);
 
@@ -17,7 +19,7 @@ const abs = (p: string) => (p.startsWith("http") ? p : `${SITE_URL}${p}`);
 const today = () => new Date().toISOString().slice(0, 10);
 
 /** Короткая версия: кто мы, что продаем, куда идти за подробностями. */
-export function buildLlmsTxt(): string {
+export function buildLlmsTxt(products: LabSolution[]): string {
   return `# ${ORG.name} (${ORG.alternateNames[0]}) — ${ORG.tagline}
 
 > ${ORG.description}
@@ -51,7 +53,9 @@ ${SERVICES.map((s) => `- **${s.name}** — ${s.description} Для кого: ${s
 
 ## Готовые AI-решения (Лаборатория решений)
 
-${PRODUCTS.map((p) => `- [${p.name} — ${p.role}](${p.url}) — ${p.task} Статус: ${p.status}.`).join("\n")}
+Все карточки с подробностями: ${abs("/solutions")}
+
+${products.map((p) => `- [${p.name} — ${p.role}](${p.liveUrl ?? abs("/solutions")}) — ${p.task} Статус: ${p.status}.`).join("\n")}
 
 ## Страницы сайта
 
@@ -68,7 +72,7 @@ ${FAQ.slice(0, 6).map((f) => `- **${f.q}** ${f.a}`).join("\n")}
 }
 
 /** Полная версия: весь публичный контент одним файлом. */
-export function buildLlmsFullTxt(): string {
+export function buildLlmsFullTxt(products: LabSolution[]): string {
   return `# ${ORG.name} — полный справочник для ИИ-ассистентов
 
 > ${ORG.description}
@@ -130,8 +134,14 @@ ${AUTHOR.description}
 
 ## 4. Лаборатория решений: готовые виртуальные сотрудники
 
-${PRODUCTS.map(
-  (p) => `### ${p.name} — ${p.role}\n\n${p.task}\n\n- Ссылка: ${p.url}\n- Статус: ${p.status}`
+Страница витрины: ${abs("/solutions")}
+
+${products.map(
+  (p) =>
+    `### ${p.name} — ${p.role}\n\n${p.task}\n\n` +
+    p.abilities.map((a) => `- ${a}\n`).join("") +
+    (p.liveUrl ? `- Ссылка: ${p.liveUrl}\n` : "") +
+    `- Статус: ${p.status}`
 ).join("\n\n")}
 
 ## 5. Вопросы и ответы

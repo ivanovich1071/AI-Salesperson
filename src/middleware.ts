@@ -41,6 +41,8 @@ const RULES: Rule[] = [
   { key: "parse-site", match: (p) => p.startsWith("/api/parse-site"), limit: 10, maxBody: 10 * 1024 },
   // Подбор пароля админки
   { key: "admin-login", match: (p) => p.startsWith("/api/admin/login"), limit: 10, maxBody: JSON_BODY },
+  // Карточки «Лаборатории решений»: только для вошедших, фото до 5 МБ
+  { key: "admin-solutions", match: (p) => p.startsWith("/api/admin/solutions"), limit: 60, maxBody: 6 * 1024 * 1024 },
 ];
 
 function clientIp(req: NextRequest): string {

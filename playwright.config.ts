@@ -73,7 +73,9 @@ export default defineConfig({
 
   webServer: {
     command: "npm run dev",
-    url: BASE_URL,
+    // Готовность — по роуту без базы: сервер стартует раньше global-setup, и запрос
+    // к главной (карточки из базы) держал бы файл test.db, пока его пересоздают
+    url: `${BASE_URL}/robots.txt`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
@@ -84,6 +86,10 @@ export default defineConfig({
       ADMIN_USER: "admin",
       ADMIN_PASSWORD: "demo2026",
       ADMIN_SESSION_SECRET: "e2e-test-secret",
+      // Второй пользователь админки — как вход Вероники на проде
+      ADMIN_USERS: "veronika:e2e-second-pass",
+      // Фото из тестов — в отдельный каталог, рабочие загрузки не трогаем
+      LAB_UPLOAD_DIR: "test-results/uploads-lab",
     },
   },
 });

@@ -48,7 +48,7 @@ test.describe("Файлы для ИИ-поисковиков", () => {
     expect(res.status()).toBe(200);
     const body = await res.text();
 
-    for (const path of ["/course", "/faq", "/app", "/privacy"]) {
+    for (const path of ["/course", "/solutions", "/faq", "/app", "/privacy"]) {
       expect(body, `нет ${path}`).toContain(`${path}<`);
     }
   });
@@ -63,6 +63,9 @@ test.describe("Файлы для ИИ-поисковиков", () => {
     expect(body).toContain("+375 29 7-200-700");
     expect(body).toContain("/llms-full.txt");
     expect(body).toContain("/identity.json");
+    // Карточки из базы: витрина и первая карточка сида
+    expect(body).toContain("/solutions");
+    expect(body).toContain("Иван");
   });
 
   test("llms-full.txt содержит программу курса и решения", async ({ request }) => {
@@ -97,12 +100,18 @@ test.describe("Файлы для ИИ-поисковиков", () => {
 });
 
 test.describe("Разметка Schema.org", () => {
-  test("главная: организация, сайт и перечень решений", async ({ page }) => {
+  test("главная: организация и сайт", async ({ page }) => {
     await page.goto("/");
     const types = await schemaTypes(page);
     expect(types).toContain("Organization");
     expect(types).toContain("WebSite");
+  });
+
+  test("решения: перечень карточек размечен там, где он показан", async ({ page }) => {
+    await page.goto("/solutions");
+    const types = await schemaTypes(page);
     expect(types).toContain("ItemList");
+    expect(types).toContain("BreadcrumbList");
   });
 
   test("курс: программа и автор", async ({ page }) => {
