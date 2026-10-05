@@ -10,6 +10,65 @@ body {
   @apply bg-milk text-ink font-sans antialiased;
 }
 
+/* Живая нейросетка на фоне первого экрана ВайбМайнд */
+.vm-hero-network::before {
+  content: "";
+  position: absolute;
+  inset: -18% -26% -12% -18%;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/images/network-bg.svg");
+  background-repeat: no-repeat;
+  background-position: 50% 52%;
+  background-size: min(1900px, 170vw) auto;
+  opacity: 0.27;
+  filter: saturate(1.05) drop-shadow(0 0 18px rgba(28, 165, 168, 0.16));
+  mix-blend-mode: screen;
+  animation: networkFloat 42s ease-in-out infinite alternate;
+  mask-image: linear-gradient(180deg, transparent 0%, black 18%, black 82%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 18%, black 82%, transparent 100%);
+}
+
+.vm-hero-network::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 72%, rgba(245, 247, 248, 0.08) 88%, rgba(245, 247, 248, 0.32) 100%);
+}
+
+@keyframes networkFloat {
+  0% {
+    transform: translate3d(-24px, 10px, 0) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate3d(12px, -14px, 0) scale(1.018);
+    opacity: 0.31;
+  }
+  100% {
+    transform: translate3d(34px, 6px, 0) scale(1.035);
+    opacity: 0.25;
+  }
+}
+
+@media (max-width: 900px) {
+  .vm-hero-network::before {
+    background-position: 48% 46%;
+    background-size: 240% auto;
+    opacity: 0.22;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vm-hero-network::before {
+    animation: none;
+    transform: none;
+    opacity: 0.23;
+  }
+}
+
 @layer components {
   .btn-primary {
     @apply inline-flex items-center gap-2 rounded-2xl bg-gold px-8 py-4 text-base font-semibold text-white shadow-gold transition-all hover:bg-gold-hover hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none;

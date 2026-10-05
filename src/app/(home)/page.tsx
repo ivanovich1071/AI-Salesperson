@@ -105,7 +105,7 @@ export default async function VibeMindHome() {
       {/* ===== HERO ===== */}
       <header
         id="hero"
-        className="relative overflow-hidden pb-24 pt-36 text-white"
+        className="vm-hero-network relative isolate overflow-hidden pb-24 pt-36 text-white"
         style={{
           background:
             "linear-gradient(90deg, #111111 0%, #111111 34%, #0e1e1f 66%, #073d3d 100%)",
@@ -119,7 +119,7 @@ export default async function VibeMindHome() {
           aria-hidden
           className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-teal-emerald/15 blur-3xl"
         />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-[2fr_3fr]">
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-[2fr_3fr]">
           <div className="flex justify-center">
             {/* Полный логотип на прозрачном фоне, вариант для ТЕМНОГО фона hero.
                 Буква «Й» в слове «Майнд» — белая: она стоит на градиенте, и любой
@@ -131,7 +131,7 @@ export default async function VibeMindHome() {
             <img
               src="/images/vibemind-logo-light.png"
               alt="Логотип ВайбМайнд"
-              className="h-64 w-auto drop-shadow-2xl md:h-72"
+              className="h-72 w-auto drop-shadow-2xl md:h-80"
             />
           </div>
           <div>
