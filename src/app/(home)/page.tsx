@@ -114,8 +114,8 @@ export default async function VibeMindHome() {
               ИИ, который усиливает профессионалов и команды
             </h1>
             <p className="mt-4 text-base font-medium italic text-teal md:text-lg">
-              <span className="block">Работаем с ИИ</span>
               <span className="block">Ориентируемся на людей</span>
+              <span className="block">Работаем с ИИ</span>
             </p>
             <p className="mt-5 text-base leading-relaxed text-white/80 md:mt-6 md:text-lg">
               Обучаем профессионалов работать с ИИ на реальных задачах. Вместе находим
@@ -162,10 +162,10 @@ export default async function VibeMindHome() {
           <h2 id="trusted-title" className="text-3xl font-bold md:text-4xl">
             Нам доверяют
           </h2>
-          <p className="mx-auto mt-5 max-w-5xl text-lg font-semibold leading-loose text-white/85 md:text-xl">
+          <p className="mx-auto mt-5 max-w-5xl text-lg font-semibold leading-loose text-teal md:text-xl">
             {TRUSTED.join(" · ")}
           </p>
-          <p className="mt-3 font-semibold text-teal-emerald">
+          <p className="mt-3 font-semibold text-white">
             А также индивидуальные предприниматели и независимые профессионалы
           </p>
         </div>
@@ -341,8 +341,8 @@ export default async function VibeMindHome() {
               конкретной организации
             </p>
             <p className="font-bold text-teal">
-              <span className="block">Работаем с ИИ</span>
               <span className="block">Ориентируемся на людей</span>
+              <span className="block">Работаем с ИИ</span>
             </p>
           </div>
         </div>

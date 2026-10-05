@@ -142,6 +142,10 @@ body {
     linear-gradient(135deg, #111111, #0e1e1f 48%, #073d3d);
 }
 
+.vm-roadmap-section.vm-soft-boundary {
+  overflow: visible;
+}
+
 .vm-roadmap-node,
 .vm-roadmap-result {
   border: 1px solid rgba(255, 255, 255, 0.16);

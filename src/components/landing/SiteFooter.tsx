@@ -6,10 +6,9 @@ export default function SiteFooter() {
     <footer className="bg-graphite py-10 text-sm text-white/60">
       <div className="mx-auto max-w-6xl px-5">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="flex items-center gap-2 font-bold text-white">
+          <div className="shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/vibemind-icon.png" alt="ВайбМайнд" className="h-8 w-auto" />
-            ВайбМайнд
           </div>
           <div className="flex flex-wrap justify-center gap-5">
             {NAV_LINKS.map((l) => (
