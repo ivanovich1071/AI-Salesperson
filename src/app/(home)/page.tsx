@@ -114,7 +114,8 @@ export default async function VibeMindHome() {
               ИИ, который усиливает профессионалов и команды
             </h1>
             <p className="mt-4 text-base font-medium italic text-teal md:text-lg">
-              Работаем с ИИ, ориентируемся на людей
+              <span className="block">Работаем с ИИ</span>
+              <span className="block">Ориентируемся на людей</span>
             </p>
             <p className="mt-5 text-base leading-relaxed text-white/80 md:mt-6 md:text-lg">
               Обучаем профессионалов работать с ИИ на реальных задачах. Вместе находим
@@ -130,7 +131,7 @@ export default async function VibeMindHome() {
       </header>
 
       {/* ===== С ЧЕГО НАЧАТЬ ===== */}
-      <section id="start" className="vm-section-fade py-16">
+      <section id="start" className="vm-section-fade vm-soft-boundary py-16">
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center">
             <h2 className="vm-title">Неважно, сколько вы уже знаете об ИИ</h2>
@@ -156,12 +157,12 @@ export default async function VibeMindHome() {
       </section>
 
       {/* ===== СОЦИАЛЬНОЕ ДОКАЗАТЕЛЬСТВО ===== */}
-      <section className="vm-trust-band py-10 text-white" aria-labelledby="trusted-title">
+      <section className="vm-trust-band vm-soft-boundary py-10 text-white" aria-labelledby="trusted-title">
         <div className="mx-auto max-w-6xl px-5 text-center">
-          <h2 id="trusted-title" className="text-2xl font-bold md:text-3xl">
+          <h2 id="trusted-title" className="text-3xl font-bold md:text-4xl">
             Нам доверяют
           </h2>
-          <p className="mx-auto mt-5 max-w-5xl text-base font-semibold leading-loose text-white/85">
+          <p className="mx-auto mt-5 max-w-5xl text-lg font-semibold leading-loose text-white/85 md:text-xl">
             {TRUSTED.join(" · ")}
           </p>
           <p className="mt-3 font-semibold text-teal-emerald">
@@ -171,7 +172,7 @@ export default async function VibeMindHome() {
       </section>
 
       {/* ===== МЕТОД ВАЙБМАЙНД ===== */}
-      <section id="process" className="bg-white py-16">
+      <section id="process" className="vm-soft-boundary bg-white py-16">
         <div className="mx-auto max-w-7xl px-5">
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal">
@@ -198,7 +199,7 @@ export default async function VibeMindHome() {
       </section>
 
       {/* ===== ДОРОЖНАЯ КАРТА ===== */}
-      <section className="vm-roadmap-section py-14 text-white" aria-labelledby="roadmap-title">
+      <section className="vm-roadmap-section vm-soft-boundary py-14 text-white" aria-labelledby="roadmap-title">
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center">
             <h2 id="roadmap-title" className="text-3xl font-bold md:text-4xl">
@@ -237,14 +238,15 @@ export default async function VibeMindHome() {
       </section>
 
       {/* ===== ЧЕЛОВЕКОЦЕНТРИЧНЫЙ ТЕЗИС ===== */}
-      <section className="px-5 py-10">
+      <section className="vm-soft-boundary px-5 py-10">
         <p className="mx-auto max-w-5xl text-center text-3xl font-extrabold leading-tight text-graphite md:text-5xl">
-          ИИ не вместо профессионала. <span className="text-teal">ИИ – в руках профессионала</span>
+          <span className="block">ИИ не вместо профессионала</span>
+          <span className="block text-teal">ИИ – в руках профессионала</span>
         </p>
       </section>
 
       {/* ===== ПЕРЕХОД К ЛАБОРАТОРИИ ===== */}
-      <section className="bg-white py-14">
+      <section className="vm-soft-boundary bg-white py-14">
         <div className="mx-auto max-w-4xl px-5 text-center">
           <h2 className="text-3xl font-bold md:text-4xl">Не каждой задаче нужен собственный ИИ</h2>
           <p className="mt-5 text-lg leading-relaxed text-graphite/75">
@@ -262,7 +264,7 @@ export default async function VibeMindHome() {
       </section>
 
       {/* ===== ЛАБОРАТОРИЯ РЕШЕНИЙ ===== */}
-      <section id="solutions" className="vm-section-fade py-16">
+      <section id="solutions" className="vm-section-fade vm-soft-boundary py-16">
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center">
             <h2 className="vm-title">Лаборатория решений</h2>
@@ -291,7 +293,7 @@ export default async function VibeMindHome() {
       </section>
 
       {/* ===== ОБУЧЕНИЕ ===== */}
-      <section id="training" className="vm-training-band py-16 text-white">
+      <section id="training" className="vm-training-band vm-soft-boundary py-16 text-white">
         <div className="mx-auto max-w-4xl px-5 text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-emerald">
             Программы обучения
@@ -315,7 +317,7 @@ export default async function VibeMindHome() {
       </section>
 
       {/* ===== О КОМПАНИИ ===== */}
-      <section id="about" className="bg-white py-16">
+      <section id="about" className="vm-soft-boundary bg-white py-16">
         <div className="mx-auto max-w-4xl px-5">
           <div className="text-center">
             <h2 className="vm-title">О компании</h2>
@@ -338,13 +340,16 @@ export default async function VibeMindHome() {
               Учитываем процессы, корпоративную культуру, требования безопасности и правила
               конкретной организации
             </p>
-            <p className="font-bold text-teal">Работаем с ИИ. Ориентируемся на людей</p>
+            <p className="font-bold text-teal">
+              <span className="block">Работаем с ИИ</span>
+              <span className="block">Ориентируемся на людей</span>
+            </p>
           </div>
         </div>
       </section>
 
       {/* ===== FAQ ===== */}
-      <section className="vm-faq-teaser py-12" aria-labelledby="faq-teaser-title">
+      <section className="vm-faq-teaser vm-soft-boundary py-12" aria-labelledby="faq-teaser-title">
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 md:grid-cols-[1.2fr_0.8fr]">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal">
