@@ -17,16 +17,21 @@ export default function SiteFooter() {
                 {l.label}
               </a>
             ))}
-            <Link href="/faq" className="hover:text-teal">
-              Вопросы и ответы
-            </Link>
             <Link href="/privacy" className="hover:text-teal">
               Политика конфиденциальности
             </Link>
+            <a
+              href="https://www.instagram.com/vibemind_by/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-teal"
+            >
+              Instagram
+            </a>
           </div>
         </div>
         <p className="mt-8 border-t border-white/10 pt-6 text-center">
-          © 2025–2026 ВайбМайнд. Все права защищены.
+          © 2025–2026 ВайбМайнд. Все права защищены
         </p>
       </div>
     </footer>

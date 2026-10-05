@@ -16,7 +16,7 @@ export default function SiteNav() {
           <span className="whitespace-nowrap">ВайбМайнд</span>
         </Link>
         {/* Порог бургер-меню — xl: на ~950px пункты наезжали на логотип */}
-        <ul className="hidden items-center gap-5 text-sm font-medium text-graphite/70 xl:flex">
+        <ul className="hidden items-center gap-4 text-sm font-medium text-graphite/70 xl:flex">
           {NAV_LINKS.map((l) => (
             <li key={l.href}>
               <a href={l.href} className="whitespace-nowrap transition-colors hover:text-teal">
@@ -30,7 +30,7 @@ export default function SiteNav() {
               className="whitespace-nowrap rounded-2xl px-5 py-2.5 font-semibold text-white shadow-teal transition-all hover:-translate-y-0.5"
               style={{ background: "linear-gradient(135deg, #1ca5a8, #19c9a2)" }}
             >
-              AI-диагностика
+              ИИ-консультация
             </Link>
           </li>
         </ul>
@@ -57,12 +57,9 @@ export default function SiteNav() {
               </a>
             </li>
           ))}
-          <li className="flex flex-col gap-2 pt-2">
+          <li className="pt-2">
             <Link href="/app?new=1" className="btn-teal w-full justify-center">
-              AI-диагностика →
-            </Link>
-            <Link href="/course" className="btn-teal-outline w-full justify-center">
-              Корпоративный курс
+              ИИ-консультация
             </Link>
           </li>
         </ul>

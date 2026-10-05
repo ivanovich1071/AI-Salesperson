@@ -5,16 +5,6 @@ import SiteFooter from "@/components/landing/SiteFooter";
 import ContactsSection from "@/components/landing/ContactsSection";
 import SolutionsGrid from "@/components/lab/SolutionsGrid";
 import { getLabSolutions } from "@/lib/lab/solutions";
-import {
-  IconSpeed,
-  IconKnowledge,
-  IconAutomation,
-  IconGuide,
-  IconTraining,
-  IconConsulting,
-  IconLab,
-  IconTeam,
-} from "@/components/icons/BrandIcons";
 
 /**
  * Карточки витрины берутся из базы (правятся в админке). Страница кэшируется,
@@ -22,77 +12,65 @@ import {
  */
 export const revalidate = 3600;
 
-/** Сколько карточек «Лаборатории решений» показывать на главной */
 const TEASER_COUNT = 3;
 
-/* ===== Данные страницы «ВайбМайнд» (структура и тексты перенесены со страницы VibeZmest) ===== */
-const BENEFITS = [
+const START_SCENARIOS = [
   {
-    Icon: IconSpeed,
-    title: "Повышаем производительность",
-    text: "Помогаем быстрее выполнять интеллектуальную работу с помощью ИИ",
+    title: "«Мы вообще не знаем, что нам нужно»",
+    text: "Начнем с людей и рабочих процессов. Оценим компетенции и готовность команды, изучим реальные задачи и определим, где ИИ действительно может быть полезен",
   },
   {
-    Icon: IconKnowledge,
-    title: "Сохраняем экспертные знания",
-    text: "Превращаем опыт и накопленную информацию в доступные рабочие знания и ИИ-помощников",
+    title: "«Хотим научить команду»",
+    text: "Построим обучение вокруг вашей работы. Профессионалы осваивают ИИ на реальных задачах, а вместе с ними мы выявляем процессы, которые можно улучшить или автоматизировать",
   },
   {
-    Icon: IconAutomation,
-    title: "Автоматизируем рутину",
-    text: "Сокращаем время сотрудников на повторяющиеся действия и рабочие процессы — с использованием ИИ и/или на основе классической автоматизации",
+    title: "«ИИ уже используем, но бессистемно и эффекта не видим»",
+    text: "Разберемся, что действительно работает, а что создает лишние действия. Соберем инициативы в дорожную карту: что внедрять, что автоматизировать, чему обучить людей и в какой последовательности двигаться",
   },
   {
-    Icon: IconGuide,
-    title: "Развиваем ИИ-компетенции",
-    text: "Помогаем специалистам и командам самостоятельно и осмысленно использовать возможности ИИ в работе",
+    title: "«У нас есть конкретная задача»",
+    text: "Разберем процесс и найдем минимально достаточное решение – от готового ИИ-инструмента до автоматизации или собственного решения",
   },
 ];
 
-const PROCESS = [
+const PROCESS_STEPS = [
   {
-    title: "Диагностика и экспертиза",
-    tagline: "Чтобы разобраться",
-    text: "Изучаем вашу задачу или рабочий процесс, определяем возможности и ограничения применения ИИ и автоматизации.",
+    title: "Диагностируем",
+    text: "Изучаем не только процессы, но и людей: задачи, компетенции, готовность команды, корпоративную культуру и организационные ограничения",
   },
   {
-    title: "Обучение",
-    tagline: "Чтобы научиться",
-    text: "Учимся применять ИИ на реальных профессиональных задачах и рабочих материалах.",
+    title: "Обучаем на вашей работе",
+    text: "Профессионалы развивают компетенции работы с ИИ на собственных задачах. Одновременно выявляем процессы, которые стоит изменить, упростить или автоматизировать",
   },
   {
-    title: "Лаборатория",
-    tagline: "Чтобы сделать вместе",
-    text: "Проверяем идеи на практике и вместе создаем рабочий прототип решения.",
+    title: "Создаем дорожную карту изменений",
+    text: "Определяем, что сотрудники могут делать самостоятельно, где достаточно готового ИИ-инструмента, что стоит автоматизировать, а где требуется отдельное решение",
   },
   {
-    title: "Проектирование и разработка",
-    tagline: "Чтобы поручить задачу нам",
-    text: "Подбираем минимально достаточное решение: от настройки готового инструмента и автоматизации до ИИ-помощника или ИИ-агента. При необходимости подключаем технических партнеров.",
+    title: "Движемся по ней вместе",
+    text: "Помогаем менять процессы, внедрять инструменты, автоматизировать отдельные операции и создавать прикладные ИИ-решения. При необходимости сложной технической реализации подключаем партнеров",
+  },
+  {
+    title: "Оставляем компетенции внутри команды",
+    text: "Передаем решение и знания о том, как с ним работать и развивать дальше. Наша задача – усилить команду, а не сделать ее зависимой от подрядчика",
   },
 ];
 
-const FORMATS = [
-  {
-    Icon: IconTraining,
-    title: "Корпоративное обучение",
-    text: "Персональные программы для руководителей, специалистов и команд на основе их реальных задач.",
-  },
-  {
-    Icon: IconConsulting,
-    title: "Консалтинг и экспертиза",
-    text: "Анализируем задачи, процессы и возможности применения ИИ, готовим рекомендации и экспертные заключения.",
-  },
-  {
-    Icon: IconLab,
-    title: "Лаборатория",
-    text: "Проверяем идеи и создаем прототипы решений вместе с вашей командой.",
-  },
-  {
-    Icon: IconTeam,
-    title: "Проектирование и разработка",
-    text: "Подбираем и создаем решения для конкретных рабочих задач — от автоматизации и ИИ-помощников до ИИ-агентов. Сложные технические компоненты при необходимости реализуем с партнерами.",
-  },
+const TRUSTED = [
+  "БелАЗ",
+  "ООО «Евроторг»",
+  "Белорусская православная церковь (отдел по делам молодежи)",
+  "АО ЭЛТИ-КУДИЦ",
+  "LLC Newm-Limited",
+  "SMAIPL",
+  "Клуб Правильного Питания",
+];
+
+const ROADMAP_OUTCOMES = [
+  "Готовый ИИ-инструмент",
+  "Автоматизировать часть",
+  "Разработать решение",
+  "Ничего не внедрять",
 ];
 
 export default async function VibeMindHome() {
@@ -102,10 +80,10 @@ export default async function VibeMindHome() {
     <main className="bg-mist text-graphite">
       <SiteNav />
 
-      {/* ===== HERO ===== */}
+      {/* ===== ПЕРВЫЙ ЭКРАН ===== */}
       <header
         id="hero"
-        className="vm-hero-network relative isolate overflow-hidden pb-24 pt-36 text-white"
+        className="vm-hero-network relative isolate overflow-hidden pb-12 pt-24 text-white md:pb-20 md:pt-32"
         style={{
           background:
             "linear-gradient(90deg, #111111 0%, #111111 34%, #0e1e1f 66%, #073d3d 100%)",
@@ -119,212 +97,279 @@ export default async function VibeMindHome() {
           aria-hidden
           className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-teal-emerald/15 blur-3xl"
         />
-        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-[2fr_3fr]">
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-6 px-5 lg:grid-cols-[2fr_3fr] lg:gap-10">
           <div className="flex justify-center">
-            {/* Полный логотип на прозрачном фоне, вариант для ТЕМНОГО фона hero.
-                Буква «Й» в слове «Майнд» — белая: она стоит на градиенте, и любой
-                темный вариант там пропадает, слово читается как «Ма нд».
-                Рукописное «Вайб» черное — оно лежит поверх бирюзовой фигуры, а не
-                на фоне, поэтому читается. На светлом фоне этот файл использовать
-                нельзя — там пропадет уже «Й». */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/vibemind-logo-light.png"
               alt="Логотип ВайбМайнд"
-              className="h-72 w-auto drop-shadow-2xl md:h-80"
+              className="h-56 w-auto drop-shadow-2xl sm:h-64 md:h-80"
             />
           </div>
           <div>
-            {/* Строка над заголовком — в цвет знака ВайбМайнд (#1ca5a8, токен teal) */}
-            <p className="text-lg font-medium italic text-teal">
+            <p className="text-base font-medium italic text-teal md:text-lg">
               Социально ответственный интеллектуальный белорусский бизнес
             </p>
-            <h1 className="mt-4 text-4xl font-extrabold leading-tight md:text-5xl">
-              Помогаем разобраться, где ИИ действительно полезен в вашей работе
+            <h1 className="mt-4 text-3xl font-extrabold leading-[1.08] sm:text-4xl md:text-5xl">
+              ИИ, который усиливает профессионалов и команды
             </h1>
-            <p className="mt-6 text-lg leading-relaxed text-white/80">
-              Исследуем рабочие процессы, находим возможности применения ИИ и автоматизации,
-              помогаем выбрать подходящий путь: освоить необходимые для вас инструменты,
-              создать ИИ-решение совместно или поручить разработку нам.
+            <p className="mt-4 text-base font-medium italic text-teal md:text-lg">
+              Работаем с ИИ, ориентируемся на людей
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <a href="#contacts" className="btn-teal">
-                Обсудить задачу
-              </a>
-              <Link
-                href="/course"
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-8 py-4 font-semibold text-white transition-all hover:bg-white/10"
-              >
-                Корпоративный курс
-              </Link>
-            </div>
+            <p className="mt-5 text-base leading-relaxed text-white/80 md:mt-6 md:text-lg">
+              Обучаем профессионалов работать с ИИ на реальных задачах. Вместе находим
+              процессы для улучшения и автоматизации, создаем дорожную карту изменений и
+              помогаем пройти ее – от первых инструментов до собственных ИИ-решений
+            </p>
+            <p className="mt-4 max-w-3xl text-sm font-semibold leading-relaxed text-white md:text-base">
+              Можно пройти весь путь вместе с нами или начать с того этапа, который нужен
+              вам сейчас
+            </p>
           </div>
         </div>
       </header>
 
-      {/* ===== ВИДЕО О КОМПАНИИ ===== */}
-      <VideoSection />
-
-      {/* ===== BENEFITS ===== */}
-      <section id="benefits" className="py-20">
+      {/* ===== С ЧЕГО НАЧАТЬ ===== */}
+      <section id="start" className="vm-section-fade py-16">
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center">
-            <h2 className="vm-title">Чем мы полезны</h2>
+            <h2 className="vm-title">Неважно, сколько вы уже знаете об ИИ</h2>
             <div className="vm-underline" />
-          </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {BENEFITS.map((b) => (
-              <div key={b.title} className="vm-card flex h-full flex-col">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal/10 text-teal">
-                  <b.Icon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-lg font-bold text-graphite">{b.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-graphite/70">{b.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== PROCESS ===== */}
-      <section id="process" className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center">
-            <h2 className="vm-title">Как мы работаем</h2>
-            <div className="vm-underline" />
-            <p className="mx-auto mt-4 max-w-2xl text-graphite/70">
-              Выберите нужный вам этап — мы подключимся там, где нужна наша экспертиза
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-graphite/70">
+              Начнем с того места, где находится ваша команда сейчас
             </p>
           </div>
-          {/* Четыре равноправные точки входа, а не цепочка 1→2→3→4. Порядок слева
-              направо при желании читается как путь, но каждая карточка самодостаточна. */}
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {PROCESS.map((s) => (
-              <div
-                key={s.title}
-                className="flex flex-col rounded-3xl border border-teal/15 bg-mist p-6"
-              >
-                <span aria-hidden className="text-xl leading-none text-teal">
-                  ✦
-                </span>
-                <h3 className="mt-3 text-lg font-bold text-graphite">{s.title}</h3>
-                <p className="mt-1 text-sm font-semibold text-teal">{s.tagline}</p>
-                <p className="mt-2 text-sm leading-relaxed text-graphite/70">{s.text}</p>
-              </div>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {START_SCENARIOS.map((scenario, index) => (
+              <article key={scenario.title} className="vm-card vm-compact-card h-full">
+                <span className="text-sm font-bold text-teal">0{index + 1}</span>
+                <h3 className="mt-3 text-lg font-bold leading-snug text-graphite">
+                  {scenario.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-graphite/70">
+                  {scenario.text}
+                </p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ===== FORMATS ===== */}
-      <section id="formats" className="py-20">
-        <div className="mx-auto max-w-6xl px-5">
+      {/* ===== СОЦИАЛЬНОЕ ДОКАЗАТЕЛЬСТВО ===== */}
+      <section className="vm-trust-band py-10 text-white" aria-labelledby="trusted-title">
+        <div className="mx-auto max-w-6xl px-5 text-center">
+          <h2 id="trusted-title" className="text-2xl font-bold md:text-3xl">
+            Нам доверяют
+          </h2>
+          <p className="mx-auto mt-5 max-w-5xl text-base font-semibold leading-loose text-white/85">
+            {TRUSTED.join(" · ")}
+          </p>
+          <p className="mt-3 font-semibold text-teal-emerald">
+            А также индивидуальные предприниматели и независимые профессионалы
+          </p>
+        </div>
+      </section>
+
+      {/* ===== МЕТОД ВАЙБМАЙНД ===== */}
+      <section id="process" className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-5">
           <div className="text-center">
-            <h2 className="vm-title">Форматы сотрудничества</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal">
+              Как мы работаем
+            </p>
+            <h2 className="vm-title mt-2">От людей и рабочих задач – к работающим решениям</h2>
             <div className="vm-underline" />
           </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {FORMATS.map((f) => (
-              <div key={f.title} className="vm-card flex h-full flex-col">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal/10 text-teal">
-                  <f.Icon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-lg font-bold text-graphite">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-graphite/70">{f.text}</p>
-              </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            {PROCESS_STEPS.map((step, index) => (
+              <article
+                key={step.title}
+                className="vm-process-card relative flex h-full flex-col rounded-3xl border border-teal/15 bg-mist p-5"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-teal to-teal-emerald text-sm font-bold text-white shadow-teal">
+                  {index + 1}
+                </span>
+                <h3 className="mt-4 font-bold leading-snug text-graphite">{step.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-graphite/70">{step.text}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ===== ЛАБОРАТОРИЯ РЕШЕНИЙ — тизер (вся витрина на /solutions) ===== */}
-      <section id="solutions" className="bg-white py-20">
+      {/* ===== ДОРОЖНАЯ КАРТА ===== */}
+      <section className="vm-roadmap-section py-14 text-white" aria-labelledby="roadmap-title">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="text-center">
+            <h2 id="roadmap-title" className="text-3xl font-bold md:text-4xl">
+              Дорожная карта изменений
+            </h2>
+          </div>
+          <div className="mt-8 grid items-center gap-4 lg:grid-cols-[1fr_auto_1.25fr_auto_2fr]">
+            <div className="vm-roadmap-node">Обучить</div>
+            <span aria-hidden className="vm-roadmap-arrow">→</span>
+            <div className="vm-roadmap-node">Изменить процесс</div>
+            <span aria-hidden className="vm-roadmap-arrow">→</span>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {ROADMAP_OUTCOMES.map((outcome) => (
+                <div key={outcome} className="vm-roadmap-result">
+                  {outcome}
+                </div>
+              ))}
+            </div>
+          </div>
+          <p className="mx-auto mt-8 max-w-4xl text-center text-lg font-bold">
+            Не внедряем ИИ ради ИИ. Находим, где он действительно усиливает работу
+          </p>
+          <p className="mx-auto mt-3 max-w-4xl text-center leading-relaxed text-white/72">
+            Учитываем не только возможности технологий, но и правила вашей организации,
+            политику безопасности, корпоративную культуру и людей, которым предстоит с этим
+            работать
+          </p>
+          <div className="mx-auto mt-7 max-w-4xl rounded-3xl border border-white/15 bg-white/5 px-6 py-5 text-center backdrop-blur">
+            <p className="font-bold">Не обязательно проходить весь путь</p>
+            <p className="mt-2 text-sm leading-relaxed text-white/75">
+              Если задача уже понятна – начнем с нее. Если пока непонятно, что именно может
+              дать ИИ, – разберемся вместе
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== ЧЕЛОВЕКОЦЕНТРИЧНЫЙ ТЕЗИС ===== */}
+      <section className="px-5 py-10">
+        <p className="mx-auto max-w-5xl text-center text-3xl font-extrabold leading-tight text-graphite md:text-5xl">
+          ИИ не вместо профессионала. <span className="text-teal">ИИ – в руках профессионала</span>
+        </p>
+      </section>
+
+      {/* ===== ПЕРЕХОД К ЛАБОРАТОРИИ ===== */}
+      <section className="bg-white py-14">
+        <div className="mx-auto max-w-4xl px-5 text-center">
+          <h2 className="text-3xl font-bold md:text-4xl">Не каждой задаче нужен собственный ИИ</h2>
+          <p className="mt-5 text-lg leading-relaxed text-graphite/75">
+            Иногда достаточно готового инструмента. Иногда нужно изменить процесс или
+            автоматизировать его часть. Иногда нужен собственный ИИ-помощник. А иногда лучше
+            вообще ничего не внедрять
+          </p>
+          <p className="mt-4 font-bold text-graphite">
+            Мы ищем не самое технологичное, а наиболее подходящее решение
+          </p>
+          <p className="mt-4 font-semibold text-teal">
+            А решения, которые уже доказали свою применимость, собираем в Лаборатории решений
+          </p>
+        </div>
+      </section>
+
+      {/* ===== ЛАБОРАТОРИЯ РЕШЕНИЙ ===== */}
+      <section id="solutions" className="vm-section-fade py-16">
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center">
             <h2 className="vm-title">Лаборатория решений</h2>
             <div className="vm-underline" />
-            <p className="mx-auto mt-4 max-w-3xl text-graphite/70">
-              Посмотрите, что мы уже реализовали на практике. Если вам нужен идентичный
-              помощник, агент или инструмент — настроим решение под вашу работу и передадим
-              вам права по его использованию.
+            <p className="mx-auto mt-4 max-w-3xl text-xl font-bold text-graphite">
+              Возможно, часть вашего пути мы уже прошли
+            </p>
+            <p className="mx-auto mt-4 max-w-3xl leading-relaxed text-graphite/70">
+              Здесь мы собираем решения, созданные для реальных рабочих задач. Их можно
+              изучить, попробовать и адаптировать под ваш процесс – обычно быстрее и
+              доступнее, чем создавать решение с нуля
             </p>
           </div>
-
-          <div className="mt-12">
-            <SolutionsGrid items={teaser} />
+          <div className="mt-10">
+            <SolutionsGrid
+              items={teaser}
+              cardCta={{ label: "Адаптировать под мою задачу", href: "/app?new=1" }}
+            />
           </div>
-
-          <div className="mt-10 text-center">
+          <div className="mt-8 text-center">
             <Link href="/solutions" className="btn-teal">
-              Все решения →
+              Перейти в Лабораторию решений
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ===== COURSE ===== */}
-      <section
-        id="course"
-        className="py-20 text-white"
-        style={{
-          background:
-            "linear-gradient(135deg, #0e1e1f 0%, #073d3d 60%, #1ca5a8 140%)",
-        }}
-      >
+      {/* ===== ОБУЧЕНИЕ ===== */}
+      <section id="training" className="vm-training-band py-16 text-white">
         <div className="mx-auto max-w-4xl px-5 text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">Корпоративный курс по ИИ</h2>
-          <div className="mx-auto mt-3 h-1 w-24 rounded-full bg-teal-emerald" />
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
-            Для большинства организаций цифровая трансформация начинается с формирования
-            общего языка и практических навыков работы с ИИ. Персональную программу под вашу
-            команду с расчетом стоимости подберет AI-диагностика.
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-emerald">
+            Программы обучения
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/course" className="btn-teal">
-              Перейти к программе курса →
-            </Link>
-            <Link
-              href="/app?new=1"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-8 py-4 font-semibold text-white transition-all hover:bg-white/10"
-            >
-              ✨ Пройти AI-диагностику
-            </Link>
-          </div>
+          <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+            Обучение, после которого остается больше, чем знания
+          </h2>
+          <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-white/80">
+            Работаем с реальными задачами вашей команды. Профессионалы осваивают инструменты
+            ИИ и развивают собственные компетенции, а вместе с ними мы выявляем процессы,
+            которые можно улучшить или автоматизировать
+          </p>
+          <p className="mx-auto mt-4 max-w-3xl font-bold leading-relaxed text-white">
+            Результатом обучения могут стать не только новые навыки, но и конкретные
+            инициативы для дорожной карты изменений
+          </p>
+          <Link href="/course" className="btn-teal mt-7">
+            Посмотреть программы обучения
+          </Link>
         </div>
       </section>
 
-      {/* ===== ABOUT ===== */}
-      <section id="about" className="bg-white py-20">
+      {/* ===== О КОМПАНИИ ===== */}
+      <section id="about" className="bg-white py-16">
         <div className="mx-auto max-w-4xl px-5">
           <div className="text-center">
             <h2 className="vm-title">О компании</h2>
             <div className="vm-underline" />
           </div>
           <div className="mt-8 space-y-4 text-lg leading-relaxed text-graphite/75">
-            <p>
-              <strong className="text-graphite">ВайбМайнд</strong> — социально
-              ответственная белорусская компания, которая помогает специалистам, командам и
-              организациям осмысленно применять ИИ в реальной работе.
+            <p className="font-bold text-graphite">
+              ВайбМайнд – белорусская компания об ИИ, технологиях и прежде всего о людях,
+              которые с ними работают
             </p>
             <p>
-              Мы исследуем рабочие процессы, обучаем, консультируем и создаем практические
-              решения там, где технологии действительно могут дать результат.
+              Мы не начинаем с вопроса «какую нейросеть внедрить». Начинаем с
+              профессионалов, их опыта и реальных рабочих процессов
             </p>
             <p>
-              Наш подход основан на методологии, исследовательской и практической
-              экспертизе, ответственном использовании технологий и внимании к людям как
-              главной ценности.
+              Диагностируем, обучаем, помогаем выстроить дорожную карту изменений и вместе
+              создаем решения – так, чтобы ИИ усиливал компетенции людей и команд
             </p>
             <p>
-              Наша задача — не создавать зависимость от внешнего подрядчика, а оставлять
-              после совместной работы действующее решение, понятный процесс и компетенции
-              для его дальнейшего развития.
+              Учитываем процессы, корпоративную культуру, требования безопасности и правила
+              конкретной организации
             </p>
+            <p className="font-bold text-teal">Работаем с ИИ. Ориентируемся на людей</p>
           </div>
         </div>
       </section>
 
-      <ContactsSection />
+      {/* ===== FAQ ===== */}
+      <section className="vm-faq-teaser py-12" aria-labelledby="faq-teaser-title">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 md:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal">
+              Полезно знать
+            </p>
+            <h2 id="faq-teaser-title" className="mt-2 text-3xl font-bold md:text-4xl">
+              Вопросы и ответы о работе с ИИ
+            </h2>
+            <p className="mt-4 max-w-2xl leading-relaxed text-graphite/70">
+              Как начать, если задача пока не сформулирована? Что происходит во время
+              обучения? Можно ли адаптировать готовое решение? Собрали подробные ответы на
+              вопросы, которые чаще всего возникают перед началом работы
+            </p>
+          </div>
+          <div className="md:text-right">
+            <Link href="/faq" className="btn-teal">
+              Открыть вопросы и ответы
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <VideoSection />
+
+      <ContactsSection consultation />
 
       <SiteFooter />
     </main>

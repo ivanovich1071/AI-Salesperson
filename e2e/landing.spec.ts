@@ -26,8 +26,8 @@ test("логотип и брендинг", async ({ page }) => {
 test("якорная навигация ведёт к секциям", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === "mobile", "на мобильном меню в бургере — проверяется отдельным тестом");
   for (const [label, id] of [
-    ["Преимущества", "benefits"],
     ["Как мы работаем", "process"],
+    ["Обучение", "training"],
     ["О компании", "about"],
   ] as const) {
     await page.locator("nav").getByRole("link", { name: label, exact: true }).click();
@@ -37,11 +37,11 @@ test("якорная навигация ведёт к секциям", async ({ 
 
 test("CTA ведут на курс и в визард", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === "mobile", "на мобильном CTA в бургер-меню");
-  await page.locator("nav").getByRole("link", { name: "AI-диагностика" }).click();
+  await page.locator("nav").getByRole("link", { name: "ИИ-консультация" }).click();
   await expect(page).toHaveURL(/\/app/);
   await page.goBack();
 
-  await page.getByRole("link", { name: "Корпоративный курс", exact: true }).first().click();
+  await page.getByRole("link", { name: "Посмотреть программы обучения", exact: true }).click();
   await expect(page).toHaveURL(/\/course/);
 });
 
@@ -83,15 +83,15 @@ test.describe("Ролик о компании", () => {
 test.describe("Лаборатория решений (тизер на главной)", () => {
   test("показывает 3 карточки и ведёт на всю витрину", async ({ page }) => {
     await expect(page.locator("#solutions button")).toHaveCount(3);
-    await page.locator("#solutions").getByRole("link", { name: /Все решения/ }).click();
+    await page.locator("#solutions").getByRole("link", { name: /Перейти в Лабораторию/ }).click();
     await expect(page).toHaveURL(/\/solutions$/);
     // «Не меньше»: admin-solutions.spec.ts параллельно добавляет свои карточки
     await expect(page.locator("#solutions button").nth(6)).toBeVisible();
   });
 
-  test("пункт меню «Решения» ведёт на /solutions", async ({ page }, testInfo) => {
+  test("пункт меню «Лаборатория решений» ведёт на /solutions", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === "mobile", "на мобильном меню в бургере");
-    await page.locator("nav").getByRole("link", { name: "Решения", exact: true }).click();
+    await page.locator("nav").getByRole("link", { name: "Лаборатория решений", exact: true }).click();
     await expect(page).toHaveURL(/\/solutions$/);
   });
 
@@ -135,26 +135,40 @@ test("контакты: телефон и телеграм компании", as
   );
 });
 
+test("FAQ заметен в меню и на главной, Instagram доступен в футере", async ({ page }) => {
+  await expect(page.locator("nav").getByRole("link", { name: "Вопросы и ответы" })).toHaveAttribute(
+    "href",
+    "/faq"
+  );
+  await expect(page.getByRole("link", { name: "Открыть вопросы и ответы" })).toHaveAttribute(
+    "href",
+    "/faq"
+  );
+  await expect(page.locator("footer").getByRole("link", { name: "Instagram" })).toHaveAttribute(
+    "href",
+    "https://www.instagram.com/vibemind_by/"
+  );
+});
+
 test.describe("блок «Как мы работаем»", () => {
-  test("четыре равноправные карточки без нумерации и стрелок", async ({ page }, testInfo) => {
+  test("пять последовательных шагов метода ВайбМайнд", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === "mobile", "на мобильном карточки в столбик");
 
-    const cards = page.locator("#process .rounded-3xl");
-    await expect(cards).toHaveCount(4);
+    const cards = page.locator("#process .vm-process-card");
+    await expect(cards).toHaveCount(5);
 
     // Стрелки-цепочка 1→2→3→4 убраны: это точки входа, а не этапы
     const arrows = page.locator("#process div[aria-hidden]").filter({ hasText: "→" });
     await expect(arrows).toHaveCount(0);
 
-    // Подзаголовок и теги-«чтобы» на месте
-    await expect(page.locator("#process")).toContainText("Выберите нужный вам этап");
-    await expect(page.locator("#process")).toContainText("Чтобы разобраться");
-    await expect(page.locator("#process")).toContainText("Чтобы поручить задачу нам");
+    await expect(page.locator("#process")).toContainText("От людей и рабочих задач");
+    await expect(page.locator("#process")).toContainText("Диагностируем");
+    await expect(page.locator("#process")).toContainText("Оставляем компетенции внутри команды");
   });
 
   test("карточки одной высоты", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === "mobile", "на мобильном карточки в столбик, высоты разные");
-    const boxes = await page.locator("#process .rounded-3xl").all();
+    const boxes = await page.locator("#process .vm-process-card").all();
     const heights = await Promise.all(
       boxes.map(async (b) => Math.round((await b.boundingBox())!.height))
     );

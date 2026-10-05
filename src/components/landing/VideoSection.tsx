@@ -53,7 +53,7 @@ export default function VideoSection() {
           <div className="vm-underline" />
           <p className="mx-auto mt-4 max-w-2xl text-graphite/70">
             Коротко о том, как мы помогаем специалистам и командам применять ИИ в реальной
-            работе.
+            работе
           </p>
         </div>
 
@@ -73,7 +73,7 @@ export default function VideoSection() {
         </div>
 
         <p className="mt-3 text-center text-xs text-graphite/60">
-          Ролик идет без звука — включите его кнопкой в плеере.
+          Ролик идет без звука — включите его кнопкой в плеере
         </p>
       </div>
     </section>

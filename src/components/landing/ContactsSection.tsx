@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /** Блок «Контакты» (#contacts) — на главной и на /solutions: туда ведет «Запросить демо» */
-export default function ContactsSection() {
+export default function ContactsSection({ consultation = false }: { consultation?: boolean }) {
   return (
     <section id="contacts" className="py-20">
       <div className="mx-auto max-w-6xl px-5">
@@ -32,8 +32,20 @@ export default function ContactsSection() {
           </div>
         </div>
         <div className="mt-10 text-center">
-          <Link href="/app?new=1" className="btn-teal">
-            ✨ Пройти AI-диагностику →
+          {consultation && (
+            <>
+              <h3 className="text-xl font-bold text-graphite">
+                ИИ-диагностика Вайб-консультантом
+              </h3>
+              <p className="mx-auto mt-2 max-w-2xl text-graphite/70">
+                Если пока непонятно, какой формат нужен, начните с разговора о вашей задаче
+              </p>
+            </>
+          )}
+          <Link href="/app?new=1" className={consultation ? "btn-teal mt-6" : "btn-teal"}>
+            {consultation
+              ? "Обсудить свою задачу с нашим Вайб-консультантом"
+              : "✨ Пройти AI-диагностику →"}
           </Link>
         </div>
       </div>

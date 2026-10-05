@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { STATUS_STYLES, type LabSolution } from "@/lib/lab/schema";
 import { labIcon } from "./icons";
 
@@ -16,17 +17,15 @@ type CardData = Pick<LabSolution, "name" | "role" | "status" | "tone" | "icon" |
 export default function SolutionCard({
   p,
   onClick,
+  cta,
 }: {
   p: CardData;
   onClick?: () => void;
+  cta?: { label: string; href: string };
 }) {
   const Icon = labIcon(p.icon);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="vm-card group flex h-full flex-col items-start text-left"
-    >
+  const content = (
+    <>
       {p.photo ? (
         // Обложка выходит за padding карточки: -mx-8/-mt-8 компенсируют p-8
         <div className="relative -mx-8 -mt-8 self-stretch overflow-hidden rounded-t-3xl">
@@ -64,6 +63,32 @@ export default function SolutionCard({
       <span className="mt-4 text-sm font-semibold text-teal group-hover:underline">
         Подробнее →
       </span>
+    </>
+  );
+
+  if (cta) {
+    return (
+      <article className="vm-card group flex h-full flex-col items-start text-left">
+        <button type="button" onClick={onClick} className="w-full text-left">
+          {content}
+        </button>
+        <Link
+          href={cta.href}
+          className="mt-5 inline-flex rounded-2xl bg-teal/10 px-4 py-3 text-sm font-semibold text-teal-dark transition-colors hover:bg-teal/15"
+        >
+          {cta.label}
+        </Link>
+      </article>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="vm-card group flex h-full flex-col items-start text-left"
+    >
+      {content}
     </button>
   );
 }

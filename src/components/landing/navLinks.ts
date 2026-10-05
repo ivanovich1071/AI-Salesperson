@@ -5,11 +5,10 @@
  * Отдельный файл без "use client": список нужен и клиентскому меню, и серверному подвалу.
  */
 export const NAV_LINKS = [
-  { href: "/#benefits", label: "Преимущества" },
   { href: "/#process", label: "Как мы работаем" },
-  { href: "/#formats", label: "Форматы" },
-  { href: "/solutions", label: "Решения" },
-  { href: "/#course", label: "Курс" },
+  { href: "/solutions", label: "Лаборатория решений" },
+  { href: "/#training", label: "Обучение" },
   { href: "/#about", label: "О компании" },
+  { href: "/faq", label: "Вопросы и ответы" },
   { href: "/#contacts", label: "Контакты" },
 ];
