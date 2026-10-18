@@ -128,7 +128,7 @@ body {
   height: 100%;
   min-height: 30rem;
   object-fit: cover;
-  filter: saturate(0.72) contrast(1.06);
+  filter: saturate(0.96) contrast(1.02) brightness(1.04);
 }
 
 .vm-proof-gallery img:nth-child(1) {
@@ -148,21 +148,23 @@ body {
   z-index: 1;
   inset: 0;
   background:
-    radial-gradient(circle at 16% 22%, rgba(25, 201, 162, 0.18), transparent 34%),
-    linear-gradient(90deg, rgba(8, 23, 24, 0.9) 0%, rgba(7, 45, 45, 0.72) 48%, rgba(7, 33, 34, 0.84) 100%),
-    linear-gradient(180deg, rgba(4, 17, 18, 0.2), rgba(4, 17, 18, 0.7));
-  backdrop-filter: blur(1.5px);
-  -webkit-backdrop-filter: blur(1.5px);
+    radial-gradient(circle at 16% 22%, rgba(25, 201, 162, 0.1), transparent 36%),
+    linear-gradient(90deg, rgba(6, 24, 25, 0.6) 0%, rgba(7, 45, 45, 0.28) 48%, rgba(7, 33, 34, 0.18) 100%),
+    linear-gradient(180deg, rgba(4, 17, 18, 0.04), rgba(4, 17, 18, 0.3));
+}
+
+.vm-proof-copy {
+  text-shadow: 0 3px 24px rgba(0, 0, 0, 0.72);
 }
 
 .vm-proof-glass {
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.66);
   border-radius: 2rem;
-  padding: 1.75rem;
-  background: linear-gradient(135deg, rgba(6, 35, 36, 0.62), rgba(4, 20, 21, 0.48));
-  box-shadow: 0 28px 80px -36px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  padding: 2.25rem;
+  background: linear-gradient(135deg, rgba(251, 255, 254, 0.88), rgba(241, 250, 249, 0.78));
+  box-shadow: 0 28px 80px -36px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
 }
 
 .vm-lab-bridge {
@@ -210,13 +212,13 @@ body {
 
   .vm-proof-vignette {
     background:
-      linear-gradient(180deg, rgba(6, 26, 27, 0.8), rgba(4, 25, 26, 0.9)),
-      linear-gradient(90deg, rgba(7, 61, 61, 0.55), rgba(8, 23, 24, 0.7));
+      linear-gradient(180deg, rgba(6, 26, 27, 0.52), rgba(4, 25, 26, 0.62)),
+      linear-gradient(90deg, rgba(7, 61, 61, 0.2), rgba(8, 23, 24, 0.24));
   }
 
   .vm-proof-glass {
     border-radius: 1.5rem;
-    padding: 1.35rem;
+    padding: 1.6rem 1rem;
   }
 }
 

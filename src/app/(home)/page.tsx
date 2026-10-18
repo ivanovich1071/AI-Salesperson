@@ -171,41 +171,39 @@ export default async function VibeMindHome() {
         </div>
         <div className="vm-proof-vignette" aria-hidden="true" />
 
-        <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-5 py-14 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:py-16">
-          <div className="max-w-xl">
+        <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-5 py-14 lg:grid-cols-[0.7fr_1.3fr] lg:items-center lg:py-16">
+          <div className="vm-proof-copy max-w-lg">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-emerald">
               Человекоцентричный подход
             </p>
-            <h2 className="mt-4 text-4xl font-extrabold leading-[1.03] sm:text-5xl lg:text-6xl">
+            <h2 className="mt-4 text-4xl font-extrabold leading-[1.03] sm:text-5xl lg:text-[3.35rem]">
               ИИ – в руках
               <span className="block text-teal-emerald">профессионала</span>
             </h2>
-            <p className="mt-5 text-lg font-medium text-white/80">
+            <p className="mt-5 text-base font-medium text-white/80 sm:text-lg">
               Работаем с ИИ. Ориентируемся на людей
             </p>
           </div>
 
-          <div className="vm-proof-glass">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/65">
-              Реальная работа с командами
-            </p>
-            <h3 id="trusted-title" className="mt-3 text-3xl font-bold md:text-4xl">
+          <div className="vm-proof-glass text-center">
+            <h3 id="trusted-title" className="text-4xl font-extrabold text-graphite md:text-5xl">
               Нам доверяют
             </h3>
-            <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-2 font-semibold leading-relaxed text-teal-emerald">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-3 font-bold leading-relaxed text-teal-dark">
               {TRUSTED.map((company, index) => (
                 <span
                   key={company}
-                  className={`inline-flex whitespace-nowrap ${
-                    company.length > 45 ? "text-[11px] sm:text-sm lg:text-base" : "text-sm md:text-lg"
+                  data-trusted-company
+                  className={`inline-flex shrink-0 whitespace-nowrap ${
+                    company.length > 45 ? "text-[9px] sm:text-base lg:text-lg" : "text-sm md:text-xl"
                   }`}
                 >
                   <span>{company}</span>
-                  {index < TRUSTED.length - 1 && <span className="ml-2 text-white/40">·</span>}
+                  {index < TRUSTED.length - 1 && <span className="ml-2 text-graphite/25">·</span>}
                 </span>
               ))}
             </div>
-            <p className="mt-4 font-semibold leading-relaxed text-white">
+            <p className="mt-5 font-semibold leading-relaxed text-graphite/80">
               А также индивидуальные предприниматели и независимые профессионалы
             </p>
           </div>

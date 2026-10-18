@@ -170,6 +170,13 @@ test("фотолента объединяет человекоцентричны
   await expect(band.getByRole("heading", { name: "Нам доверяют" })).toBeVisible();
   await expect(band.locator(".vm-proof-gallery img")).toHaveCount(3);
   await expect(band.getByText("АО ЭЛТИ-КУДИЦ", { exact: true })).toHaveCSS("white-space", "nowrap");
+  const trustPanel = await band.locator(".vm-proof-glass").boundingBox();
+  const companies = await band.locator("[data-trusted-company]").all();
+  for (const company of companies) {
+    const box = await company.boundingBox();
+    expect(box!.x).toBeGreaterThanOrEqual(trustPanel!.x - 1);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(trustPanel!.x + trustPanel!.width + 1);
+  }
   await expect(page.getByText("ИИ не вместо профессионала", { exact: true })).toHaveCount(0);
 });
 
