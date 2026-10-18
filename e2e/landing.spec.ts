@@ -104,6 +104,8 @@ test.describe("Лаборатория решений (тизер на главн
     await expect(modal).toBeVisible();
     await expect(modal.getByRole("heading", { name: "Корпоративный календарь" })).toBeVisible();
     await expect(modal.getByText("Что умеет")).toBeVisible();
+    await expect(modal.getByText("Стоимость: от 900 BYN единоразово")).toBeVisible();
+    await expect(modal.getByText("Без обязательной ежемесячной платы", { exact: false })).toBeVisible();
 
     // Крестик
     await modal.getByRole("button", { name: "Закрыть" }).click();

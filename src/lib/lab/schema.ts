@@ -79,7 +79,7 @@ export const LabSolutionInput = z.object({
     "Ссылка должна начинаться с http:// или https://"
   ),
   liveLabel: optionalText(40),
-  note: optionalText(300),
+  note: optionalText(1200),
   icon: z.string().trim().max(30).default("lab"),
   photo: optionalText(200).refine(
     (v) =>

@@ -8,7 +8,10 @@ export function isUploaded(photo: string): boolean {
   return photo.startsWith("/uploads/");
 }
 
-type CardData = Pick<LabSolution, "name" | "role" | "status" | "tone" | "icon" | "photo">;
+type CardData = Pick<
+  LabSolution,
+  "name" | "role" | "status" | "tone" | "icon" | "photo" | "tags"
+>;
 
 /**
  * Карточка витрины. Одна и та же на /solutions, в тизере на главной и в
@@ -26,6 +29,7 @@ export default function SolutionCard({
   compact?: boolean;
 }) {
   const Icon = labIcon(p.icon);
+  const price = p.tags.find((tag) => /^Стоимость:/i.test(tag));
   const content = (
     <>
       {p.photo ? (
@@ -62,6 +66,7 @@ export default function SolutionCard({
         {p.name}
       </h3>
       <p className="mt-1 text-sm text-graphite/70">{p.role}</p>
+      {price && <p className="mt-3 text-sm font-bold text-teal-dark">{price}</p>}
       <span className="mt-4 text-sm font-semibold text-teal group-hover:underline">
         Подробнее →
       </span>

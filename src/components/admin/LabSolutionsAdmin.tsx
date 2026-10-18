@@ -401,10 +401,11 @@ export default function LabSolutionsAdmin({
                 </div>
               </div>
               <div>
-                <label className="label-base" htmlFor="lab-note">Примечание мелким шрифтом</label>
-                <input
+                <label className="label-base" htmlFor="lab-note">Дополнительное описание</label>
+                <textarea
                   id="lab-note"
                   className="input-base"
+                  rows={6}
                   value={draft.note}
                   onChange={(e) => set("note", e.target.value)}
                 />

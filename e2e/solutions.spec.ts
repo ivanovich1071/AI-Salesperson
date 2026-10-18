@@ -25,6 +25,8 @@ test("карточка открывает модалку, ссылка ведё�
   await page.locator("#solutions button").first().click();
   await expect(modal.getByRole("heading", { name: "Корпоративный календарь" })).toBeVisible();
   await expect(modal.getByText("Что умеет")).toBeVisible();
+  await expect(modal.getByText("Стоимость: от 900 BYN единоразово")).toBeVisible();
+  await expect(modal.getByText("Один или несколько исполнителей")).toBeVisible();
 
   const live = modal.getByRole("link", { name: "Открыть демо" });
   await expect(live).toHaveAttribute(

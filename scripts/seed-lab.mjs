@@ -3,8 +3,8 @@
 //
 // Заливает карточки из src/lib/lab/defaults.json, если таблица пуста.
 // При обновлении существующей базы один раз добавляет новую первую карточку
-// «Корпоративный календарь». Остальные карточки живут в базе и правятся в
-// админке, поэтому повторный запуск их не перезаписывает.
+// «Корпоративный календарь» или обновляет ее исходную версию. Остальные
+// карточки и последующие ручные правки живут в базе и не перезаписываются.
 
 import { readFileSync } from "node:fs";
 import { PrismaClient } from "@prisma/client";
@@ -42,7 +42,21 @@ if (count > 0) {
   });
 
   if (existingCalendar) {
-    console.log(`Лаборатория решений: в базе уже ${count} карточек, сид не нужен.`);
+    // Первая версия календаря была добавлена этим сидом с updatedBy="сид".
+    // Обновляем только ее: карточку, которую уже правил человек в админке,
+    // автоматический деплой трогать не должен.
+    if (existingCalendar.updatedBy === "сид") {
+      await prisma.labSolution.update({
+        where: { id: existingCalendar.id },
+        data: {
+          ...cardData(calendar, existingCalendar.sortOrder),
+          updatedBy: "обновление карточки календаря",
+        },
+      });
+      console.log("Лаборатория решений: обновлена карточка «Корпоративный календарь».");
+    } else {
+      console.log(`Лаборатория решений: в базе уже ${count} карточек, сид не нужен.`);
+    }
   } else {
     await prisma.$transaction([
       prisma.labSolution.updateMany({ data: { sortOrder: { increment: 1 } } }),

@@ -12,6 +12,9 @@ export default function SolutionModal({
   onClose: () => void;
 }) {
   const Icon = labIcon(p.icon);
+  const price = p.tags.find((tag) => /^Стоимость:/i.test(tag));
+  const detailTags = p.tags.filter((tag) => !/^Стоимость:/i.test(tag));
+  const noteParagraphs = p.note?.split(/\n{2,}/).filter(Boolean) ?? [];
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-graphite/80 p-6"
@@ -78,9 +81,9 @@ export default function SolutionModal({
           </>
         )}
 
-        {p.tags.length > 0 && (
+        {detailTags.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
-            {p.tags.map((t) => (
+            {detailTags.map((t) => (
               <span
                 key={t}
                 className="rounded-2xl bg-mist px-3 py-1 text-xs font-medium text-graphite/70"
@@ -91,7 +94,28 @@ export default function SolutionModal({
           </div>
         )}
 
-        {p.note && <p className="mt-4 text-xs text-graphite/60">{p.note}</p>}
+        {price && (
+          <p className="mt-5 rounded-2xl bg-teal/10 px-4 py-3 font-bold text-teal-dark">
+            {price}
+          </p>
+        )}
+
+        {noteParagraphs.length > 0 && (
+          <div className="mt-5 space-y-3 text-sm leading-relaxed text-graphite/75">
+            {noteParagraphs.map((paragraph) => (
+              <p
+                key={paragraph}
+                className={
+                  paragraph.startsWith("Без обязательной ежемесячной платы")
+                    ? "font-bold text-graphite"
+                    : undefined
+                }
+              >
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        )}
 
         <div className="mt-6 flex flex-wrap gap-3">
           {p.liveUrl && (
