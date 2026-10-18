@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 /**
  * /solutions — витрина «Лаборатории решений». Карточки приходят из базы
  * (сид scripts/seed-lab.mjs). Соседний admin-solutions.spec.ts параллельно
- * добавляет свои карточки, поэтому считаем «не меньше семи», а не ровно.
+ * добавляет свои карточки, поэтому считаем «не меньше восьми», а не ровно.
  */
 
 test.beforeEach(async ({ page }) => {
@@ -13,8 +13,8 @@ test.beforeEach(async ({ page }) => {
 test("стартовые карточки на месте, по порядку", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "Лаборатория решений" })).toBeVisible();
   const cards = page.locator("#solutions button");
-  expect(await cards.count()).toBeGreaterThanOrEqual(7);
-  await expect(cards.first()).toContainText("Иван");
+  expect(await cards.count()).toBeGreaterThanOrEqual(8);
+  await expect(cards.first()).toContainText("Корпоративный календарь");
   for (const name of ["Бот SMAIPL", "Рецензент", "Илона", "Retail Scout", "AI Business Auditor"]) {
     await expect(page.locator("#solutions").getByRole("heading", { name, exact: true })).toBeVisible();
   }
@@ -23,11 +23,14 @@ test("стартовые карточки на месте, по порядку",
 test("карточка открывает модалку, ссылка ведёт наружу, крестик закрывает", async ({ page }) => {
   const modal = page.locator("div.fixed.inset-0.z-50");
   await page.locator("#solutions button").first().click();
-  await expect(modal.getByRole("heading", { name: "Иван" })).toBeVisible();
+  await expect(modal.getByRole("heading", { name: "Корпоративный календарь" })).toBeVisible();
   await expect(modal.getByText("Что умеет")).toBeVisible();
 
-  const live = modal.getByRole("link", { name: /Потыкать в Telegram/i });
-  await expect(live).toHaveAttribute("href", "https://t.me/ELTIKBot");
+  const live = modal.getByRole("link", { name: "Открыть демо" });
+  await expect(live).toHaveAttribute(
+    "href",
+    "https://vibemind.by/calendar/demo.html?demo=1"
+  );
   await expect(live).toHaveAttribute("target", "_blank");
 
   await modal.getByRole("button", { name: "Закрыть" }).click();

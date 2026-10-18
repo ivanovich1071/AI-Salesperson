@@ -86,7 +86,7 @@ test.describe("Лаборатория решений (тизер на главн
     await page.locator("#solutions").getByRole("link", { name: /Перейти в Лабораторию/ }).click();
     await expect(page).toHaveURL(/\/solutions$/);
     // «Не меньше»: admin-solutions.spec.ts параллельно добавляет свои карточки
-    await expect(page.locator("#solutions button").nth(6)).toBeVisible();
+    await expect(page.locator("#solutions button").nth(7)).toBeVisible();
   });
 
   test("пункт меню «Лаборатория решений» ведёт к тизеру на главной", async ({ page }, testInfo) => {
@@ -97,12 +97,12 @@ test.describe("Лаборатория решений (тизер на главн
   });
 
   test("карточка открывает модалку и закрывается", async ({ page }) => {
-    // Модалка — оверлей на всю страницу; имя «Иван» есть и в карточке, поэтому ищем внутри неё
+    // Модалка — оверлей на всю страницу; имя решения есть и в карточке, поэтому ищем внутри неё
     const modal = page.locator("div.fixed.inset-0.z-50");
 
     await page.locator("#solutions button").first().click();
     await expect(modal).toBeVisible();
-    await expect(modal.getByRole("heading", { name: "Иван" })).toBeVisible();
+    await expect(modal.getByRole("heading", { name: "Корпоративный календарь" })).toBeVisible();
     await expect(modal.getByText("Что умеет")).toBeVisible();
 
     // Крестик
@@ -116,12 +116,22 @@ test.describe("Лаборатория решений (тизер на главн
     await expect(modal).toBeHidden();
   });
 
-  test("ссылки на ботов ведут наружу", async ({ page }) => {
+  test("ссылка первой карточки открывает демо календаря", async ({ page }) => {
     const modal = page.locator("div.fixed.inset-0.z-50");
     await page.locator("#solutions button").first().click();
-    const live = modal.getByRole("link", { name: /Потыкать в Telegram/i });
-    await expect(live).toHaveAttribute("href", "https://t.me/ELTIKBot");
+    const live = modal.getByRole("link", { name: "Открыть демо" });
+    await expect(live).toHaveAttribute(
+      "href",
+      "https://vibemind.by/calendar/demo.html?demo=1"
+    );
     await expect(live).toHaveAttribute("target", "_blank");
+  });
+
+  test("публичное демо календаря размещено на сайте", async ({ request }) => {
+    const response = await request.get("/calendar/demo.html?demo=1");
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("text/html");
+    expect(await response.text()).toContain("get_demo_workspace");
   });
 });
 
