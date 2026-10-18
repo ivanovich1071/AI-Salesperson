@@ -282,6 +282,7 @@ export default async function VibeMindHome() {
             <SolutionsGrid
               items={teaser}
               cardCta={{ label: "Адаптировать под мою задачу", href: "/app?new=1" }}
+              compact
             />
           </div>
           <div className="mt-8 text-center">
@@ -340,10 +341,7 @@ export default async function VibeMindHome() {
               Учитываем процессы, корпоративную культуру, требования безопасности и правила
               конкретной организации
             </p>
-            <p className="font-bold text-teal">
-              <span className="block">Ориентируемся на людей</span>
-              <span className="block">Работаем с ИИ</span>
-            </p>
+            <p className="font-bold text-teal">Ориентируемся на людей. Работаем с ИИ</p>
           </div>
         </div>
       </section>

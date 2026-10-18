@@ -18,10 +18,12 @@ export default function SolutionCard({
   p,
   onClick,
   cta,
+  compact = false,
 }: {
   p: CardData;
   onClick?: () => void;
   cta?: { label: string; href: string };
+  compact?: boolean;
 }) {
   const Icon = labIcon(p.icon);
   const content = (
@@ -36,7 +38,7 @@ export default function SolutionCard({
             height={600}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             unoptimized={isUploaded(p.photo)}
-            className="aspect-[4/3] w-full object-cover"
+            className={compact ? "h-44 w-full object-cover" : "aspect-[4/3] w-full object-cover"}
           />
           <span
             className={`absolute right-3 top-3 rounded-2xl px-3 py-1 text-xs font-semibold shadow-sm ${STATUS_STYLES[p.tone]}`}

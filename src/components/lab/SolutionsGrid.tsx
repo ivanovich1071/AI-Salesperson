@@ -14,21 +14,26 @@ type CardCta = {
 export default function SolutionsGrid({
   items,
   cardCta,
+  compact = false,
 }: {
   items: LabSolution[];
   cardCta?: CardCta;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState<LabSolution | null>(null);
 
   return (
     <>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        className={`grid gap-6 sm:grid-cols-2 lg:grid-cols-3 ${compact ? "mx-auto max-w-5xl" : ""}`}
+      >
         {items.map((p) => (
           <SolutionCard
             key={p.id}
             p={p}
             onClick={() => setOpen(p)}
             cta={cardCta}
+            compact={compact}
           />
         ))}
       </div>

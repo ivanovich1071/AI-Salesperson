@@ -6,7 +6,7 @@
  */
 export const NAV_LINKS = [
   { href: "/#process", label: "Как мы работаем" },
-  { href: "/solutions", label: "Лаборатория решений" },
+  { href: "/#solutions", label: "Лаборатория решений" },
   { href: "/#training", label: "Обучение" },
   { href: "/#about", label: "О компании" },
   { href: "/faq", label: "Вопросы и ответы" },

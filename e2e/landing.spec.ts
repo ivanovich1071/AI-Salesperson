@@ -89,10 +89,11 @@ test.describe("Лаборатория решений (тизер на главн
     await expect(page.locator("#solutions button").nth(6)).toBeVisible();
   });
 
-  test("пункт меню «Лаборатория решений» ведёт на /solutions", async ({ page }, testInfo) => {
+  test("пункт меню «Лаборатория решений» ведёт к тизеру на главной", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === "mobile", "на мобильном меню в бургере");
     await page.locator("nav").getByRole("link", { name: "Лаборатория решений", exact: true }).click();
-    await expect(page).toHaveURL(/\/solutions$/);
+    await expect(page).toHaveURL(/\/#solutions$/);
+    await expect(page.locator("#solutions")).toBeInViewport();
   });
 
   test("карточка открывает модалку и закрывается", async ({ page }) => {
