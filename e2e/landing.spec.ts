@@ -163,6 +163,23 @@ test("FAQ заметен в меню и на главной, Instagram дост�
   );
 });
 
+test("фотолента объединяет человекоцентричный тезис и доверие", async ({ page }) => {
+  const band = page.locator(".vm-proof-band");
+  await expect(band).toBeVisible();
+  await expect(band.getByRole("heading", { name: /ИИ – в руках профессионала/ })).toBeVisible();
+  await expect(band.getByRole("heading", { name: "Нам доверяют" })).toBeVisible();
+  await expect(band.locator(".vm-proof-gallery img")).toHaveCount(3);
+  await expect(band.getByText("АО ЭЛТИ-КУДИЦ", { exact: true })).toHaveCSS("white-space", "nowrap");
+  await expect(page.getByText("ИИ не вместо профессионала", { exact: true })).toHaveCount(0);
+});
+
+test("переход к Лаборатории компактный и без повторяющей строки", async ({ page }) => {
+  const bridge = page.locator(".vm-lab-bridge");
+  await expect(bridge.getByRole("heading", { name: "Не каждой задаче нужен собственный ИИ" })).toBeVisible();
+  await expect(bridge).toContainText("наиболее подходящее решение");
+  await expect(page.getByText(/собираем в Лаборатории решений/)).toHaveCount(0);
+});
+
 test.describe("блок «Как мы работаем»", () => {
   test("пять последовательных шагов метода ВайбМайнд", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === "mobile", "на мобильном карточки в столбик");

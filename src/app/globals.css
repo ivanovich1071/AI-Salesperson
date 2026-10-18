@@ -107,10 +107,117 @@ body {
   padding: 1.5rem;
 }
 
-.vm-trust-band {
+.vm-proof-band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #0e1e1f;
+}
+
+.vm-proof-gallery {
+  position: absolute;
+  inset: -1rem;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 0.85fr;
+  gap: 0.35rem;
+  transform: scale(1.025);
+}
+
+.vm-proof-gallery img {
+  width: 100%;
+  height: 100%;
+  min-height: 30rem;
+  object-fit: cover;
+  filter: saturate(0.72) contrast(1.06);
+}
+
+.vm-proof-gallery img:nth-child(1) {
+  object-position: 50% 48%;
+}
+
+.vm-proof-gallery img:nth-child(2) {
+  object-position: 52% 50%;
+}
+
+.vm-proof-gallery img:nth-child(3) {
+  object-position: 48% 50%;
+}
+
+.vm-proof-vignette {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
   background:
-    radial-gradient(circle at 18% 20%, rgba(0, 217, 166, 0.14), transparent 30%),
-    linear-gradient(120deg, #0e1e1f, #073d3d 68%, #0e4d4d);
+    radial-gradient(circle at 16% 22%, rgba(25, 201, 162, 0.18), transparent 34%),
+    linear-gradient(90deg, rgba(8, 23, 24, 0.9) 0%, rgba(7, 45, 45, 0.72) 48%, rgba(7, 33, 34, 0.84) 100%),
+    linear-gradient(180deg, rgba(4, 17, 18, 0.2), rgba(4, 17, 18, 0.7));
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+}
+
+.vm-proof-glass {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 2rem;
+  padding: 1.75rem;
+  background: linear-gradient(135deg, rgba(6, 35, 36, 0.62), rgba(4, 20, 21, 0.48));
+  box-shadow: 0 28px 80px -36px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.vm-lab-bridge {
+  background:
+    radial-gradient(circle at 12% 40%, rgba(25, 201, 162, 0.12), transparent 30%),
+    linear-gradient(180deg, #ffffff, #f5f7f8);
+}
+
+.vm-lab-bridge-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(28, 165, 168, 0.2);
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 24px 70px -42px rgba(7, 61, 61, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.vm-lab-bridge-card::after {
+  content: "";
+  position: absolute;
+  right: -5rem;
+  bottom: -7rem;
+  width: 15rem;
+  height: 15rem;
+  border-radius: 999px;
+  background: rgba(25, 201, 162, 0.12);
+  filter: blur(24px);
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .vm-proof-gallery {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+
+  .vm-proof-gallery img:nth-child(3) {
+    display: none;
+  }
+
+  .vm-proof-gallery img {
+    min-height: 43rem;
+  }
+
+  .vm-proof-vignette {
+    background:
+      linear-gradient(180deg, rgba(6, 26, 27, 0.8), rgba(4, 25, 26, 0.9)),
+      linear-gradient(90deg, rgba(7, 61, 61, 0.55), rgba(8, 23, 24, 0.7));
+  }
+
+  .vm-proof-glass {
+    border-radius: 1.5rem;
+    padding: 1.35rem;
+  }
 }
 
 .vm-process-card {

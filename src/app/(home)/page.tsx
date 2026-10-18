@@ -156,18 +156,59 @@ export default async function VibeMindHome() {
         </div>
       </section>
 
-      {/* ===== СОЦИАЛЬНОЕ ДОКАЗАТЕЛЬСТВО ===== */}
-      <section className="vm-trust-band vm-soft-boundary py-10 text-white" aria-labelledby="trusted-title">
-        <div className="mx-auto max-w-6xl px-5 text-center">
-          <h2 id="trusted-title" className="text-3xl font-bold md:text-4xl">
-            Нам доверяют
-          </h2>
-          <p className="mx-auto mt-5 max-w-5xl text-lg font-semibold leading-loose text-teal md:text-xl">
-            {TRUSTED.join(" · ")}
-          </p>
-          <p className="mt-3 font-semibold text-white">
-            А также индивидуальные предприниматели и независимые профессионалы
-          </p>
+      {/* ===== ЛЮДИ И СОЦИАЛЬНОЕ ДОКАЗАТЕЛЬСТВО ===== */}
+      <section
+        className="vm-proof-band vm-soft-boundary text-white"
+        aria-labelledby="trusted-title"
+      >
+        <div className="vm-proof-gallery" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/home/workshop-speaker.jpg" alt="" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/home/workshop-team.jpg" alt="" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/home/workshop-audience.jpg" alt="" />
+        </div>
+        <div className="vm-proof-vignette" aria-hidden="true" />
+
+        <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-5 py-14 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:py-16">
+          <div className="max-w-xl">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-emerald">
+              Человекоцентричный подход
+            </p>
+            <h2 className="mt-4 text-4xl font-extrabold leading-[1.03] sm:text-5xl lg:text-6xl">
+              ИИ – в руках
+              <span className="block text-teal-emerald">профессионала</span>
+            </h2>
+            <p className="mt-5 text-lg font-medium text-white/80">
+              Работаем с ИИ. Ориентируемся на людей
+            </p>
+          </div>
+
+          <div className="vm-proof-glass">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/65">
+              Реальная работа с командами
+            </p>
+            <h3 id="trusted-title" className="mt-3 text-3xl font-bold md:text-4xl">
+              Нам доверяют
+            </h3>
+            <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-2 font-semibold leading-relaxed text-teal-emerald">
+              {TRUSTED.map((company, index) => (
+                <span
+                  key={company}
+                  className={`inline-flex whitespace-nowrap ${
+                    company.length > 45 ? "text-[11px] sm:text-sm lg:text-base" : "text-sm md:text-lg"
+                  }`}
+                >
+                  <span>{company}</span>
+                  {index < TRUSTED.length - 1 && <span className="ml-2 text-white/40">·</span>}
+                </span>
+              ))}
+            </div>
+            <p className="mt-4 font-semibold leading-relaxed text-white">
+              А также индивидуальные предприниматели и независимые профессионалы
+            </p>
+          </div>
         </div>
       </section>
 
@@ -237,29 +278,29 @@ export default async function VibeMindHome() {
         </div>
       </section>
 
-      {/* ===== ЧЕЛОВЕКОЦЕНТРИЧНЫЙ ТЕЗИС ===== */}
-      <section className="vm-soft-boundary px-5 py-10">
-        <p className="mx-auto max-w-5xl text-center text-3xl font-extrabold leading-tight text-graphite md:text-5xl">
-          <span className="block">ИИ не вместо профессионала</span>
-          <span className="block text-teal">ИИ – в руках профессионала</span>
-        </p>
-      </section>
-
       {/* ===== ПЕРЕХОД К ЛАБОРАТОРИИ ===== */}
-      <section className="vm-soft-boundary bg-white py-14">
-        <div className="mx-auto max-w-4xl px-5 text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">Не каждой задаче нужен собственный ИИ</h2>
-          <p className="mt-5 text-lg leading-relaxed text-graphite/75">
-            Иногда достаточно готового инструмента. Иногда нужно изменить процесс или
-            автоматизировать его часть. Иногда нужен собственный ИИ-помощник. А иногда лучше
-            вообще ничего не внедрять
-          </p>
-          <p className="mt-4 font-bold text-graphite">
-            Мы ищем не самое технологичное, а наиболее подходящее решение
-          </p>
-          <p className="mt-4 font-semibold text-teal">
-            А решения, которые уже доказали свою применимость, собираем в Лаборатории решений
-          </p>
+      <section className="vm-lab-bridge vm-soft-boundary py-10">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="vm-lab-bridge-card grid gap-6 px-6 py-8 md:grid-cols-[0.9fr_1.1fr] md:items-center md:gap-10 md:px-10">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal">
+                Перед выбором решения
+              </p>
+              <h2 className="mt-3 text-3xl font-bold leading-tight md:text-4xl">
+                Не каждой задаче нужен собственный ИИ
+              </h2>
+            </div>
+            <div>
+              <p className="text-base leading-relaxed text-graphite/70 md:text-lg">
+                Иногда достаточно готового инструмента, изменения процесса или автоматизации
+                его части. Собственное решение создаем только там, где оно действительно
+                необходимо
+              </p>
+              <p className="mt-4 font-bold text-graphite">
+                Мы ищем не самое технологичное, а наиболее подходящее решение
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
