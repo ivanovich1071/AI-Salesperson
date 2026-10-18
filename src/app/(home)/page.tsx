@@ -172,15 +172,15 @@ export default async function VibeMindHome() {
         <div className="vm-proof-vignette" aria-hidden="true" />
 
         <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-5 py-14 lg:grid-cols-[0.7fr_1.3fr] lg:items-center lg:py-16">
-          <div className="vm-proof-copy max-w-lg">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-emerald">
-              Человекоцентричный подход
-            </p>
-            <h2 className="mt-4 text-4xl font-extrabold leading-[1.03] sm:text-5xl lg:text-[3.35rem]">
+          <div
+            className="vm-proof-copy max-w-lg pt-36 sm:pt-28 lg:self-end lg:pb-3 lg:pt-0"
+            data-proof-copy="lowered"
+          >
+            <h2 className="text-3xl font-extrabold leading-[1.04] sm:text-4xl lg:text-[2.65rem]">
               ИИ – в руках
               <span className="block text-teal-emerald">профессионала</span>
             </h2>
-            <p className="mt-5 text-base font-medium text-white/80 sm:text-lg">
+            <p className="mt-3 text-sm font-medium text-white/85 sm:text-base">
               Работаем с ИИ. Ориентируемся на людей
             </p>
           </div>
