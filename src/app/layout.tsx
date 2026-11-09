@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import JsonLd from "@/components/seo/JsonLd";
 import { graph, organizationLd, websiteLd } from "@/lib/seo/jsonLd";
@@ -102,7 +103,30 @@ export default function RootLayout({
             Разметка конкретного контента (решения, курс, FAQ) живет в layout-ах разделов. */}
         <JsonLd data={graph(organizationLd(), websiteLd())} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Script id="yandex-metrika" strategy="afterInteractive">{`
+          (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a);
+          })(window,document,"script","https://mc.yandex.ru/metrika/tag.js","ym");
+          ym(114145936, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true });
+          (function(){
+            function page(){ return location.pathname + location.search; }
+            var previous=page();
+            function track(){
+              var current=page();
+              if(current!==previous){ previous=current; ym(114145936,"hit",location.href); }
+            }
+            var push=history.pushState;
+            history.pushState=function(){ var result=push.apply(this,arguments); track(); return result; };
+            var replace=history.replaceState;
+            history.replaceState=function(){ var result=replace.apply(this,arguments); track(); return result; };
+            addEventListener("popstate",track);
+          })();
+        `}</Script>
+      </body>
     </html>
   );
 }
