@@ -46,7 +46,8 @@ export async function POST(req: NextRequest) {
           participantCount: input.participantCount,
           matchScore: input.matchScore,
           totalCost: proposal?.trainingCost,
-        })
+        }),
+        "diagnostic"
       );
     }
 
