@@ -48,8 +48,11 @@ export function isTelegramConfigured(): boolean {
  * @returns сколько сообщений реально ушло
  */
 export async function sendTelegramMessage(text: string): Promise<number> {
+  return sendToTelegram(text, recipients());
+}
+
+async function sendToTelegram(text: string, chatIds: string[], threadId?: number): Promise<number> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatIds = recipients();
   if (!token || chatIds.length === 0) {
     console.warn("[telegram] уведомление пропущено: не задан TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID");
     return 0;
@@ -63,6 +66,7 @@ export async function sendTelegramMessage(text: string): Promise<number> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
+          message_thread_id: threadId,
           text,
           parse_mode: "HTML",
           disable_web_page_preview: true,
@@ -85,8 +89,29 @@ export async function sendTelegramMessage(text: string): Promise<number> {
  * Уведомление «в фоне»: вызывающий код не ждет ответа Telegram.
  * Нужно, чтобы клиент не смотрел лишние секунды на спиннер брони.
  */
-export function notifyTelegram(text: string): void {
+export function notifyTelegram(text: string, siteEvent?: "diagnostic" | "booking"): void {
   void sendTelegramMessage(text);
+  if (siteEvent) void sendSiteTopicNotification(siteEvent);
+}
+
+async function sendSiteTopicNotification(event: "diagnostic" | "booking"): Promise<void> {
+  const chatId = process.env.TELEGRAM_SITE_CHAT_ID?.trim();
+  const rawThreadId = process.env.TELEGRAM_SITE_THREAD_ID?.trim();
+  if (!chatId && !rawThreadId) return;
+
+  const threadId = Number(rawThreadId);
+  if (!chatId || !/^-100\d+$/.test(chatId) || !/^\d+$/.test(rawThreadId ?? "") ||
+      !Number.isSafeInteger(threadId) || threadId < 1) {
+    console.warn("[telegram] тема сайта не настроена: проверьте TELEGRAM_SITE_CHAT_ID и TELEGRAM_SITE_THREAD_ID");
+    return;
+  }
+
+  const title = event === "booking"
+    ? "🗓 Новая заявка на встречу с сайта"
+    : "📋 На сайте завершена диагностика";
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://vibemind.by").replace(/\/+$/, "");
+  const adminUrl = escapeHtml(`${site}/admin`).replace(/"/g, "&quot;");
+  await sendToTelegram(`<b>${title}</b>\n<a href="${adminUrl}">Открыть в админке</a>`, [chatId], threadId);
 }
 
 export interface BookingNotification {
