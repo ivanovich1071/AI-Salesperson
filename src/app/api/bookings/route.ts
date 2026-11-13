@@ -55,7 +55,8 @@ export async function POST(req: NextRequest) {
         role: summary?.userRole,
         participants: summary?.participantCount,
         modules: summary?.modules,
-      })
+      }),
+      "booking"
     );
 
     return NextResponse.json({
